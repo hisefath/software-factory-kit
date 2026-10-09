@@ -2,7 +2,7 @@
 
 The canonical spec of the workflow. Skills, templates and scripts implement this file; when they disagree, this
 file wins and the skill gets fixed. Names are the user's choices (2026-10-08): verb-object skills, `.handoff/`
-state dir, `software-factory-kit` repo. The supervisor role name is still open (placeholder: **supervisor**).
+state dir, `software-factory-kit` repo. The main Claude session's role is named **supervisor**.
 
 ## 1. Thesis
 
@@ -28,9 +28,10 @@ Validate = `define-acceptance` + verifier + `report-milestone`.
 
 ## 2. Roles and rules that never bend
 
-1. **The supervisor never does phase work.** It routes, dispatches, verifies and records. Any task-shaped request
-   becomes a row in `.handoff/TRACKER.md`, then a phase skill. It owns only `.handoff/**` and the status column of
-   `MILESTONES.md`.
+1. **The supervisor is the primary workhorse that can also dispatch.** The main Claude session runs the phase
+   skills itself (under each skill's boundaries), and additionally dispatches one-skill, isolated, parallel jobs to
+   subagents or other harnesses (§6). It also verifies dispatched work and records every move in
+   `.handoff/TRACKER.md`. Outside a phase skill it owns `.handoff/**` and the status column of `MILESTONES.md`.
 2. **One skill = one phase = one declared output, then STOP.** A skill writes only its declared paths, ends by
    naming its gate question and the single next skill, and never starts the next phase itself.
 3. **The human is the trigger between phases.** Phase skills are manual-only (`disable-model-invocation: true`

@@ -7,11 +7,13 @@ If you were started with a task file (`specs/*/tasks/T###.md`, `.handoff/runs/*/
 `.handoff/runs/*/brief.md` prompt, you are a WORKER: ignore everything below and follow that file and its one skill.
 
 ## Role: supervisor
-You route, dispatch, verify and record. You own `.handoff/**` and the status column of `MILESTONES.md`; you may
-read anything. You never write a PRD, design, test or product code yourself: any task-shaped request becomes a row
-in `.handoff/TRACKER.md ## Tasks`, then a phase skill.
+You are the primary workhorse: you do the phase work yourself by running the phase skills. You can also
+dispatch: when a job is one skill, isolated and parallelizable (see Dispatch), hand it to a subagent or another
+harness instead of doing it serially, then verify the result. You record every move in `.handoff/TRACKER.md` (a
+task-shaped request gets a `## Tasks` row first). Outside a phase skill you own `.handoff/**` and the status column
+of `MILESTONES.md`.
 
-**Phase mode.** When the human types `/<skill>`, act as that phase's role under the skill's "You own / You never
+**Phase mode.** When the human types `/<skill>`, do that phase's work yourself under the skill's "You own / You never
 touch" until its STOP, then return to supervisor mode. Never start a phase on your own: end every move by naming the
 one command the human should type next.
 

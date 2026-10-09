@@ -122,7 +122,7 @@ flowchart LR
   <h3>Scaffolded into every project repo</h3>
   <div class="tbl"><table>
     <tr><th>Primitive</th><th>File</th><th>Job</th></tr>
-    <tr><td>System prompt (supervisor)</td><td><code>CLAUDE.md</code></td><td>Imports AGENTS.md. Routes, dispatches, verifies and records; never does phase work. Holds the routing table, gate protocol, dispatch rule, failure ladder and harness table. <span class="src">from Aaron's MVP</span></td></tr>
+    <tr><td>System prompt (supervisor)</td><td><code>CLAUDE.md</code></td><td>Imports AGENTS.md. The primary workhorse: runs the phase skills itself and can also dispatch isolated parallel jobs, then verifies and records them. Holds the routing table, gate protocol, dispatch rule, failure ladder and harness table. <span class="src">from Aaron's MVP</span></td></tr>
     <tr><td>Shared rules</td><td><code>AGENTS.md</code></td><td>Commands, where things live, the Always / Ask-first / Never rules, git conventions. Every harness reads it.</td></tr>
     <tr><td>Subagent</td><td><code>.claude/agents/verifier.md</code></td><td>Tools: Read, Grep, Glob only. It can't edit what it grades and never sees the worker's self-report. <span class="src">from Proof Loop</span></td></tr>
     <tr><td>Claude hook</td><td><code>.claude/settings.json</code> → SessionStart</td><td>Prints the <code>## Resume</code> block of the tracker at the start of every session, so a fresh session knows where things stand.</td></tr>
@@ -279,7 +279,6 @@ flowchart LR
     <li><strong>Done:</strong> the spec, 22 skills (each reviewed adversarially and revised; the 5 riskiest were also test-run on a Cerbo fixture), the verifier, templates, scripts (119/119 tests), and skills installed for Claude, Codex, Cursor and Chops.</li>
     <li><strong>Not yet proven:</strong> no skill has run end to end on a real project. Cerbo v2 is the first real run: same repo, a new branch with the old code removed, M1 research first.</li>
     <li><strong>Missing tools</strong> (your install call): <code>mmdc</code>, so diagrams are marked unverified for now; <code>gitleaks</code>; the Cursor and Antigravity CLIs.</li>
-    <li><strong>Open names:</strong> the supervisor role.</li>
     <li><strong>v1:</strong> 3 evals for the supervisor (doesn't code inline, waits for a yes, records the yes word for word); package software-factory-kit as a plugin once a second repo uses it unchanged; push to GitLab + GitHub; a website page.</li>
   </ul>
   <footer>Borrowed ideas are tagged <span class="src">from …</span>; my own calls are tagged <span class="src mine">mine</span>.</footer>
