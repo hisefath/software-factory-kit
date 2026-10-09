@@ -1,0 +1,295 @@
+<title>factory-kit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a route card on drafting paper — left rail of section stations, numbered only where order is real (phases). */
+:root{
+  --paper:#eef1f3; --sheet:#f8fafb; --ink:#14212b; --muted:#566673; --rule:#cfd8de;
+  --human:#c26a00; --human-bg:#fbefd9; --machine:#0f7a72; --machine-bg:#dcf0ee; --accent:#2a4d8f;
+  --display:"Archivo",system-ui,sans-serif; --body:"Public Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11181d;--sheet:#172129;--ink:#e3e9ed;--muted:#97a6b1;--rule:#2b3943;--human:#f0a443;--human-bg:#3a2a12;--machine:#4fc2b7;--machine-bg:#143330;--accent:#8fb0ee;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#11181d;--sheet:#172129;--ink:#e3e9ed;--muted:#97a6b1;--rule:#2b3943;--human:#f0a443;--human-bg:#3a2a12;--machine:#4fc2b7;--machine-bg:#143330;--accent:#8fb0ee;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:32px 80px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:40px}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font:13px/1.5 var(--body)}
+nav b{display:block;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+nav a{display:block;color:var(--ink);text-decoration:none;padding:3px 0 3px 10px;border-left:2px solid var(--rule)}
+nav a:hover,nav a:focus-visible{border-left-color:var(--accent);color:var(--accent);outline:none}
+main{min-width:0}
+h1{font:800 clamp(44px,8vw,84px)/0.95 var(--display);font-stretch:72%;letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+h2{font:700 30px/1.15 var(--display);font-stretch:85%;margin:0 0 6px;text-wrap:balance}
+h3{font:700 18px/1.3 var(--display);margin:22px 0 6px}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:19px;max-width:62ch;color:var(--ink)}
+p,li{max-width:68ch}
+section{padding-block:44px;border-top:1px solid var(--rule)}
+section:first-of-type{border-top:0;padding-top:0}
+.thesis{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}
+.pill{font:600 14px var(--body);padding:8px 14px;border-radius:4px}
+.pill.h{background:var(--human-bg);color:var(--human)} .pill.m{background:var(--machine-bg);color:var(--machine)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:26px}
+.stats div{background:var(--sheet);padding:14px 16px}
+.stats strong{display:block;font:800 34px/1 var(--display);font-stretch:80%;font-variant-numeric:tabular-nums}
+.stats span{font-size:13px;color:var(--muted)}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--rule);background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:0}
+code,.mono{font:13px var(--mono)}
+td code{white-space:nowrap}
+.gate{display:inline-block;font:600 11px var(--mono);padding:2px 6px;border-radius:3px;background:var(--human-bg);color:var(--human);white-space:nowrap}
+.auto{display:inline-block;font:600 11px var(--mono);padding:2px 6px;border-radius:3px;background:var(--machine-bg);color:var(--machine);white-space:nowrap}
+.src{display:inline-block;font:600 10px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border:1px solid var(--rule);border-radius:10px;color:var(--muted);margin-left:6px;vertical-align:2px}
+.src.mine{border-color:var(--accent);color:var(--accent)}
+.gatebox{border:2px solid var(--human);background:var(--sheet);padding:14px 18px;margin:12px 0;max-width:68ch}
+.gatebox .q{font:700 17px/1.4 var(--display)}
+pre{background:var(--sheet);border:1px solid var(--rule);padding:14px 16px;overflow-x:auto;font:13px/1.55 var(--mono);margin:12px 0}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps>li{counter-increment:s;position:relative;padding-left:44px;margin:18px 0}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:0;font:800 26px/1 var(--display);color:var(--accent)}
+.cmd{display:flex;align-items:center;gap:8px;background:var(--sheet);border:1px solid var(--rule);padding:8px 10px;margin:8px 0;max-width:68ch}
+.cmd code{flex:1;min-width:0;overflow-x:auto;white-space:pre}
+.cmd button{font:600 12px var(--body);background:transparent;color:var(--accent);border:1px solid var(--rule);padding:4px 10px;cursor:pointer;border-radius:3px}
+.cmd button:focus-visible{outline:2px solid var(--accent)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:16px 18px}
+.card h3{margin-top:0}
+pre.mermaid{background:var(--sheet);text-align:center}
+.status li{margin:6px 0}
+footer{color:var(--muted);font-size:13px;margin-top:40px}
+@media (max-width:820px){.wrap{grid-template-columns:minmax(0,1fr)}nav{position:static;display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<nav aria-label="Sections">
+  <b>Open</b><a href="#thesis">Thesis</a><a href="#loop">The loop</a>
+  <b>What changed</b><a href="#added">Added to Claude</a><a href="#repo">The repo</a>
+  <b>Walk it</b><a href="#phases">Phases &amp; gates</a><a href="#tracks">Tracks</a><a href="#dispatch">Dispatch</a><a href="#use">How to use it</a>
+  <b>Then</b><a href="#verify">Verification</a><a href="#routing">Failure routing</a><a href="#glossary">Primitives</a><a href="#status">Status &amp; next</a>
+</nav>
+
+<main>
+<section id="thesis">
+  <div class="eyebrow">Sefath's AI-native workflow · v0.1 · 2026-10-08</div>
+  <h1>factory-kit</h1>
+  <p class="lede">A software factory where I set intent and approve decisions, agents do the investigating, planning, building and testing, and scripts check the work continuously. Each phase is a single-purpose skill with one declared output. The phase stops when its output is written, and I'm the one who starts the next phase.</p>
+  <div class="thesis"><span class="pill h">Human approval gates catch wrong</span><span class="pill m">Automated quality gates catch broken</span></div>
+  <div class="stats">
+    <div><strong>22</strong><span>phase skills, verb-object names</span></div>
+    <div><strong>6</strong><span>core human gates (G0–G5) + 5 situational</span></div>
+    <div><strong>1</strong><span>read-only verifier subagent</span></div>
+    <div><strong>119</strong><span>passing self-tests for the scripts</span></div>
+  </div>
+</section>
+
+<section id="loop">
+  <h2>The loop</h2>
+  <p>Diamond 1 decides <em>what</em> to build: discover, then define. Diamond 2 decides <em>how</em>: develop, then deliver. Spec-driven development fits on top of the diamonds: <code>AGENTS.md</code> plays the role of the constitution, followed by specify, clarify, plan, tasks, implement and validate. <span class="src">from Double Diamond</span><span class="src">from spec-kit</span></p>
+<pre class="mermaid">
+flowchart LR
+  A([Your ask]) --> B[sharpen-brief]
+  B -->|G0| C[gather-evidence]
+  C --> D[write-prd]
+  D -->|G1 · hard stop| E[design-hld]
+  E --> E2[[draw-diagrams ×3 in parallel]]
+  E2 -->|G2| F[design-lld]
+  F --> F2[[draw-diagrams ×N in parallel]]
+  F2 -->|G3| G[define-acceptance]
+  G --> H[slice-tasks]
+  H -->|G4| I[[implement-task ×N, worktrees, any harness]]
+  I --> J{{scope-guard + make check}}
+  J --> K[verifier + check-security]
+  K --> L[report-milestone]
+  L -->|G5 merge| M[ship-milestone]
+  M --> N[route-failure · quiz-me · demo]
+  N -. lessons .-> B
+</pre>
+</section>
+
+<section id="added">
+  <h2>What was added to Claude (and the other harnesses)</h2>
+  <p>Some things are installed once, for every session on this Mac. The rest is copied into each project repo by <code>scripts/init-repo.sh</code>, so each project carries its own rules in git.</p>
+  <h3>Installed globally (tonight)</h3>
+  <div class="tbl"><table>
+    <tr><th>Primitive</th><th>What</th><th>Where</th><th>Who reads it</th></tr>
+    <tr><td>Skills ×22</td><td>One per SDLC phase, each with <code>SKILL.md</code>, an output template, and <code>agents/openai.yaml</code></td><td>symlinks: <code>~/.claude/skills/&lt;name&gt;</code></td><td>Claude Code (<code>/write-prd</code> etc.)</td></tr>
+    <tr><td></td><td>Same folders, same source</td><td>symlinks: <code>~/.agents/skills/&lt;name&gt;</code></td><td>Codex, Cursor, Antigravity, Chops "Global"</td></tr>
+    <tr><td>Plugins</td><td>None added. superpowers, ponytail and hf-cli stay on globally but get <strong>turned off inside factory repos</strong>, because their rules competed with the phase skills.</td><td><code>.claude/settings.json</code> per repo</td><td>Claude Code</td></tr>
+  </table></div>
+  <h3>Scaffolded into every project repo</h3>
+  <div class="tbl"><table>
+    <tr><th>Primitive</th><th>File</th><th>Job</th></tr>
+    <tr><td>System prompt (supervisor)</td><td><code>CLAUDE.md</code></td><td>Imports AGENTS.md. Routes, dispatches, verifies and records; never does phase work. Holds the routing table, gate protocol, dispatch rule, failure ladder and harness table. <span class="src">from Aaron's MVP</span></td></tr>
+    <tr><td>Shared rules</td><td><code>AGENTS.md</code></td><td>Commands, where things live, the Always / Ask-first / Never rules, git conventions. Every harness reads it.</td></tr>
+    <tr><td>Subagent</td><td><code>.claude/agents/verifier.md</code></td><td>Tools: Read, Grep, Glob only. It can't edit what it grades and never sees the worker's self-report. <span class="src">from Proof Loop</span></td></tr>
+    <tr><td>Claude hook</td><td><code>.claude/settings.json</code> → SessionStart</td><td>Prints the <code>## Resume</code> block of the tracker at the start of every session, so a fresh session knows where things stand.</td></tr>
+    <tr><td>Permissions</td><td><code>.claude/settings.json</code> → deny</td><td>Blocks Claude from reading <code>.env</code>, <code>.env.*</code> and <code>*.pem</code>.</td></tr>
+    <tr><td>Git hook</td><td><code>.githooks/pre-push</code></td><td>Runs <code>make check</code>, scope-guard for task branches, and gitleaks when installed. Blocks the push on failure.</td></tr>
+    <tr><td>Shared state</td><td><code>.handoff/</code></td><td><code>TRACKER.md</code> (Resume, Tasks, Approvals, Log), <code>inbox/</code>, <code>runs/&lt;id&gt;/result.md</code>, <code>reviews/</code>. Committed so it gets reviewed in the merge request. <span class="src mine">mine</span></td></tr>
+    <tr><td>Scripts</td><td><code>scripts/</code></td><td><code>scope-guard.sh</code>, <code>delegate.sh</code>, <code>embed-diagrams.sh</code></td></tr>
+    <tr><td>Templates</td><td><code>specs/_templates/</code>, <code>.gitlab/…/Default.md</code>, <code>MILESTONES.md</code>, <code>docs/README.md</code>, <code>docs/decisions/DECISION_JOURNAL.md</code></td><td>The task contract, result contract, merge request body, milestone index, artifact index and decision ledger.</td></tr>
+  </table></div>
+</section>
+
+<section id="repo">
+  <h2>The repo</h2>
+  <p><code>~/Desktop/gauntlet_workbench/factory-kit</code> holds the first commit, <code>f1db017</code>. It isn't pushed yet; pushing is your call.</p>
+<pre>factory-kit/
+  docs/WORKFLOW.md          the spec — wins every conflict
+  docs/SKILL_STANDARD.md    how every skill is written
+  docs/walkthrough.html     this page
+  skills/&lt;verb-object&gt;/     SKILL.md · assets/template.md · agents/openai.yaml
+  agents/verifier.md        read-only reviewer subagent
+  templates/                what init-repo.sh copies into a project
+  scripts/                  install.sh · init-repo.sh · delegate.sh · scope-guard.sh · embed-diagrams.sh · test.sh
+  FINDINGS.md               layer-5 failure log (F1, F2 already)
+  HARNESS_CHANGELOG.md      every adopted change + who approved it</pre>
+</section>
+
+<section id="phases">
+  <h2>Phases and gates</h2>
+  <p>Each skill writes only its declared paths, then stops with the gate question and the one next command. <span class="gate">Gn</span> marks a human approval gate; <span class="auto">auto</span> marks an automated quality gate.</p>
+  <div class="tbl"><table>
+    <tr><th>Skill</th><th>Writes</th><th>Never</th><th>Gate</th></tr>
+    <tr><td><code>sharpen-brief</code></td><td><code>specs/M&lt;N&gt;-*/brief.md</code></td><td>propose solutions</td><td><span class="gate">G0</span></td></tr>
+    <tr><td><code>gather-evidence</code></td><td><code>docs/research/R&lt;NN&gt;-*.md</code>, <code>sources.md</code></td><td>cite an unread source</td><td>—</td></tr>
+    <tr><td><code>audit-codebase</code></td><td><code>docs/audit/AUDIT.md</code></td><td>modify code</td><td><span class="gate">G-audit</span></td></tr>
+    <tr><td><code>write-prd</code></td><td><code>docs/product/prd.md</code></td><td>name a framework or database outside Constraints</td><td><span class="gate">G1</span></td></tr>
+    <tr><td><code>clarify-spec</code></td><td>one target file</td><td>add scope</td><td>per question</td></tr>
+    <tr><td><code>map-ux-flows</code></td><td><code>docs/design/flows.md</code>, <code>screens.md</code></td><td>mention props or endpoints</td><td><span class="gate">G-ux</span></td></tr>
+    <tr><td><code>design-hld</code></td><td><code>docs/architecture/hld.md</code></td><td>design tables or classes</td><td><span class="gate">G2</span></td></tr>
+    <tr><td><code>design-lld</code></td><td><code>lld.md</code>, <code>contracts/openapi.yaml</code>, brownfield <code>change-plan.md</code></td><td>write function bodies</td><td><span class="gate">G3</span></td></tr>
+    <tr><td><code>draw-diagrams</code></td><td><code>diagrams/&lt;type&gt;.mmd</code></td><td>invent a box the design lacks</td><td>inside G2/G3</td></tr>
+    <tr><td><code>define-acceptance</code></td><td><code>acceptance.md</code> + red <code>tests/acceptance/**</code></td><td>write product code</td><td>inside G4</td></tr>
+    <tr><td><code>slice-tasks</code></td><td><code>tasks/T###.md</code>, <code>MILESTONES.md</code> row</td><td>horizontal "all the DB" tasks</td><td><span class="gate">G4</span></td></tr>
+    <tr><td><code>implement-task</code></td><td>commits + <code>result.md</code></td><td>edit outside <code>Owns:</code></td><td><span class="auto">auto</span></td></tr>
+    <tr><td><code>fix-bug</code></td><td><code>specs/bugs/*.md</code> + one fix commit</td><td>fix without a red repro</td><td>rides G5</td></tr>
+    <tr><td><code>check-security</code></td><td><code>docs/security/CHECKLIST.md</code></td><td>write fixes</td><td>inside G5</td></tr>
+    <tr><td><code>report-milestone</code></td><td><code>docs/milestones/M&lt;N&gt;.md</code></td><td>merge, hard-code counts</td><td><span class="gate">G5</span></td></tr>
+    <tr><td><code>ship-milestone</code></td><td>runbook, <code>smoke.sh</code>, <code>HEALTH.md</code></td><td>declare live from <code>/health</code> alone</td><td><span class="gate">G-live</span></td></tr>
+    <tr><td><code>log-decision</code></td><td><code>DECISION_JOURNAL.md</code> (+ MADR for one-way decisions)</td><td>decide anything</td><td>—</td></tr>
+    <tr><td><code>garden-docs</code></td><td><code>docs/README.md</code>, <code>README.md</code></td><td>add claims</td><td>rides MR</td></tr>
+    <tr><td><code>route-failure</code></td><td><code>FINDINGS.md</code>, proposed diffs</td><td>apply its own fix</td><td><span class="gate">G-L5</span></td></tr>
+    <tr><td><code>quiz-me</code></td><td>private <code>TOPICS_TO_REVIEW.md</code></td><td>grade generously</td><td>—</td></tr>
+    <tr><td><code>write-demo-script</code></td><td><code>docs/demo/SCRIPT.md</code>, <code>POSTS.md</code></td><td>post</td><td><span class="gate">G-demo</span></td></tr>
+    <tr><td><code>record-demo</code></td><td><code>docs/demo/out/*</code></td><td>record an unapproved script</td><td>you post</td></tr>
+  </table></div>
+  <h3>The questions I answer</h3>
+  <div class="gatebox"><div class="eyebrow">G1 · PRD</div><div class="q">Right problem, scope, non-goals and success measure, with every ⚠ resolved or waived?</div></div>
+  <div class="gatebox"><div class="eyebrow">G2 · HLD</div><div class="q">Do these containers, connections, trust boundaries and invariants match my intent? Approve D&lt;n&gt;?</div></div>
+  <div class="gatebox"><div class="eyebrow">G3 · LLD</div><div class="q">Could I defend every table, state owner, endpoint and sequence in an interview?</div></div>
+  <div class="gatebox"><div class="eyebrow">G5 · Merge</div><div class="q">Is the evidence pasted, every disposition done, nothing graded its own work, and can one revert roll it back?</div></div>
+  <p>Answers are <strong>Approve / Revise / Stop</strong>. My exact words go into <code>.handoff/TRACKER.md</code> with the artifact's commit SHA <em>before</em> anything acts on them. If the file changes after that SHA, the approval is stale. <span class="src mine">mine: SHA-bound approvals</span></p>
+</section>
+
+<section id="tracks">
+  <h2>Tracks</h2>
+  <p>Not every change needs every gate.</p>
+  <div class="two">
+    <div class="card"><h3>Fix</h3><p>Fits in one sentence, touches ≤2 files, has a repro, and changes no API, data model, dependency, auth, payment or migration. Runs <code>fix-bug</code> → verifier → G5.</p></div>
+    <div class="card"><h3>Standard</h3><p>The next milestone of a product that already has a PRD. Runs the LLD delta → diagrams → G3 → acceptance → tasks → G4 → build → G5.</p></div>
+    <div class="card"><h3>Full</h3><p>A new product or graded project. Every phase, and each planning phase is its own merged milestone: M1 research → M2 PRD → M3 design → smaller implementation milestones. <span class="src mine">mine</span></p></div>
+  </div>
+</section>
+
+<section id="dispatch">
+  <h2>Dispatch: who does what</h2>
+  <p><strong>My rule:</strong> the Claude supervisor hands a job to another harness or a subagent only when the job is <em>one skill</em>, <em>isolated</em> (it owns its own files and needs files, not conversation) and <em>parallel</em> (something else can run at the same time). The best example is diagrams: once the architect's design is written, Codex draws the ERD, class diagrams, component tree and sequence diagrams side by side. <span class="src mine">mine</span></p>
+  <div class="tbl"><table>
+    <tr><th>Harness</th><th>How it's called</th><th>Default jobs</th></tr>
+    <tr><td>Claude Code</td><td>interactive; subagents in worktrees</td><td>supervisor, every phase with a gate, verifier</td></tr>
+    <tr><td>Codex (Oracle seat)</td><td><code>bash scripts/delegate.sh &lt;task&gt;</code> → <code>codex exec --sandbox workspace-write</code></td><td><code>draw-diagrams</code>, <code>write-demo-script</code>, isolated <code>implement-task</code>, second-opinion review</td></tr>
+    <tr><td>Cursor / Antigravity</td><td>not installed yet</td><td>later workers</td></tr>
+    <tr><td>Grok Bot</td><td>no CLI; you paste into <code>.handoff/inbox/</code></td><td>research digests (leads, not evidence)</td></tr>
+  </table></div>
+  <p>Every dispatched job gets a contract: a task file with <code>Owns:</code> and a runnable Done-when check. It returns a result file with <code>status: done | human_review | relaunch</code> and pasted test output. One id, like <code>M2-T003</code>, links the task file, branch, commit trailer and report. <span class="src">from chief-of-stuff</span></p>
+</section>
+
+<section id="use">
+  <h2>How to use it</h2>
+  <ol class="steps">
+    <li><strong>Scaffold a project.</strong> Then fill in the Commands table in <code>AGENTS.md</code> and copy <code>Makefile.example</code> to a real <code>make check</code>.
+      <div class="cmd"><code>bash ~/Desktop/gauntlet_workbench/factory-kit/scripts/init-repo.sh ~/Desktop/gauntlet_workbench/my-project</code><button type="button" data-copy>Copy</button></div></li>
+    <li><strong>Open Claude Code in the repo.</strong> The SessionStart hook prints the Resume block. Describe what you want in plain words; the supervisor picks a track, adds a tracker row and tells you the next command.</li>
+    <li><strong>Plan, one phase at a time.</strong> Type <code>/sharpen-brief</code>. It asks one question at a time, each with a recommended answer, then stops at G0. Answer Approve / Revise / Stop, and the supervisor records your words and runs <code>log-decision</code>. Do the same with <code>/write-prd</code> (G1), <code>/design-hld</code> (G2) and <code>/design-lld</code> (G3).</li>
+    <li><strong>Let diagrams fan out.</strong> After each design draft, the supervisor commits it, dispatches one <code>draw-diagrams</code> job per diagram type, then embeds the results:
+      <div class="cmd"><code>bash scripts/embed-diagrams.sh docs/architecture/lld.md</code><button type="button" data-copy>Copy</button></div></li>
+    <li><strong>Define done, then slice.</strong> <code>/define-acceptance</code> writes red tests. <code>/slice-tasks</code> writes one file per task and prints a coverage matrix for G4.</li>
+    <li><strong>Build.</strong> Say "go M2". Tasks whose files don't overlap run in parallel, each in its own worktree. The supervisor checks every result itself: the result file, then scope-guard, then <code>make check</code>, then the diff.</li>
+    <li><strong>Close the milestone.</strong> Run <code>/garden-docs</code>, then the verifier alongside <code>/check-security</code>, then <code>/report-milestone</code> → G5. You merge; then <code>/ship-milestone</code>.</li>
+    <li><strong>Improve the factory.</strong> <code>/route-failure</code> turns each failure into a FINDINGS row and a proposed fix in the right layer. <code>/quiz-me</code> gets you interview-ready. <code>/write-demo-script</code> (Codex) and then <code>/record-demo</code> handle the video.</li>
+  </ol>
+</section>
+
+<section id="verify">
+  <h2>Verification</h2>
+  <div class="two">
+    <div class="card"><h3>Automated quality gates</h3><ul>
+      <li><code>scope-guard.sh</code>: fails any change outside the task's <code>Owns:</code> paths. It reads the scope from the base branch, so a task can't widen its own scope.</li>
+      <li><code>make check</code>: lint, types and tests in one green/red command.</li>
+      <li><code>pre-push</code>: both of the above, plus a secret scan.</li>
+      <li>Red acceptance tests written before any code exists.</li></ul></div>
+    <div class="card"><h3>Separation of duties</h3><ul>
+      <li>The verifier can read but not edit.</li>
+      <li>The verifier never sees the worker's own summary.</li>
+      <li>The supervisor re-runs the checks itself; an exit code isn't proof.</li>
+      <li>Implementers can never edit <code>tests/acceptance/**</code>. <span class="src">from Proof Loop</span></li></ul></div>
+  </div>
+</section>
+
+<section id="routing">
+  <h2>Failure routing</h2>
+  <p>When an agent fails, fix the narrowest layer that would have stopped it. Fix tools and the environment before rewording prompts. Nothing new is added without a FINDINGS row. <span class="src">from compound engineering</span></p>
+  <div class="tbl"><table>
+    <tr><th>Symptom</th><th>Fix it in</th></tr>
+    <tr><td>Checkable behavior broke</td><td>a failing test first</td></tr>
+    <tr><td>Wrote outside its phase or task</td><td><code>Owns:</code> + scope-guard (code, not words)</td></tr>
+    <tr><td>Built the wrong thing</td><td>the spec: sharper requirements, a new brief question</td></tr>
+    <tr><td>Same wrong command again</td><td>one line in AGENTS.md, or a script</td></tr>
+    <tr><td>Phase procedure botched</td><td>that skill's recipe + red-flags row</td></tr>
+    <tr><td>Wrong skill fired</td><td>the skill description's "Do NOT use for…"</td></tr>
+    <tr><td>Plugin hijacked the session</td><td>settings: turn it off per repo (F1)</td></tr>
+    <tr><td>One-off quirk</td><td>log it; don't make it a rule</td></tr>
+  </table></div>
+</section>
+
+<section id="glossary">
+  <h2>The primitives, in plain words</h2>
+  <div class="tbl"><table>
+    <tr><th>Thing</th><th>What it is</th><th>Like…</th></tr>
+    <tr><td>System prompt / CLAUDE.md</td><td>Instructions loaded at the start of every session</td><td>the rules poster on the classroom wall</td></tr>
+    <tr><td>AGENTS.md</td><td>The same idea, readable by every harness</td><td>the poster translated for every substitute teacher</td></tr>
+    <tr><td>Skill</td><td>A recipe that loads only when it's used</td><td>a recipe card you pull out of a box</td></tr>
+    <tr><td>Plugin</td><td>A package bundling skills, hooks and agents for installing</td><td>the box a LEGO set ships in</td></tr>
+    <tr><td>Subagent</td><td>A fresh worker with its own tools that never sees your chat</td><td>sending a classmate to the library with a note</td></tr>
+    <tr><td>Hook</td><td>Code the harness runs on events, every time</td><td>the school bell</td></tr>
+    <tr><td>Permissions</td><td>Allow and deny rules for tools and files</td><td>hall passes</td></tr>
+    <tr><td>Headless CLI</td><td><code>claude -p</code>, <code>codex exec</code>: a prompt goes in, a file comes out</td><td>a worksheet for a substitute</td></tr>
+    <tr><td>Worktree</td><td>A second checkout of the repo on its own branch</td><td>a separate desk per task</td></tr>
+  </table></div>
+  <p><strong>Terminology:</strong> say <em>human approval gates</em> and <em>automated quality gates</em>, not "human-in-the-loop evaluation gates". In AI engineering, "evals" means automated measurement.</p>
+</section>
+
+<section id="status">
+  <h2>Status and next</h2>
+  <ul class="status">
+    <li><strong>Done:</strong> the spec, 22 skills (each reviewed adversarially and revised; the 5 riskiest were also test-run on a Cerbo fixture), the verifier, templates, scripts (119/119 tests), and skills installed for Claude, Codex, Cursor and Chops.</li>
+    <li><strong>Not yet proven:</strong> no skill has run end to end on a real project. Cerbo v2 is the first real run: same repo, a new branch with the old code removed, M1 research first.</li>
+    <li><strong>Missing tools</strong> (your install call): <code>mmdc</code>, so diagrams are marked unverified for now; <code>gitleaks</code>; the Cursor and Antigravity CLIs.</li>
+    <li><strong>Open names:</strong> the supervisor role.</li>
+    <li><strong>v1:</strong> 3 evals for the supervisor (doesn't code inline, waits for a yes, records the yes word for word); package factory-kit as a plugin once a second repo uses it unchanged; push to GitLab + GitHub; a website page.</li>
+  </ul>
+  <footer>Borrowed ideas are tagged <span class="src">from …</span>; my own calls are tagged <span class="src mine">mine</span>.</footer>
+</section>
+</main>
+</div>
+<script>
+document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
+  const t=b.previousElementSibling.textContent;
+  const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1500)};
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(done).catch(()=>{const r=document.createRange();r.selectNodeContents(b.previousElementSibling);const s=getSelection();s.removeAllRanges();s.addRange(r)})}
+}));
+</script>
