@@ -1,4 +1,4 @@
-# factory-kit
+# software-factory-kit
 
 My AI-native software factory: a supervisor `CLAUDE.md`, one skill per SDLC phase, and the scripts that make the
 boundaries real. Human defines intent and approves decisions at **human approval gates**; agents investigate, plan,

@@ -1,6 +1,6 @@
 # Skill authoring standard
 
-Every factory-kit skill follows this. A reviewer rejects a skill that breaks any MUST.
+Every software-factory-kit skill follows this. A reviewer rejects a skill that breaks any MUST.
 
 ## Folder
 
@@ -27,7 +27,7 @@ name: <verb-object>            # MUST equal the folder name
 description: Use when <trigger>. Produces <path>. Do NOT use for <nearest sibling> (use <sibling-skill>).
 disable-model-invocation: true # phase skills: the human is the trigger between phases
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "<phase # from WORKFLOW.md §4>"
   gate: "<gate id or none>"
 ---

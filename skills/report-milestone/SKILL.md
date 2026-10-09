@@ -3,7 +3,7 @@ name: report-milestone
 description: "Use when every task of a milestone has landed on milestone/m<N>-<slug> (or been cut) and the merge request needs its shipped-vs-planned evidence report before the G5 merge decision, or when G5 asked for the report to be revised. Produces docs/milestones/M<N>.md, which is also the MR description. Do NOT use for hunting defects in the diff (use the verifier subagent), the security baseline (use check-security), or deploying the merged SHA (use ship-milestone)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "12"
   gate: "G5"
 ---

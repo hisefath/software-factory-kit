@@ -39,7 +39,7 @@ Harness commands (cwd = the worktree):
   shell   bash -c '<frontmatter cmd:>'   token-free runs for testing this wrapper
 Every harness gets HANDOFF_DIR, TASK_ID and RUN_DIR in its environment and stdin from /dev/null.
 
-Env: FACTORY_KIT_DIR  skills root (default $HOME/Desktop/gauntlet_workbench/factory-kit)
+Env: FACTORY_KIT_DIR  skills root (default $HOME/Desktop/gauntlet_workbench/software-factory-kit)
      CODEX_BIN        codex binary
      DELEGATE_TIMEOUT_SEC  hard timeout (default: the "<n> min" in budget:, else 30 min)
      DELEGATE_CLAUDE_ALLOWED_TOOLS  --allowedTools rules for claude workers (default: make check/test/lint/types,
@@ -108,7 +108,7 @@ common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || d
 case $common in */.git) root=$(cd "${common%/.git}" && pwd -P) ;; *) die "bare repositories are not supported" ;; esac
 hd="$root/.handoff"
 tracker="$hd/TRACKER.md"
-[ -f "$tracker" ] || die "no $tracker — run factory-kit scripts/init-repo.sh on this repo first"
+[ -f "$tracker" ] || die "no $tracker — run software-factory-kit scripts/init-repo.sh on this repo first"
 
 task_abs="$(cd "$(dirname "$task_arg")" && pwd -P)/$(basename "$task_arg")"
 task_top=$(cd "$(git -C "$(dirname "$task_abs")" rev-parse --show-toplevel)" && pwd -P)
@@ -159,7 +159,7 @@ if [ "$last" = DISPATCH ] && [ "$force" = 0 ] && [ "$dry" = 0 ]; then
 fi
 
 # ---- harness binary, skill, prompt -----------------------------------------------------------------------
-kit=${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/factory-kit}
+kit=${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}
 skill_md="$kit/skills/${skill:-none}/SKILL.md"
 case $harness in
   claude) bin=$(command -v claude || true); [ -n "$bin" ] || die "claude is not on PATH" ;;
@@ -172,7 +172,7 @@ case $harness in
 esac
 if [ "$harness" != shell ]; then
   [ -n "$skill" ] || die "frontmatter skill: is required for harness $harness"
-  [ -f "$skill_md" ] || die "skill not found: $skill_md (set FACTORY_KIT_DIR or run factory-kit scripts/install.sh)"
+  [ -f "$skill_md" ] || die "skill not found: $skill_md (set FACTORY_KIT_DIR or run software-factory-kit scripts/install.sh)"
 fi
 version=$("$bin" --version 2>&1 | head -1 || true)
 

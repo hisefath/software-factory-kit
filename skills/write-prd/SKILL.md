@@ -3,7 +3,7 @@ name: write-prd
 description: Use when an approved brief (G0) exists and the product's requirements must be written or extended before any design work, or when G1 came back Revise. Produces docs/product/prd.md. Do NOT use for resolving open ⚠ questions in an existing PRD (use clarify-spec) or for choosing architecture or stack (use design-hld).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "3"
   gate: "G1"
 ---

@@ -3,7 +3,7 @@ name: record-demo
 description: "Use when docs/demo/SCRIPT.md has status: approved (after G-demo) and its grader cut and social cut must be recorded, assembled and checked into upload-ready video, or when the human asked to re-take or re-cut a recorded shot. Produces docs/demo/SMOKE.md, docs/demo/RECORDING.md and docs/demo/out/ (grader and social *.mp4 and *.srt, thumb.png). Do NOT use for writing or changing the script or the post copy (use write-demo-script) or for fixing a defect the demo smoke finds (use fix-bug)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "18"
   gate: "none"
 ---

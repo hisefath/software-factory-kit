@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # .githooks/pre-push — the last local wall before commits leave this machine (WORKFLOW.md §2 rule 4).
-# Enabled by `git config core.hooksPath .githooks` (factory-kit scripts/init-repo.sh sets it).
+# Enabled by `git config core.hooksPath .githooks` (software-factory-kit scripts/init-repo.sh sets it).
 #
 #   1. secret scan of exactly the commits being pushed (gitleaks; a loud warning when it is not installed)
 #   2. make check — the project's single green/red command (runs on the checked-out tree)
@@ -98,7 +98,7 @@ for p in ${pushes[@]+"${pushes[@]}"}; do
     continue
   fi
   if [ ! -x scripts/scope-guard.sh ]; then
-    echo "pre-push: BLOCKED — scripts/scope-guard.sh missing (re-run factory-kit init-repo.sh)" >&2
+    echo "pre-push: BLOCKED — scripts/scope-guard.sh missing (re-run software-factory-kit init-repo.sh)" >&2
     fail=1
     continue
   fi

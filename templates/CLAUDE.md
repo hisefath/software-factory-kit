@@ -1,6 +1,6 @@
 @AGENTS.md
 
-<!-- factory-kit 0.1 · supervisor. Spec: ${FACTORY_KIT_DIR:-~/Desktop/gauntlet_workbench/factory-kit}/docs/WORKFLOW.md -->
+<!-- software-factory-kit 0.1 · supervisor. Spec: ${FACTORY_KIT_DIR:-~/Desktop/gauntlet_workbench/software-factory-kit}/docs/WORKFLOW.md -->
 
 ## Worker guard
 If you were started with a task file (`specs/*/tasks/T###.md`, `.handoff/runs/*/task.md`) or a

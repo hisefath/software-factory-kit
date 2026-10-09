@@ -3,7 +3,7 @@ name: slice-tasks
 description: Use when define-acceptance has written specs/M<N>-<slug>/acceptance.md for a milestone whose PRD, HLD and LLD are approved, and the milestone must be cut into dispatchable tasks before any build starts, or when G4 asked for the slices to be revised. Produces specs/M<N>-<slug>/tasks/T###.md (one file per task) and the milestone's MILESTONES.md row. Do NOT use for writing acceptance checks or tests (use define-acceptance), changing a table, interface or decision (use design-lld), or building a task (use implement-task).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "8"
   gate: "G4"
 ---
@@ -93,7 +93,7 @@ decision.
    recommended answer and why**, at most 5 this pass:
    - "Which journey is the tracer bullet? Recommended: <the `Exit demo` cell of the PRD `## Milestone cut` row for
      M<N> / the flows.md demo spine>, because it is the path a reviewer will watch first."
-   - Codex is pre-approved for Gauntlet work (factory-kit docs/WORKFLOW.md §6). Ask only when AGENTS.md or
+   - Codex is pre-approved for Gauntlet work (software-factory-kit docs/WORKFLOW.md §6). Ask only when AGENTS.md or
      TRACKER.md marks the repo or a path partner-confidential or private: "Is <paths> partner-confidential?
      Recommended: yes (keep those tasks on Claude) unless the repo is already public."
    Unanswered → use the recommendation and list it under Assumed answers.
@@ -136,7 +136,7 @@ decision.
      default claude allow-list runs only make/git/date: dispatch claude tasks as Agent-tool subagents, or extend
      DELEGATE_CLAUDE_ALLOWED_TOOLS with the runner (supervisor's call)."
    - Never tell a task to skip or weaken a test.
-9. **Choose harness, hitl and budget per task** (factory-kit docs/WORKFLOW.md §6, inlined here).
+9. **Choose harness, hitl and budget per task** (software-factory-kit docs/WORKFLOW.md §6, inlined here).
    - `codex` only when the task is one skill (`implement-task`), isolated (disjoint `Owns:`, needs only the files in
      its manifest, no conversation) and parallelizable (`parallel: true`), **and** it deletes no files (the Oracle
      seat's policy blocks installs, `rm`, push and `python -c`), needs no secret or partner-confidential context and

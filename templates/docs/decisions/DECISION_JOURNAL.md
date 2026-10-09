@@ -1,6 +1,6 @@
 # Decision journal
 
-Why each design choice was made and what it cost (factory-kit WORKFLOW.md §9). Committed, append-only.
+Why each design choice was made and what it cost (software-factory-kit WORKFLOW.md §9). Committed, append-only.
 
 - Written only by the `log-decision` skill, after every gate. It records decisions the **human** made; an entry is
   never `accepted` without the human's quoted words.

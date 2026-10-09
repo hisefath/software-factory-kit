@@ -2,7 +2,7 @@
 milestone: M{{N}}
 slug: {{kebab-case-outcome}}
 artifact: brief
-written_by: sharpen-brief (factory-kit 0.1)
+written_by: sharpen-brief (software-factory-kit 0.1)
 written_at: {{output of date '+%Y-%m-%d %H:%M %Z (UTC%z)'}}
 assignment: {{each official source as a repo-relative path, or the name the human gives it if it lives outside the repo; never an absolute or home path}}
 track_recommended: {{Full | Standard | Fix}}

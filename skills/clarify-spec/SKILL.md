@@ -3,7 +3,7 @@ name: clarify-spec
 description: "Use when one spec artifact (brief, codebase audit, PRD, UX flows or screens, HLD, LLD, change plan, acceptance or demo script) still has open ⚠ markers or vague requirements that the human must settle before its gate. Produces the answers applied inline in that one file plus its Clarifications log. Do NOT use for a task file (use slice-tasks, or clarify the acceptance.md or lld.md it derives from), for writing, restructuring or re-scoping the artifact (use its owner skill, e.g. write-prd) or for recording a design decision (use log-decision)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "3b"
   gate: "per-question"
 ---

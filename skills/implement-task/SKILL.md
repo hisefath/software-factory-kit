@@ -3,7 +3,7 @@ name: implement-task
 description: "Use when one approved task file with skill: implement-task is ready to build after G4 (specs/M<N>-<slug>/tasks/T###.md, or a supervisor job file .handoff/runs/M<N>-T###/task.md such as a ship-milestone GAP task), usually dispatched by the supervisor into its own git worktree, including a relaunch or a sent-back revision of an earlier run of that task. Produces commits on branch m<N>/t###-<slug> and $HANDOFF_DIR/runs/<id>/result.md. Do NOT use for a bug with a repro and no task file (use fix-bug), writing acceptance tests (use define-acceptance), or cutting work into tasks (use slice-tasks)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "9"
   gate: "automated: scope-guard + make check"
 ---

@@ -3,7 +3,7 @@ name: audit-codebase
 description: Use when the project inherits existing code or a deployed app (brownfield, including a rebuild that must learn from an old version) and you need to know what risk comes with it, before write-prd; also as `audit-codebase record` after each G-audit answer. Produces docs/audit/AUDIT.md. Do NOT use for code this project wrote (use verifier or check-security) or for open research questions (use gather-evidence).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "2b"
   gate: "G-audit"
 ---

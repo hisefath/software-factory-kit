@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test.sh — self-test for the factory-kit scripts, in a throwaway git repo under mktemp -d.
+# test.sh — self-test for the software-factory-kit scripts, in a throwaway git repo under mktemp -d.
 # No network, no tokens, no installs: claude/codex are replaced by stubs, `shell` tasks run real commands.
 set -euo pipefail
 
@@ -16,15 +16,15 @@ EOF
 case "${1:-}" in -h | --help) usage; exit 0 ;; "") ;; *) usage >&2; exit 2 ;; esac
 
 kit=$(cd "$(dirname "$0")/.." && pwd -P)
-tmp=$(mktemp -d "${TMPDIR:-/tmp}/factory-kit-test.XXXXXX")
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/software-factory-kit-test.XXXXXX")
 tmp=$(cd "$tmp" && pwd -P)
 cleanup() { if [ "${KEEP:-0}" = 1 ]; then echo "kept: $tmp"; else rm -rf "$tmp"; fi; }
 trap cleanup EXIT
 
 # Hermetic git: ignore the user's global/system config (commit signing, hooks, default branch).
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
-export GIT_AUTHOR_NAME="factory-kit test" GIT_AUTHOR_EMAIL=test@example.invalid
-export GIT_COMMITTER_NAME="factory-kit test" GIT_COMMITTER_EMAIL=test@example.invalid
+export GIT_AUTHOR_NAME="software-factory-kit test" GIT_AUTHOR_EMAIL=test@example.invalid
+export GIT_COMMITTER_NAME="software-factory-kit test" GIT_COMMITTER_EMAIL=test@example.invalid
 
 passed=0 failed=0
 out="$tmp/out.log"
@@ -47,7 +47,7 @@ hasnt() { if grep -qF -- "$3" "$2"; then bad "$1 (unexpected: $3)" "$2"; else ok
 is() { if [ "$2" = "$3" ]; then ok "$1"; else bad "$1 (got '$2', want '$3')"; fi; }
 replace_line() { sed "s|$2|$3|" "$1" >"$1.tmp" && mv "$1.tmp" "$1"; } # portable sed -i
 
-echo "# factory-kit self-test ($tmp)"
+echo "# software-factory-kit self-test ($tmp)"
 
 # ---- 0. syntax and usage ---------------------------------------------------------------------------------
 for f in "$kit"/scripts/*.sh "$kit/templates/.githooks/pre-push"; do
@@ -103,7 +103,7 @@ rc 1 "init-repo: refuses a non-git directory" bash "$kit/scripts/init-repo.sh" "
 # ---- fixtures: passing make check, milestone branch, task files, stub harnesses ----------------------------
 cd "$repo"
 printf 'check:\n\t@echo check-ok\n' >Makefile
-git add -A && git commit -qm "chore: factory-kit scaffold"
+git add -A && git commit -qm "chore: software-factory-kit scaffold"
 git checkout -q -b milestone/m1-demo
 mkdir -p specs/M1-demo/tasks
 cat >specs/M1-demo/tasks/T001.md <<'EOF'

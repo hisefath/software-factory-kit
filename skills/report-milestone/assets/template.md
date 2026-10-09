@@ -1,6 +1,6 @@
 # M{{N}} {{goal in a few words}} — milestone report
 
-<!-- guide: report-milestone template (factory-kit WORKFLOW.md §4 phase 12). This file is also the merge request
+<!-- guide: report-milestone template (software-factory-kit WORKFLOW.md §4 phase 12). This file is also the merge request
      description, unchanged: GitLab-flavoured Markdown, no front matter.
      Keep every `## ` and `### ` heading exactly as written and in this order (Summary, 13 numbered sections,
      Appendix A). Replace every {{placeholder}} and delete every `<!-- guide:` comment when filling.

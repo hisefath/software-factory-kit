@@ -3,7 +3,7 @@ name: gather-evidence
 description: "Use when a brief's research questions, or a post-G1 evidence follow-up, need answers backed by sources that were actually read. Produces docs/research/R<NN>-<slug>.md and appends docs/research/sources.md. Do NOT use for turning evidence into requirements (use write-prd), choosing architecture (use design-hld), or assessing inherited code (use audit-codebase)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "2"
   gate: "none"
 ---

@@ -1,9 +1,9 @@
 ---
 name: quiz-me
-description: "Use when the human wants to learn and rehearse defending this project's accepted decisions (a milestone's D-rows and the HLD/LLD choices behind them) before an interview, demo or review, or to re-test chosen or due topics from their private review list. Produces ~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md, outside the repo. Do NOT use for making, changing or recording a decision (use log-decision, or the owning design skill on Revise) or for writing demo material (use write-demo-script)."
+description: "Use when the human wants to learn and rehearse defending this project's accepted decisions (a milestone's D-rows and the HLD/LLD choices behind them) before an interview, demo or review, or to re-test chosen or due topics from their private review list. Produces ~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md, outside the repo. Do NOT use for making, changing or recording a decision (use log-decision, or the owning design skill on Revise) or for writing demo material (use write-demo-script)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "16"
   gate: "self-check"
 ---
@@ -12,11 +12,11 @@ metadata:
 
 **Outcome:** the human was taught every in-scope accepted decision in plain words, then quizzed one question at a
 time and graded strictly against rubrics written before each question; every partial or wrong answer is a dated,
-specific topic row in `~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md`; the repo is exactly as it was at the start.
+specific topic row in `~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md`; the repo is exactly as it was at the start.
 
 ## You own / You never touch
 
-- You own `~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` fully: creating it from `assets/template.md`, adding
+- You own `~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` fully: creating it from `assets/template.md`, adding
   and updating `TR-<n>` topic rows, appending one `### S<k>` session block. You never write anything inside the
   repo: no docs, no `docs/learnings/`, no `.handoff/**`, no journal edit, no commit, no revert.
 - You own **teaching**: plain-language explanations, analogies and background on general concepts (what a foreign
@@ -63,7 +63,7 @@ the path, never guess.
      `for f in AGENTS.md $(find specs docs/product docs/research -name '*.md' 2>/dev/null); do awk -v f="$f" '/^## Interview log/{s=1;next} /^## /{s=0} !s && tolower($0) ~ /interview|defen[cs]e|walk[- ]?through|presentation/ {print f":"FNR": "$0}' "$f"; done`
    - Found: weight questions toward it and cite it in rubrics; an expectation the sources cannot answer is listed
      in STOP. Nothing found and the human answers "none": write "no defense rubric found; using the journal schema".
-8. **`~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` (optional):** open `TR` rows, which are due (Next review ≤
+8. **`~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` (optional):** open `TR` rows, which are due (Next review ≤
    today), which ids appear on earlier `Taught:` lines. Missing: step 1 creates it.
 9. **`.handoff/TRACKER.md ## Resume` (read-only, for STOP's next skill):** missing → next = `write-demo-script`.
 10. **`references/question-bank.md`** in this skill: question stems per type and per design element, follow-up
@@ -85,7 +85,7 @@ state, because shell variables do not survive between commands.
 bash <<'EOF'
 set -u
 top=$(git rev-parse --show-toplevel) || { echo "STOP: not inside a git repo"; exit 1; }
-repo=$(basename "$top"); F="$HOME/factory-kit-private/$repo/TOPICS_TO_REVIEW.md"
+repo=$(basename "$top"); F="$HOME/software-factory-kit-private/$repo/TOPICS_TO_REVIEW.md"
 date '+%Y-%m-%d %H:%M %Z'; echo "F=$F"
 mkdir -p "$(dirname "$F")" && test -w "$(dirname "$F")" || { echo "STOP: cannot write $(dirname "$F")"; exit 1; }
 if test -e "$F"; then
@@ -112,7 +112,7 @@ EOF
 ```bash
 bash <<'EOF'
 set -u; top=$(git rev-parse --show-toplevel) || exit 1; cd "$top"
-F="$HOME/factory-kit-private/$(basename "$top")/TOPICS_TO_REVIEW.md"
+F="$HOME/software-factory-kit-private/$(basename "$top")/TOPICS_TO_REVIEW.md"
 k=$(( $(awk '/^### S[0-9]+ /{n=substr($2,2)+0; if(n>m)m=n} END{print m+0}' "$F") + 1 ))
 fp=$({ git rev-parse HEAD; git --no-optional-locks status --porcelain=v1 -uall; git diff HEAD --binary; git ls-files -z -o --exclude-standard | xargs -0 cat; } 2>/dev/null | git hash-object --stdin | cut -c1-12)
 printf '\n### S%s · %s · scope %s · base %s · fp %s · quiz-me (%s)\n\nDefense expectations: %s\nTaught: pending\n' \
@@ -190,7 +190,7 @@ EOF
 
 ## Output
 
-- **Path:** `~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` only, outside the repo, never committed.
+- **Path:** `~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` only, outside the repo, never committed.
 - Fill `assets/template.md`: Part 1 is the three chat cards (Teach, Question, Grade; never written to a file), Part 2
   is the file skeleton (created once), Part 3 is the `### S<k>` session block appended per session.
 - Every field of every Q block and `TR` row is required. Unknown: `not given`. Missing project fact:
@@ -207,7 +207,7 @@ fix the private file `<F>` and re-run; never touch the repo. `FAIL repo-untouche
 bash <<'EOF'
 set -u; bad=0; ok(){ echo "PASS $1"; }; no(){ echo "FAIL $1: $2"; bad=1; }
 top=$(git rev-parse --show-toplevel) || { echo "FAIL repo: not a git repo"; exit 1; }; cd "$top"
-F="$HOME/factory-kit-private/$(basename "$top")/TOPICS_TO_REVIEW.md"
+F="$HOME/software-factory-kit-private/$(basename "$top")/TOPICS_TO_REVIEW.md"
 test -s "$F" || { echo "FAIL file: missing or empty $F"; exit 1; }
 k=$(awk '/^### S[0-9]+ /{n=substr($2,2)+0; if(n>m)m=n} END{print m+0}' "$F")
 [ "$k" -ge 1 ] || { echo "FAIL session: no ### S<k> header in $F"; exit 1; }
@@ -255,7 +255,7 @@ is older than the same for `docs/milestones/M<N>.md`) → `write-demo-script`. E
 
 ```
 quiz-me session S<k> stopped (<date>).
-Wrote: ~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md, your private study file outside the repo (session S<k>;
+Wrote: ~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md, your private study file outside the repo (session S<k>;
   topic rows added <TR ids | none>, updated <TR ids | none>, resolved <TR ids | none>).
   A topic row (TR-<n>) is one weak spot on your spaced-review list; it comes back on its due date.
 Repo: <untouched (its fingerprint at the end matches the one taken at the start) | CHANGED during the session, not by me: <git status lines>>

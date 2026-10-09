@@ -3,7 +3,7 @@ name: design-lld
 description: "Use when an HLD approved at G2 needs its low-level design, when a later milestone needs an LLD delta, or when G3 asked for the LLD to be revised. Produces docs/architecture/lld.md, docs/architecture/contracts/openapi.yaml and, for brownfield (inherited) code, specs/M<N>-<slug>/change-plan.md. Do NOT use for containers, connections, trust boundaries or invariants (use design-hld), rendering diagrams (use draw-diagrams), or acceptance tests (use define-acceptance)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "6"
   gate: "G3"
 ---

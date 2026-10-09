@@ -1,4 +1,4 @@
-<title>factory-kit</title>
+<title>software-factory-kit</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 /* Layout: a route card on drafting paper — left rail of section stations, numbered only where order is real (phases). */
@@ -74,7 +74,7 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
 <main>
 <section id="thesis">
   <div class="eyebrow">Sefath's AI-native workflow · v0.1 · 2026-10-08</div>
-  <h1>factory-kit</h1>
+  <h1>software-factory-kit</h1>
   <p class="lede">A software factory where I set intent and approve decisions, agents do the investigating, planning, building and testing, and scripts check the work continuously. Each phase is a single-purpose skill with one declared output. The phase stops when its output is written, and I'm the one who starts the next phase.</p>
   <div class="thesis"><span class="pill h">Human approval gates catch wrong</span><span class="pill m">Automated quality gates catch broken</span></div>
   <div class="stats">
@@ -136,8 +136,8 @@ flowchart LR
 
 <section id="repo">
   <h2>The repo</h2>
-  <p><code>~/Desktop/gauntlet_workbench/factory-kit</code> holds the first commit, <code>f1db017</code>. It isn't pushed yet; pushing is your call.</p>
-<pre>factory-kit/
+  <p><code>~/Desktop/gauntlet_workbench/software-factory-kit</code> holds the first commit, <code>f1db017</code>. It isn't pushed yet; pushing is your call.</p>
+<pre>software-factory-kit/
   docs/WORKFLOW.md          the spec — wins every conflict
   docs/SKILL_STANDARD.md    how every skill is written
   docs/walkthrough.html     this page
@@ -212,7 +212,7 @@ flowchart LR
   <h2>How to use it</h2>
   <ol class="steps">
     <li><strong>Scaffold a project.</strong> Then fill in the Commands table in <code>AGENTS.md</code> and copy <code>Makefile.example</code> to a real <code>make check</code>.
-      <div class="cmd"><code>bash ~/Desktop/gauntlet_workbench/factory-kit/scripts/init-repo.sh ~/Desktop/gauntlet_workbench/my-project</code><button type="button" data-copy>Copy</button></div></li>
+      <div class="cmd"><code>bash ~/Desktop/gauntlet_workbench/software-factory-kit/scripts/init-repo.sh ~/Desktop/gauntlet_workbench/my-project</code><button type="button" data-copy>Copy</button></div></li>
     <li><strong>Open Claude Code in the repo.</strong> The SessionStart hook prints the Resume block. Describe what you want in plain words; the supervisor picks a track, adds a tracker row and tells you the next command.</li>
     <li><strong>Plan, one phase at a time.</strong> Type <code>/sharpen-brief</code>. It asks one question at a time, each with a recommended answer, then stops at G0. Answer Approve / Revise / Stop, and the supervisor records your words and runs <code>log-decision</code>. Do the same with <code>/write-prd</code> (G1), <code>/design-hld</code> (G2) and <code>/design-lld</code> (G3).</li>
     <li><strong>Let diagrams fan out.</strong> After each design draft, the supervisor commits it, dispatches one <code>draw-diagrams</code> job per diagram type, then embeds the results:
@@ -280,7 +280,7 @@ flowchart LR
     <li><strong>Not yet proven:</strong> no skill has run end to end on a real project. Cerbo v2 is the first real run: same repo, a new branch with the old code removed, M1 research first.</li>
     <li><strong>Missing tools</strong> (your install call): <code>mmdc</code>, so diagrams are marked unverified for now; <code>gitleaks</code>; the Cursor and Antigravity CLIs.</li>
     <li><strong>Open names:</strong> the supervisor role.</li>
-    <li><strong>v1:</strong> 3 evals for the supervisor (doesn't code inline, waits for a yes, records the yes word for word); package factory-kit as a plugin once a second repo uses it unchanged; push to GitLab + GitHub; a website page.</li>
+    <li><strong>v1:</strong> 3 evals for the supervisor (doesn't code inline, waits for a yes, records the yes word for word); package software-factory-kit as a plugin once a second repo uses it unchanged; push to GitLab + GitHub; a website page.</li>
   </ul>
   <footer>Borrowed ideas are tagged <span class="src">from …</span>; my own calls are tagged <span class="src mine">mine</span>.</footer>
 </section>

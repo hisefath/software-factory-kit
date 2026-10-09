@@ -3,7 +3,7 @@ name: check-security
 description: Use when a milestone branch is at G5 prep and needs baseline security evidence for code this project wrote. Produces docs/security/CHECKLIST.md. Do NOT use for inherited code before the PRD (use audit-codebase), for gaps between code and approved specs (use verifier), or to fix a finding (the supervisor routes a fix-bug or implement-task fix).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "11"
   gate: "G5"
 ---

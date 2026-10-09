@@ -1,7 +1,7 @@
 # quiz-me output skeleton
 
 <!-- Three parts. Part 1 is shown in chat, one card per message, and is never written to any file.
-     Part 2 is the private file ~/factory-kit-private/{{repo}}/TOPICS_TO_REVIEW.md, created once, outside the repo.
+     Part 2 is the private file ~/software-factory-kit-private/{{repo}}/TOPICS_TO_REVIEW.md, created once, outside the repo.
      Part 3 is appended to that file once per session, under ## Sessions, newest last.
      Replace every {{placeholder}}. Ids: TR-<n> = topic row (one weak spot on the human's review list), numbered
      across all sessions, never reused or deleted; S<k> = session number; Q-<k>.<n> = question n of session k.
@@ -68,7 +68,7 @@ Follow-up {{1 | 2}} (new case): {{a transfer question: apply the missing piece t
 ```markdown
 # Topics to review — {{repo}}
 
-<!-- Private. Lives at ~/factory-kit-private/{{repo}}/TOPICS_TO_REVIEW.md, outside the repo; never commit it.
+<!-- Private. Lives at ~/software-factory-kit-private/{{repo}}/TOPICS_TO_REVIEW.md, outside the repo; never commit it.
      Written only by quiz-me. No credentials, keys or PHI, even inside quoted answers ([redacted: kind]).
      Rows are never deleted or renumbered; a resolved row stays as the record of what used to be shaky. -->
 

@@ -2,7 +2,7 @@
 
 <!-- guide: four parts. Part 1 is appended to docs/decisions/DECISION_JOURNAL.md (one block per decision). Part 2 is a
      new file docs/decisions/{{NNNN}}-{{slug}}.md, only for an accepted Type 1 decision. Part 3 is appended to
-     ~/factory-kit-private/{{repo}}/REFLECTIONS.md, only when the human offered a reflection. Part 4 is a chat card,
+     ~/software-factory-kit-private/{{repo}}/REFLECTIONS.md, only when the human offered a reflection. Part 4 is a chat card,
      never written to a file. Replace every {{placeholder}}, choose one value where a placeholder lists `a | b`, and
      delete every `<!-- guide:` comment. Unknown → `⚠ <question>`, never an invention. Times come from `date`. -->
 
@@ -118,7 +118,7 @@ Journal: D{{n}} in `docs/decisions/DECISION_JOURNAL.md` · Approval: `.handoff/T
 {{Approvals row time}}, "{{exact words}}" · Artifact: `{{path}}@{{short sha}}` · Revisit if: {{trigger}}
 ```
 
-## Part 3 — private reflection, appended to `~/factory-kit-private/{{repo}}/REFLECTIONS.md`
+## Part 3 — private reflection, appended to `~/software-factory-kit-private/{{repo}}/REFLECTIONS.md`
 
 <!-- guide: only when the human offered a reflection with their answer. Their words verbatim; never summarized,
      never prompted for, never written inside the repo, never containing secrets or PHI. -->

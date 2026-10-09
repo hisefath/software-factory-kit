@@ -3,18 +3,18 @@
 Six parts. Part 0 is a scratch file; Parts 1-4 are written to files; Part 5 is chat only. Fill every `<...>`; an
 unknown is `⚠ <question>`, never a guess. No `|` inside a table cell. Times from `date`, counts from commands. Never
 paste secrets, tokens, PHI, real personal data or an absolute home path: `<redacted: kind>`.
-`$KIT` = `${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/factory-kit}`.
+`$KIT` = `${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}`.
 
 ---
 
 ## Part 0: the pass's env file (scratch, never committed; once per pass)
 
-Run in bash from the project repo root (factory-kit mode: the factory-kit root). It prints the env file's path;
+Run in bash from the project repo root (software-factory-kit mode: the software-factory-kit root). It prints the env file's path;
 start every later command with `. <that path> &&`, because shell state does not survive between commands.
 
 ```
 ROOT=$(git rev-parse --show-toplevel) && PROJECT=$(basename "$ROOT") &&
-KIT="${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/factory-kit}" &&
+KIT="${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}" &&
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/route-failure-$PROJECT.XXXXXX") &&
 { printf "set -o pipefail\nKIT='%s'\nROOT='%s'\nPROJECT='%s'\ntmp='%s'\ncd '%s' || return 1\n" \
     "$KIT" "$ROOT" "$PROJECT" "$tmp" "$ROOT"
@@ -76,7 +76,7 @@ If `## Proposals` is missing, append it once, with this comment, after the table
      A filed block's diff never changes; a changed diff is a new block that supersedes it.
      The human approves the exact diff bytes at G-L5; the approval binds to their hash, not to a commit:
      .handoff/TRACKER.md ## Approvals | time | G-L5 | H<n>@<diff-sha256> | exact words |
-     (factory-kit mode: the block's Verdict line). Nothing here is applied before that record exists. -->
+     (software-factory-kit mode: the block's Verdict line). Nothing here is applied before that record exists. -->
 ```
 
 Each block, exactly:
@@ -87,7 +87,7 @@ Each block, exactly:
 - F#: F<n> (two rows only when two fixes in one pass touch the same file) · Layer: <layer> · Reach: <task, project,
   factory template, factory skill or WORKFLOW.md>
 - Proposed: <date> by route-failure (<harness>, <model id>) · Project: <PROJECT>
-- Apply in: <factory-kit or PROJECT> (repo root; never an absolute path) · Files: `<rel path>`, `<rel path>`
+- Apply in: <software-factory-kit or PROJECT> (repo root; never an absolute path) · Files: `<rel path>`, `<rel path>`
 - Root cause: <symptom → why → why → the harness gap, one line>
 - Why this layer: <the §10 row, and why not the earlier preference step; one plain sentence>
 - Rules: `<rel path>` <before> → <after> (ceiling <~20 rules, 6 red-flag rows or 300 lines>); pruned:
@@ -107,7 +107,7 @@ Each block, exactly:
 ```
 ````
 
-Hash, check or apply the diff exactly as stored (`<apply-in>` = `$KIT` for `factory-kit`, `$ROOT` for the project):
+Hash, check or apply the diff exactly as stored (`<apply-in>` = `$KIT` for `software-factory-kit`, `$ROOT` for the project):
 
 ```
 hx <n> | shasum -a 256 | cut -c1-12          # diff-sha256; e3b0c44298fc means hx found nothing

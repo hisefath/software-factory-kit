@@ -3,7 +3,7 @@ name: ship-milestone
 description: "Use when a milestone's merge request has been merged after G5 and that exact merge SHA must go live (including the project's first-ever deploy), be verified from outside and be watched, or when G-live asked for a revision. Produces docs/runbooks/deploy.md, docs/ops/HEALTH.md and scripts/smoke.sh. Do NOT use for deciding whether to merge (use report-milestone) or for fixing a defect the smoke test found (use fix-bug)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "13"
   gate: "G-live"
 ---
@@ -96,7 +96,7 @@ a recorded human yes.
    |---|---|---|
    | 0 | Which platform, project and service run production? | The one hld.md §11 or AGENTS.md names; if neither does, Railway (one web service + one managed database), whose commands are researched in `references/platforms.md`, with a `⚠` so design-hld §11 catches up. Any other platform starts every command `⚠ unverified`. |
    | 1 | Which environments get M<N>, at which HTTPS URLs? (First deploy: which domain will you generate?) | hld.md §11's list; production only if there is no staging (a staging hop catches config errors but doubles deploy time). First deploy: the platform's generated subdomain, whose TLS certificate is automatic; a custom domain adds DNS and certificate waits, so add it later. |
-   | 2 | How does the merged SHA reach the platform? | A clean `git archive` of the SHA uploaded by the DEP steps (the factory-kit default): deploying stays its own human yes after merge. Git-connected is fewer commands, but then the push that updates the watched repo and branch *is* the deploy. Never the working tree: it can ship uncommitted or ignored files, and then nobody knows what is live. |
+   | 2 | How does the merged SHA reach the platform? | A clean `git archive` of the SHA uploaded by the DEP steps (the software-factory-kit default): deploying stays its own human yes after merge. Git-connected is fewer commands, but then the push that updates the watched repo and branch *is* the deploy. Never the working tree: it can ship uncommitted or ignored files, and then nobody knows what is live. |
    | 3 | Which Demo smoke steps become smoke checks? | Every `## Demo smoke` step an anonymous `GET` can prove; steps needing a login or a write are listed as covered by tests and the demo. No Demo smoke section: the entry page, one list or detail page, and one login-guarded page expecting a redirect to login (proves routing and the auth guard without credentials). |
    | 4 | What availability promise (SLO) do we make? | 99.5% of 5-minute `/healthz` probes succeed per 30 days, an error budget of 3.6 hours. Higher costs on-call effort a solo project cannot staff. |
    | 5 | What watches production, and who is told? | An external uptime monitor on `/healthz` every 5 minutes, alerting the owner (the human creates the account). Your own CI or server cannot report its own outage. |

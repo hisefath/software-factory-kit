@@ -2,7 +2,7 @@
 name: log-decision
 description: "Use only after the human has answered a gate, a per-finding gate card (G-audit A<n>, G5 SEC-<n> or DV-<n>, G-L5 H<n>) or a clarify-spec decision candidate, and the supervisor has written that answer verbatim to .handoff/TRACKER.md ## Approvals; never before the answer exists. Produces appended D<n> entries in docs/decisions/DECISION_JOURNAL.md, plus docs/decisions/NNNN-<slug>.md for an accepted one-way (Type 1) decision. Do NOT use to propose or choose an option (the artifact's owner skill proposes, e.g. design-hld), to settle ⚠ markers (use clarify-spec), or for verifier row dispositions (they stay in the review file)."
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "X"
   gate: "none"
 ---
@@ -31,7 +31,7 @@ with every option that lost still visible. Each accepted Type 1 decision also ha
 - You own **copying** options, costs and reasons from the artifact at the approved version; you never invent a pro,
   a cost, a reason or a first proposal, and you never drop a rejected option, "do nothing", or the agent's first
   proposal.
-- You own appending a reflection the human offered to `~/factory-kit-private/<repo>/REFLECTIONS.md`; you never
+- You own appending a reflection the human offered to `~/software-factory-kit-private/<repo>/REFLECTIONS.md`; you never
   write a reflection inside the repo, ask for one, or write one yourself.
 - You own reading anything; you never edit the source artifact (its owner skill does), `.handoff/**` (the
   supervisor does), `AGENTS.md`, `CLAUDE.md`, skills, code or tests. You never commit, push, install anything or
@@ -68,7 +68,7 @@ covers.
 | clarify-spec decision candidate | the row approving that clarify-spec pass · `<target>@<sha>` | the `#### CQ-<n>` entry's Options at that sha | the card's skip default: the ⚠ stays and the gate cannot pass until it is resolved or waived | `CQ-<n>` the call names |
 | verifier row dispositions | — | — | — | none: out of scope, say so in STOP |
 
-- **G-L5 check:** `KIT="${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/factory-kit}"`, then
+- **G-L5 check:** `KIT="${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}"`, then
   ``awk -v h='### H<n> ' 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&/^```diff$/{d=1;next} d&&/^```$/{exit} d' "$KIT/HARNESS_CHANGELOG.md" | shasum -a 256 | cut -c1-12``
   must print `<hash>`. Anything else means the approved bytes are gone: write `proposed`, flag "stale G-L5 hash".
   The entry's artifact is `HARNESS_CHANGELOG.md H<n>@<hash>`.
@@ -171,7 +171,7 @@ covers.
    only one a flip may change). Superseding a decision that has a record: change only that record's `status:` line
    to `superseded by NNNN`.
 8. **Private reflection, only if offered.**
-   `R=~/factory-kit-private/$(basename "$(git rev-parse --show-toplevel)"); mkdir -p "$R"`, then append Part 3 to
+   `R=~/software-factory-kit-private/$(basename "$(git rev-parse --show-toplevel)"); mkdir -p "$R"`, then append Part 3 to
    `$R/REFLECTIONS.md` with the human's words verbatim.
 9. **Verify.** Run every Done-when check; fix and re-run until all pass. Then send STOP.
 
@@ -179,7 +179,7 @@ covers.
 
 - `docs/decisions/DECISION_JOURNAL.md`: new entries appended (Part 1), plus only the edits step 6-7 allow.
 - `docs/decisions/NNNN-<slug>.md`: one per accepted Type 1 entry (Part 2).
-- `~/factory-kit-private/<repo>/REFLECTIONS.md`: only when the human offered a reflection (Part 3).
+- `~/software-factory-kit-private/<repo>/REFLECTIONS.md`: only when the human offered a reflection (Part 3).
 - Fill `assets/template.md` exactly. Every field is required; unknown → `⚠ <question>`, never invented. Part 4 is the
   chat question card, never written to a file.
 
@@ -238,7 +238,7 @@ Send exactly this, filled, and stop:
 log-decision recorded (<date>) your answer at <gate id> on <artifact>: "<exact words>"
 Wrote: docs/decisions/DECISION_JOURNAL.md (+D<a>…D<b> | nothing appended); status edits: <D<k> proposed→accepted | D<k> superseded-by D<m> | none>
        <docs/decisions/NNNN-<slug>.md (Type 1 record) | no record: no accepted Type 1>
-       <reflection appended to ~/factory-kit-private/<repo>/REFLECTIONS.md (outside the repo) | no reflection offered>
+       <reflection appended to ~/software-factory-kit-private/<repo>/REFLECTIONS.md (outside the repo) | no reflection offered>
 - D<n> <title> [<status>] · <Type 1 one-way | Type 2 two-way>
   You chose <X> over <Y>; you pay <W>; revisit if <trigger>.
   Interview line: "<...>"

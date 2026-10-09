@@ -1,7 +1,7 @@
 # Docs index
 
 THE map of this repo's artifacts: one line per artifact type → where it lives, which skill writes it, and the
-human approval gate that accepts it (factory-kit WORKFLOW.md §4). If an artifact is not reachable from this
+human approval gate that accepts it (software-factory-kit WORKFLOW.md §4). If an artifact is not reachable from this
 page, agents will not find it. `garden-docs` keeps this file in sync; it lists paths, never counts.
 
 `M<N>` = milestone number · `<slug>` = short kebab name · `T###` = task number · ids never get renumbered.
@@ -59,4 +59,4 @@ page, agents will not find it. `garden-docs` keeps this file in sync; it lists p
 
 - `docs/product/prd.md` is living; `specs/M<N>-<slug>/` is frozen once its milestone merges.
 - Templates for the task and result contracts: `specs/_templates/task.md`, `specs/_templates/result.md`.
-- Private reflections and quiz notes never live here: `~/factory-kit-private/<repo>/`.
+- Private reflections and quiz notes never live here: `~/software-factory-kit-private/<repo>/`.

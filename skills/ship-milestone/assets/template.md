@@ -281,7 +281,7 @@ write $HANDOFF_DIR/runs/{{M<N+1>-T901}}/result.md
 <!-- file: scripts/smoke.sh -->
 ```bash
 #!/usr/bin/env bash
-# scripts/smoke.sh — written by ship-milestone (factory-kit 0.1) for {{project name}}.
+# scripts/smoke.sh — written by ship-milestone (software-factory-kit 0.1) for {{project name}}.
 # Proves that the deployment at <base-url> runs <expected-sha> and that its core journey answers.
 # Usage: bash scripts/smoke.sh <https-base-url> <expected-sha>
 # Exit:  0 every check passed · 1 at least one check failed · 2 bad arguments
@@ -307,7 +307,7 @@ fi
 
 HEALTH_PATH="{{/healthz}}"
 CURL=(curl -q --silent --show-error --proto '=https' --tlsv1.2 --max-time 15
-      --retry 2 --retry-delay 3 --user-agent 'factory-kit-smoke/0.1')
+      --retry 2 --retry-delay 3 --user-agent 'software-factory-kit-smoke/0.1')
 
 passed=0
 failed=0

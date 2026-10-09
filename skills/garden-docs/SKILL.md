@@ -3,7 +3,7 @@ name: garden-docs
 description: "Use when a milestone branch needs its docs made findable, in sync and honest before the verifier pass (the milestone's tasks have landed), or as the first commit of the next milestone branch after a merge or go-live. Produces docs/README.md, README.md, ARCHITECTURE.md (graded or asked only) and moves into docs/archive/. Do NOT use on main, for writing or changing a requirement, design or decision (use clarify-spec, design-hld, design-lld or log-decision), or for the milestone report and MR body (use report-milestone)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "14"
   gate: "G5" # rides the MR (WORKFLOW §4): no gate of its own; G5 is asked later by report-milestone
 ---

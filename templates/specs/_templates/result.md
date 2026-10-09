@@ -12,7 +12,7 @@ not_verified: []
 ---
 
 <!--
-Result contract (factory-kit WORKFLOW.md §7). The worker writes it to $HANDOFF_DIR/runs/<id>/result.md as its last
+Result contract (software-factory-kit WORKFLOW.md §7). The worker writes it to $HANDOFF_DIR/runs/<id>/result.md as its last
 act; scripts/delegate.sh parses `task` and `status`. Delete this comment when filling.
 
 status   done          Done-when passes, all work committed, tree clean

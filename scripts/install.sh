@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — make factory-kit skills visible to every harness by symlinking (never copying) them.
+# install.sh — make software-factory-kit skills visible to every harness by symlinking (never copying) them.
 #
 # One source folder, many readers: editing skills/<name>/SKILL.md here is instantly what Claude Code,
 # Codex, Cursor, Antigravity and Chops see, so the harnesses can never drift apart.

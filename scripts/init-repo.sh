@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # init-repo.sh — phase 0: scaffold the constitution into a project repo (WORKFLOW.md §4 row 0).
 #
-# Copies factory-kit templates/ (+ the verifier subagent and the three workflow scripts) into the repo,
+# Copies software-factory-kit templates/ (+ the verifier subagent and the three workflow scripts) into the repo,
 # never overwriting an existing file: anything already there is skipped and reported, so re-running is safe.
 set -euo pipefail
 
@@ -65,7 +65,7 @@ put() { # put <source> <repo-relative dest> [chmod mode]
 echo "init-repo: scaffolding $repo ($mode) from $kit"
 
 for t in AGENTS.md CLAUDE.md; do
-  [ -f "$tpl/$t" ] || echo "  WARN    factory-kit has no templates/$t yet — $t not scaffolded" >&2
+  [ -f "$tpl/$t" ] || echo "  WARN    software-factory-kit has no templates/$t yet — $t not scaffolded" >&2
 done
 
 while IFS= read -r f; do
@@ -115,7 +115,7 @@ for line in '.handoff/runs/*/events.jsonl' '.handoff/runs/*/stderr.log' 'docs/de
   if [ "$header" = 0 ]; then
     # make sure we start on a fresh line
     if [ -s "$gi" ] && [ "$(tail -c1 "$gi" | wc -l)" -eq 0 ]; then echo >>"$gi"; fi
-    echo "# factory-kit (scripts/init-repo.sh): agent event logs may contain file contents; raw demo footage" >>"$gi"
+    echo "# software-factory-kit (scripts/init-repo.sh): agent event logs may contain file contents; raw demo footage" >>"$gi"
     header=1
   fi
   echo "$line" >>"$gi"

@@ -58,7 +58,7 @@ rule the file already states but the agent ignored never gets a second sentence,
 | `AGENTS.md`, `CLAUDE.md` (project or template) | each list item | `grep -cE '^[[:space:]]*([-*]\|[0-9]+\.) ' <file>` | ~20 |
 | `SKILL.md` | lines; red-flag rows | `wc -l < <file>`; `awk '/^## Red flags/{r=1;next} /^## /{r=0} r && /^\| / && !/^\|---/ && !/^\| Thought/' <file> \| wc -l` | under 300 lines; 3-6 rows |
 | a skill's question bank | numbered questions | `grep -cE '^[0-9]+\. ' <file>` | the bank's own "How this bank grows" rule |
-| scripts, hooks, settings | none | none | smallest diff; in factory-kit, `bash scripts/test.sh` must still pass |
+| scripts, hooks, settings | none | none | smallest diff; in software-factory-kit, `bash scripts/test.sh` must still pass |
 
 (In the commands above, `\|` is the table's escape; type a plain `|` in the shell.)
 
@@ -69,8 +69,8 @@ needed and a capable newcomer would follow anyway.
 ## 5. Metrics (for the STOP message)
 
 These cover the **whole tracker**, not only the retro window: label them that way in STOP. Run in the project
-root, in bash, after `. <env file> &&`. Task ids look like `M1-T003`. factory-kit mode has no tracker: write
-`n/a in factory-kit mode`.
+root, in bash, after `. <env file> &&`. Task ids look like `M1-T003`. software-factory-kit mode has no tracker: write
+`n/a in software-factory-kit mode`.
 
 ```bash
 T=.handoff/TRACKER.md

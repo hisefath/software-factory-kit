@@ -13,7 +13,7 @@ budget: 1 run, 30 min
 Owns: path/to/file.ext, path/to/dir-this-task-creates/*
 
 <!--
-Task contract (factory-kit WORKFLOW.md §7), one file per task at specs/M<N>-<slug>/tasks/T###.md; approved at G4;
+Task contract (software-factory-kit WORKFLOW.md §7), one file per task at specs/M<N>-<slug>/tasks/T###.md; approved at G4;
 it is the worker's ONLY input. This is a reference copy: slice-tasks fills each task file from FILE 1 of its own
 skills/slice-tasks/assets/template.md (the canonical shape, with per-field guidance), and its analyze pass FAILs
 any other shape. Delete this comment when filling by hand.

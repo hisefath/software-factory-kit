@@ -1,4 +1,4 @@
-<!-- write-demo-script template (factory-kit 0.1). Three parts:
+<!-- write-demo-script template (software-factory-kit 0.1). Three parts:
      Part A -> docs/demo/SCRIPT.md · Part B -> docs/demo/POSTS.md · Part C -> the job's ## Return path (dispatched only).
      Copy the part inside its fence, keep every heading in this order, replace every {{…}}.
      Unknowns are "⚠ <question>", never a guess. Table cells never contain "|".

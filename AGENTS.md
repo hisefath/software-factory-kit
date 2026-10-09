@@ -1,4 +1,4 @@
-# AGENTS.md — factory-kit
+# AGENTS.md — software-factory-kit
 
 This repo is the factory itself (skills, templates, scripts), not a product.
 - `docs/WORKFLOW.md` is the source of truth; skills/templates/scripts implement it. Change WORKFLOW.md first.

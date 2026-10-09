@@ -4,7 +4,7 @@
      the files you write have no outer fence. Replace every {{placeholder}}, delete every `<!-- guide:` comment,
      keep every heading in the order shown. Unknowns become `⚠ <question>`, never inventions.
      Part A's factory rows (everything above `## Project-specific`) are copied VERBATIM: check C5 diffs them
-     against this file. They mirror factory-kit WORKFLOW.md §4, and factory-kit's templates/docs/README.md (what
+     against this file. They mirror software-factory-kit WORKFLOW.md §4, and software-factory-kit's templates/docs/README.md (what
      init-repo.sh scaffolds) must be byte-identical to Part A up to `## Project-specific`; a wrong row is a
      route-failure finding, fixed in both files at once. -->
 
@@ -14,7 +14,7 @@
 # Docs index
 
 THE map of this repo's artifacts: one line per artifact type → where it lives, which skill writes it, and the
-human approval gate that accepts it (factory-kit WORKFLOW.md §4). If an artifact is not reachable from this
+human approval gate that accepts it (software-factory-kit WORKFLOW.md §4). If an artifact is not reachable from this
 page, agents will not find it. `garden-docs` keeps this file in sync; it lists paths, never counts.
 
 `M<N>` = milestone number · `<slug>` = short kebab name · `T###` = task number · ids never get renumbered.
@@ -75,7 +75,7 @@ page, agents will not find it. `garden-docs` keeps this file in sync; it lists p
 
 - `docs/product/prd.md` is living; `specs/M<N>-<slug>/` is frozen once its milestone merges.
 - Templates for the task and result contracts: `specs/_templates/task.md`, `specs/_templates/result.md`.
-- Private reflections and quiz notes never live here: `~/factory-kit-private/<repo>/`.
+- Private reflections and quiz notes never live here: `~/software-factory-kit-private/<repo>/`.
 
 ## Project-specific
 
@@ -162,7 +162,7 @@ gate approvals and tags.
      S4 needs AGENTS.md's Never list to still name push, merge and deploy, and CLAUDE.md's human-only list to still
      name spending money; drop any word the file no longer backs. -->
 
-Built with the factory-kit workflow. {{S1: A human answered the approval gates; the exact words are in
+Built with the software-factory-kit workflow. {{S1: A human answered the approval gates; the exact words are in
 [.handoff/TRACKER.md](.handoff/TRACKER.md) (section Approvals).}} {{S2: Each recorded decision was made by that
 human: [decision journal](docs/decisions/DECISION_JOURNAL.md).}}
 

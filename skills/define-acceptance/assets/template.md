@@ -3,7 +3,7 @@ milestone: M{{N}}
 slug: {{kebab-case-outcome}}
 artifact: acceptance
 status: draft
-written_by: define-acceptance (factory-kit 0.1)
+written_by: define-acceptance (software-factory-kit 0.1)
 written_at: {{output of date '+%Y-%m-%d %H:%M %Z (UTC%z)'}}
 base_sha: {{git rev-parse --short HEAD when the skill started}}
 inputs: "{{docs/product/prd.md@<sha> (G1), docs/architecture/lld.md@<sha> (G3), docs/architecture/hld.md@<sha> (G2), docs/design/screens.md@<sha> (G-ux) or screens n/a (no UI this milestone)}}"

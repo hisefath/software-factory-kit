@@ -3,7 +3,7 @@ name: design-hld
 description: Use when the PRD has passed G1 and the system needs its high-level design before any low-level design starts, or when G2 asked for the HLD to be revised. Produces docs/architecture/hld.md. Do NOT use for tables, classes, endpoints, sequences or state machines (use design-lld).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "5"
   gate: "G2"
 ---

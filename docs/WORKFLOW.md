@@ -1,8 +1,8 @@
-# factory-kit workflow (v0.1)
+# software-factory-kit workflow (v0.1)
 
 The canonical spec of the workflow. Skills, templates and scripts implement this file; when they disagree, this
 file wins and the skill gets fixed. Names are the user's choices (2026-10-08): verb-object skills, `.handoff/`
-state dir, `factory-kit` repo. The supervisor role name is still open (placeholder: **supervisor**).
+state dir, `software-factory-kit` repo. The supervisor role name is still open (placeholder: **supervisor**).
 
 ## 1. Thesis
 
@@ -88,8 +88,8 @@ Paths are relative to the project repo. `M<N>` = milestone number, `T###` = task
 | 13 | `ship-milestone` | Get the merged SHA live, verified, watched | `docs/runbooks/deploy.md`, `docs/ops/HEALTH.md`, `scripts/smoke.sh` | Write secret values; declare live from `/health` alone | **G-live** "/version = merged SHA, smoke green with TLS verified?" |
 | X | `log-decision` | Record a decision the human just made | append to `docs/decisions/DECISION_JOURNAL.md`; Type-1 → `docs/decisions/NNNN-<slug>.md` | Mark accepted without quoted human words; renumber/delete; drop rejected options | none (it IS the record) |
 | 14 | `garden-docs` | Keep docs findable, in sync, not overclaiming | `docs/README.md`, `README.md`, `ARCHITECTURE.md` summary, `docs/archive/` | Change decisions or code; hard-code numbers | rides the MR |
-| 15 | `route-failure` | Turn a failure into a proposed harness change in the owning layer | rows in factory-kit `FINDINGS.md`; proposed diff in `HARNESS_CHANGELOG.md`; `docs/learnings/<slug>.md` only if durable | Edit CLAUDE.md/AGENTS.md/skills without approval of the exact diff; freeze a one-off quirk | **G-L5** "Which layer owns this, adopt this fix?" |
-| 16 | `quiz-me` | Make the human able to defend every decision | private: `~/factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` | Edit the repo; grade generously | self-check |
+| 15 | `route-failure` | Turn a failure into a proposed harness change in the owning layer | rows in software-factory-kit `FINDINGS.md`; proposed diff in `HARNESS_CHANGELOG.md`; `docs/learnings/<slug>.md` only if durable | Edit CLAUDE.md/AGENTS.md/skills without approval of the exact diff; freeze a one-off quirk | **G-L5** "Which layer owns this, adopt this fix?" |
+| 16 | `quiz-me` | Make the human able to defend every decision | private: `~/software-factory-kit-private/<repo>/TOPICS_TO_REVIEW.md` | Edit the repo; grade generously | self-check |
 | 17 | `write-demo-script` | Script, storyboard, shot list, post copy (grade-6 reading level) | `docs/demo/SCRIPT.md` (`status: draft`), `docs/demo/POSTS.md` | Record, post, claim what the code can't back | **G-demo** "Would a 12-year-old follow it, and is every claim true?" (human flips `status: approved`) |
 | 18 | `record-demo` | Verified recording from an approved script | `docs/demo/SMOKE.md`, `docs/demo/RECORDING.md`, `docs/demo/out/*` (`docs/demo/raw/` gitignored) | Rewrite the script; post; show secrets/PHI | human uploads and posts |
 
@@ -257,7 +257,7 @@ harness → reset the worktree → `human_review` + one question. At most 2 veri
 - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
 ```
 
-Private reflections and quiz notes live outside the repo in `~/factory-kit-private/<repo>/`.
+Private reflections and quiz notes live outside the repo in `~/software-factory-kit-private/<repo>/`.
 
 ## 10. Failure routing (layer 5)
 

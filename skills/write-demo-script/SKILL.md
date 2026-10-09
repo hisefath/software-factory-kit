@@ -3,7 +3,7 @@ name: write-demo-script
 description: "Use when a shipped milestone needs its demo video script and post copy. Produces docs/demo/SCRIPT.md (status: draft) and docs/demo/POSTS.md. Do NOT use for recording (use record-demo), demo screen layout (use map-ux-flows) or the milestone report (use report-milestone)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "17"
   gate: "G-demo"
 ---

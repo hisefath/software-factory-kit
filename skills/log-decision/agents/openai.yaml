@@ -1,4 +1,4 @@
-# log-decision is the one factory-kit skill a model may invoke on its own (SKILL_STANDARD.md): the supervisor runs it
+# log-decision is the one software-factory-kit skill a model may invoke on its own (SKILL_STANDARD.md): the supervisor runs it
 # after every gate. It records only what the human already answered; without quoted words it writes `proposed`.
 policy:
   allow_implicit_invocation: true

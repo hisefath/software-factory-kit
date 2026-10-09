@@ -10,7 +10,7 @@ Explain this choice to the human in plain words; it decides whether "what is liv
 
 | Method | You get | You pay | Pick when |
 |---|---|---|---|
-| Upload a clean export of the SHA (`git archive <sha>` → platform CLI upload) | An explicit deploy step after merge; exactly the committed files ship | The app cannot read git at runtime, so the deploy writes a small build-info file; a few more commands | The platform is not connected to the repo, or you want deploy separate from merge (default for factory-kit) |
+| Upload a clean export of the SHA (`git archive <sha>` → platform CLI upload) | An explicit deploy step after merge; exactly the committed files ship | The app cannot read git at runtime, so the deploy writes a small build-info file; a few more commands | The platform is not connected to the repo, or you want deploy separate from merge (default for software-factory-kit) |
 | Git-connected deploy from `main` | No deploy command at all; the platform usually exposes the commit to the app | Whatever reaches the watched repo and branch deploys. With GitLab canonical and a GitHub push mirror (WORKFLOW §8), that is the push of `main` to the mirror, not the merge: the push is the deploy and needs the deploy yes. A lagging mirror shows up as SM-1 red (old code live) | The platform already watches the branch you merge to |
 | Upload the working tree | Fastest to type | Can ship uncommitted or git-ignored files; nobody can say which commit is live | Never |
 

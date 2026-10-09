@@ -1,4 +1,4 @@
-# Makefile — `make check` is this project's single green/red command (factory-kit WORKFLOW.md §2 rule 4).
+# Makefile — `make check` is this project's single green/red command (software-factory-kit WORKFLOW.md §2 rule 4).
 # Every agent runs it before claiming done, the supervisor re-runs it to verify, and .githooks/pre-push runs it
 # before anything leaves the machine. It must exit non-zero when ANY part fails.
 #

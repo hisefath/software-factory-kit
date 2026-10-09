@@ -3,7 +3,7 @@ name: map-ux-flows
 description: Use when a G1-approved PRD has UI-critical stories and the screens, user flows, states and copy must be designed before architecture. Produces docs/design/flows.md and docs/design/screens.md. Do NOT use for component trees, state ownership or endpoints (use design-lld), for system boxes and trust boundaries (use design-hld), or for the demo script itself (use write-demo-script).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "4"
   gate: "G-ux"
 ---

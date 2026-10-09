@@ -44,7 +44,7 @@ bash <tmp>/garden-checks.sh <skill-dir>/assets/template.md <demo-url | -> > <tmp
 
 ````bash
 #!/usr/bin/env bash
-# garden-docs checks (factory-kit 0.1). Run from the project root:
+# garden-docs checks (software-factory-kit 0.1). Run from the project root:
 #   bash garden-checks.sh <garden-docs>/assets/template.md <demo-url | ->
 set -u
 T=${1:-} URL=${2:--}

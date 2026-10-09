@@ -3,7 +3,7 @@ name: define-acceptance
 description: Use when a milestone's PRD (G1) and LLD (G3) are approved and "done" must be written down as failing checks before any task is sliced or code is written, or when G4 came back Revise on acceptance coverage, or an implementer reports an acceptance test as wrong. Produces specs/M<N>-<slug>/acceptance.md and failing tests under tests/acceptance/**. Do NOT use for slicing work into tasks (use slice-tasks), a one-bug repro and fix (use fix-bug), or checking finished code against the spec (use verifier).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "7"
   gate: "G4"
 ---

@@ -3,7 +3,7 @@ name: fix-bug
 description: "Use when the supervisor has routed a reported bug (or a failing smoke line SM-n / SMK-n from ship-milestone or record-demo) to the Fix track: the product does something other than what was specified or intended, a repro exists, and the fix looks like one sentence in at most 2 files. Produces specs/bugs/<slug>.md and one fix(<scope>) commit holding the fix and its regression test. Do NOT use for new or changed behaviour, or anything touching an API, data model, dependency, auth, payment or migration (Standard track: design-lld), or for a milestone task file (use implement-task)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "F"
   gate: "G5"
 ---

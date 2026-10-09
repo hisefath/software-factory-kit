@@ -1,16 +1,16 @@
 ---
 name: route-failure
-description: "Use when an agent failed, escalated or was corrected (FAIL/ESCALATE lines in .handoff/TRACKER.md, verifier rows set to fix, a gate answered Revise, the human correcting an agent in this session), usually at milestone close, and the harness should change so it cannot happen again. Produces F<n> rows in factory-kit FINDINGS.md, exact proposed diffs in factory-kit HARNESS_CHANGELOG.md and, for durable lessons only, docs/learnings/<slug>.md. Do NOT use for fixing the product defect itself (use fix-bug) or for recording a product or architecture decision (use log-decision)."
+description: "Use when an agent failed, escalated or was corrected (FAIL/ESCALATE lines in .handoff/TRACKER.md, verifier rows set to fix, a gate answered Revise, the human correcting an agent in this session), usually at milestone close, and the harness should change so it cannot happen again. Produces F<n> rows in software-factory-kit FINDINGS.md, exact proposed diffs in software-factory-kit HARNESS_CHANGELOG.md and, for durable lessons only, docs/learnings/<slug>.md. Do NOT use for fixing the product defect itself (use fix-bug) or for recording a product or architecture decision (use log-decision)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "15"
   gate: "G-L5"
 ---
 
 # route-failure
 
-**Outcome:** every failure that this project's `FINDINGS.md` rows do not yet cite has one `F<n>` row in factory-kit
+**Outcome:** every failure that this project's `FINDINGS.md` rows do not yet cite has one `F<n>` row in software-factory-kit
 `FINDINGS.md` naming the layer that owns it and a guard; every proposed harness change is an exact diff that applies
 cleanly, filed as a `### H<n>` block with `status: proposed` in `HARNESS_CHANGELOG.md`; durable, non-obvious lessons
 have a `docs/learnings/<slug>.md`; nothing else changed, nothing was committed and no diff was applied.
@@ -33,8 +33,8 @@ have a `docs/learnings/<slug>.md`; nothing else changed, nothing was committed a
   it) or `.handoff/**` (the supervisor owns it; you only read it).
 - You own **the classification and the recommendation**; the human owns the verdict at G-L5.
 - You may quote evidence (a log line, an error, the human's words) up to 3 lines. You never copy secrets, tokens,
-  PHI or real personal data: write `<redacted: kind>`. factory-kit is public.
-- You own a fresh scratch directory per pass (`mktemp -d`). You never commit (the human commits factory-kit, the
+  PHI or real personal data: write `<redacted: kind>`. software-factory-kit is public.
+- You own a fresh scratch directory per pass (`mktemp -d`). You never commit (the human commits software-factory-kit, the
   supervisor commits the project), push, install anything, or start the next skill.
 
 ## Inputs
@@ -44,14 +44,14 @@ Run `date '+%Y-%m-%d %H:%M %Z'` first; every time you write comes from it. Then 
 every later command in bash starting with `. <that path> &&`: it sets `KIT`, `ROOT`, `PROJECT`, `tmp` and `hx`,
 turns on `pipefail` and `cd`s to `ROOT`.
 
-**Mode.** *Project mode* (default) runs in a product repo. *factory-kit mode* runs when `PROJECT` is
-`factory-kit`, i.e. the human corrected the factory itself: inputs 3-6 are optional, Q-b is the main source, and
+**Mode.** *Project mode* (default) runs in a product repo. *software-factory-kit mode* runs when `PROJECT` is
+`software-factory-kit`, i.e. the human corrected the factory itself: inputs 3-6 are optional, Q-b is the main source, and
 there is no learning file and no `log-decision` (FINDINGS and HARNESS_CHANGELOG are the record).
 
 Read, in this order:
 
 1. **`$KIT/docs/WORKFLOW.md` §10, `$KIT/FINDINGS.md`, `$KIT/HARNESS_CHANGELOG.md`** (required). Missing: stop with
-   "factory-kit not found at $KIT; set FACTORY_KIT_DIR."
+   "software-factory-kit not found at $KIT; set FACTORY_KIT_DIR."
 2. **`AGENTS.md`** (required): the project's commands and rules. Missing: stop and name it.
 3. **`.handoff/TRACKER.md`** (required in project mode, read-only): `## Log` lines with ` FAIL ` or ` ESCALATE `;
    `## Tasks` rows in `failed` or `human_review` (the table is cleared at milestone close: when it is empty, read
@@ -89,8 +89,8 @@ human approves the exact diff.
    and the same with `'^### H[0-9]+'` on `HARNESS_CHANGELOG.md` (none: `F1`, `H1`).
 2. **Record earlier verdicts first.** Take each `### H<n>` still `proposed`, `approved` or `stale` whose
    `Project:` is `$PROJECT`; list every other one once in STOP as "waiting in <project>". Its verdict is the newest
-   Approvals row whose artifact cell is `H<n>@<hash>` (factory-kit mode: the block's `Verdict:` line). G-L5 binds
-   to the diff bytes, not to a commit, because the block lives in factory-kit, not in this repo (the form
+   Approvals row whose artifact cell is `H<n>@<hash>` (software-factory-kit mode: the block's `Verdict:` line). G-L5 binds
+   to the diff bytes, not to a commit, because the block lives in software-factory-kit, not in this repo (the form
    `log-decision` checks). The approval is **bound** when `hx <n> | shasum -a 256 | cut -c1-12` prints `<hash>`.
    - Revise → `revise`; the human's words become a failure input of this pass; the new block takes the same F row
      (`F#: F<n>`), the old one becomes `superseded by H<m>`, the F row `proposed (H<m>)`.
@@ -125,7 +125,7 @@ human approves the exact diff.
       absent sentence, a wrong default, a wrong harness. "The model was careless" is never a root cause.
    b. Match the symptom to the WORKFLOW.md §10 rows. When several match, pick by `references/routing.md` §2:
       checks → tools → artifacts → prompts → no durable change, with §10's row order as the tiebreak inside a step.
-   c. Pick the narrowest reach that is still durable: one task file → this project's files → a factory-kit
+   c. Pick the narrowest reach that is still durable: one task file → this project's files → a software-factory-kit
       template or skill → WORKFLOW.md. Go wider only when the same cause would recur in another project.
    d. Search history, `logged` rows included: `grep -niE '<2-3 symptom words>' "$KIT/FINDINGS.md"`. Same cause
       found → note `recurs F<m>`. A "one-off" seen twice is not one-off. A recurrence after an adopted fix means
@@ -133,13 +133,13 @@ human approves the exact diff.
    e. `grep -n` the target file for the rule. If it already says it, the failure is "rule ignored": do not add a
       second sentence; move to a check or a tool.
 6. **Draft the fix by kind** (`references/routing.md` §6 has an example of each, §8 the statuses):
-   - **Harness change:** one H block per F per repo (a fix in the project and in factory-kit is two blocks). Two
+   - **Harness change:** one H block per F per repo (a fix in the project and in software-factory-kit is two blocks). Two
      fixes in this pass that touch the same file share one block whose `F#:` names both rows. Start the diff with
      `: > "$tmp/H<n>.diff"`; for each file copy it to `$tmp`, edit only the copy, then
      `diff -u --label a/<rel> --label b/<rel> <original> "$tmp/<copy>" >> "$tmp/H<n>.diff"` (exit 1 means it
      found a difference, as wanted) with `<rel>` relative to the repo root it applies in (a new file:
      `--label /dev/null --label b/<rel> /dev/null "$tmp/<copy>"`). If the change contradicts WORKFLOW.md, the
-     factory-kit block also changes WORKFLOW.md (it wins every conflict). Check
+     software-factory-kit block also changes WORKFLOW.md (it wins every conflict). Check
      `git -C <apply-in> apply --check "$tmp/H<n>.diff"` exits 0.
    - **Product change** (a missing test, a spec gap, a wrong design decision): no diff. Status
      `routed → <skill>` with a one-line ask for `fix-bug`, `define-acceptance`, `clarify-spec <file>`, or
@@ -157,9 +157,9 @@ human approves the exact diff.
    `scripts/test.sh` case, a `scope-guard.sh` exit code, a `grep` with its expected output, a hook). "The human will
    notice" is not a guard: write `⚠ no mechanical guard: <why>`.
 9. **Write the outputs** (Output below). Write a learning only when both hold: it would recur on another task or
-   project if nothing changed, and a capable newcomer reading AGENTS.md would not already know it. factory-kit
+   project if nothing changed, and a capable newcomer reading AGENTS.md would not already know it. software-factory-kit
    mode: FINDINGS.md is the record, no learning file.
-10. Run every Done-when check, fix what fails, send STOP, then present G-L5 one decision per reply. factory-kit
+10. Run every Done-when check, fix what fails, send STOP, then present G-L5 one decision per reply. software-factory-kit
     mode: when the human answers, write their exact words and the block's hash into its `Verdict:` line before
     anything is applied; that line is the Approvals record.
 
@@ -174,7 +174,7 @@ Fill this skill's `assets/template.md`. Every field is required; an unknown is `
   `routed → <skill> + proposed (H<n>)` · `logged` · `superseded by F<m>` (lifecycle: `references/routing.md` §8).
   The Symptom cell ends with its evidence pointer `(ev: …)`.
 - **Part 2 → `$KIT/HARNESS_CHANGELOG.md`**: one `### H<n>` block per F per repo, under `## Proposals` (append that
-  heading, with the template's comment, at the end of the file if it is missing). `Apply in:` is `factory-kit`
+  heading, with the template's comment, at the end of the file if it is missing). `Apply in:` is `software-factory-kit`
   (`<apply-in>` = `$KIT`) or the project name (`<apply-in>` = `$ROOT`), never an absolute path. Paste
   `$tmp/H<n>.diff` into the block unchanged. Its `diff-sha256` is `hx <n> | shasum -a 256 | cut -c1-12`, the
   first 12 hex of the diff bytes as stored, because those bytes are what the human approves. Heading status:
@@ -214,7 +214,7 @@ each as a Part 5 card, and finish with the Part 5 block decision for the `routed
 this pass, Decision 1 is that block decision.
 
 ```
-route-failure stopped (<date>). Project <PROJECT> (<project | factory-kit> mode). Window: <evidence not yet in
+route-failure stopped (<date>). Project <PROJECT> (<project | software-factory-kit> mode). Window: <evidence not yet in
   FINDINGS.md | the window you named>.
 Wrote: $KIT/FINDINGS.md F<a>…F<b> · $KIT/HARNESS_CHANGELOG.md H<x>…H<y> (status proposed) ·
   docs/learnings/<slug>.md | none
@@ -223,7 +223,7 @@ Applied: nothing. No skill, AGENTS.md, CLAUDE.md, hook, script or setting was ed
 Earlier proposals: <H<n> → adopted | approved, waiting to be applied | rejected | revise | stale | still waiting>
   · waiting in other projects: <H<n> (<project>)> | none
 Metrics (whole tracker, not only this window): first-pass acceptance <x>/<y> tasks · fix loops <f> FAIL lines
-  over <y> tasks · gate Revise <r>/<g> · scope-guard blocks <s> | n/a in factory-kit mode
+  over <y> tasks · gate Revise <r>/<g> · scope-guard blocks <s> | n/a in software-factory-kit mode
 Inventory: <n> failures → <p> proposed · <t> routed · <l> logged · <k> not routed
 - F<n> [<layer>] <symptom> → <H<n> | routed → <skill> | logged>; guard: <check>
 Not routed: <pointer: why it is not a failure> | none
@@ -231,11 +231,11 @@ Not routed: <pointer: why it is not a failure> | none
 Gate G-L5: "Which layer owns this, adopt this fix?"
 <Decision 1: the first Part 5 card, filled>
 On Approve the supervisor writes | <time> | G-L5 | H<n>@<diff-sha256> | <your exact words> | to ## Approvals (the
-block decision for rows without a diff: artifact FINDINGS.md F<a>-F<b>) and runs log-decision; factory-kit mode: I
+block decision for rows without a diff: artifact FINDINGS.md F<a>-F<b>) and runs log-decision; software-factory-kit mode: I
 write your words into H<n>'s Verdict line instead. Only you, or the supervisor after that record, apply it, and the
 command refuses unless the bytes are the ones you approved:
   d=$(awk -v h='### H<n> ' 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&/^```diff$/{d=1;next} d&&/^```$/{exit} d' \
-    "<factory-kit path>/HARNESS_CHANGELOG.md") && [ "$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)" = <diff-sha256> ] &&
+    "<software-factory-kit path>/HARNESS_CHANGELOG.md") && [ "$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)" = <diff-sha256> ] &&
   printf '%s\n' "$d" | git -C "<apply-in path>" apply
 The next route-failure pass records it as adopted.
 Next skill (WORKFLOW §4 milestone close chain): `quiz-me`, once no G-L5 card of this pass is pending. I am not
@@ -251,4 +251,4 @@ starting it.
 | "That was weird; better add a rule so it never happens again." | First occurrence with no harness cause is a one-off: status `logged`. A second occurrence in FINDINGS promotes it. |
 | "AGENTS.md is long, but one more line won't hurt." | Count the rules. At the ceiling the same diff removes or merges one; a rule the model skims past is worse than none. |
 | "The verifier suggested fix for R3" or "the human said Revise at G2, so that agent failed." | Only the human's disposition in `## Approvals` counts (no word: `⚠ pending`), and a Revise because the human learned something is the gate working. Route it only when the inputs already held what the agent missed. |
-| "I'll paste the whole error so the row explains itself." | Quote at most 3 lines with secrets and PHI redacted, or point at the TRACKER line. factory-kit is public. |
+| "I'll paste the whole error so the row explains itself." | Quote at most 3 lines with secrets and PHI redacted, or point at the TRACKER line. software-factory-kit is public. |

@@ -1,6 +1,6 @@
 # AGENTS.md — <project name>
 
-<One sentence: what this project is and who it is for.> Built with factory-kit 0.1 (spec-driven, one milestone
+<One sentence: what this project is and who it is for.> Built with software-factory-kit 0.1 (spec-driven, one milestone
 per merge request). Every harness (Claude Code, Codex, Cursor, Antigravity) reads this file.
 
 ## Commands

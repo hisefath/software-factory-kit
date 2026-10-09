@@ -3,7 +3,7 @@ name: draw-diagrams
 description: "Use when one diagram must be drawn from a committed design section: hld-context, hld-container or deployment from docs/architecture/hld.md, or erd, be-class, fe-components, sequence-<journey> or state-<entity> from docs/architecture/lld.md, usually as a parallel job dispatched after design-hld or design-lld drafts. Produces docs/architecture/diagrams/<type>.mmd. Do NOT use for changing or completing the design (use design-hld or design-lld) or for screens and user flows (use map-ux-flows)."
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "6b"
   gate: "G2|G3"
 ---

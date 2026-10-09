@@ -3,7 +3,7 @@ name: sharpen-brief
 description: Use when a new product, graded project or capstone is starting on the Full track and its brief does not exist yet, or when G0 came back Revise. Produces specs/M<N>-<slug>/brief.md. Do NOT use for writing requirements or a PRD (use write-prd) or for answering the brief's research questions (use gather-evidence).
 disable-model-invocation: true
 metadata:
-  factory-kit: "0.1"
+  software-factory-kit: "0.1"
   phase: "1"
   gate: "G0"
 ---
