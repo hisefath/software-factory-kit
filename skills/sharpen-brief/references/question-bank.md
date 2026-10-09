@@ -83,6 +83,17 @@ recommendation (replace with a sourced one whenever the assignment or repo gives
     Why: inherited code adds `audit-codebase` before `write-prd`, and it changes the risk.
     Default: whatever the tree shows; ask only when it shows both.
 
+## F. Value and the partner (added 2026-10-09, FINDINGS.md F3)
+
+1. **"If this shipped and worked, which number would the partner's business watch move?"**
+   Ask only if the assignment names no headline metric.
+   Why: the North Star must be in their business terms, or the demo proves engineering but not value.
+   Default: money or time the problem leaks today, per the assignment's own wording.
+2. **"What do you most want this partner to remember about you after the demo?"**
+   Ask only for a hiring-partner project, after reading the partner's page.
+   Why: the project is an audition; we design the build, docs and demo to show that on purpose.
+   Default: the top values in the assignment's "what we're looking for" section.
+
 ## How this bank grows
 
 `route-failure` adds a question here when a milestone built the wrong thing (WORKFLOW.md §10, "Spec" row). New

@@ -35,6 +35,28 @@ The human's original words: "{{verbatim ask; secret or personal values → [reda
 |---|---|---|---|---|---|
 | JS-01 | {{situation}} | {{motivation, never a feature or screen}} | {{outcome}} | {{role}} | {{ids only: REQ-## / Q#}} |
 
+## Hiring partner
+
+Who we are building for and what should impress them (`docs/METRICS.md` §5). Facts with a source; unknowns go to
+Research questions. Not a partner project: one row `none: <why>`.
+
+| Aspect | What we know | Source | What the project should show them |
+|---|---|---|---|
+| {{who they are: product, customers, size, eng team, stack}} | {{fact, or ⚠ (→ R<NN>)}} | {{source name/§}} | {{how the build, docs or demo shows it}} |
+
+## Value and metrics
+
+Candidates for `write-prd`, not decisions (`docs/METRICS.md` §1-3). Targets are set in the PRD.
+
+- **Underlying problem in the business's terms:** {{what leaks or costs, in the partner's own metric words, quoted with source}}
+
+| ID | Candidate metric | Role | Actionable or vanity ("if bad, what would we fix?") | Leading or lagging | Data that would measure it |
+|---|---|---|---|---|---|
+| NS-01 | {{the one number that shows the core promise is kept}} | North Star | {{actionable: …}} | {{lagging}} | {{source, or ⚠ (→ R<NN>)}} |
+| SM-01 | {{supporting metric}} | explains / guards NS-01 | {{…}} | {{leading}} | {{…}} |
+
+Vanity traps considered and rejected: {{metric: why it tells nobody what to fix}}
+
 ## Appetite and deadlines
 
 - **Now:** {{output of date}}

@@ -123,8 +123,14 @@ As a {{persona}}, I want {{capability}}, so that {{benefit}}.
      free, each linked to a GOAL, with how and when it is measured in plain words. Never restate an FR or NFR: if an
      AE can prove it, it is not an SC. -->
 
-- **SC-001** {{≥ 80 %}} of {{persona}} {{complete the core job}} in under {{2}} minutes, measured by {{method}} by {{date}}. (GOAL-1)
-- **SC-002** {{Outcome metric with target}}, measured by {{method}}. (GOAL-2)
+<!-- Metric tree (software-factory-kit docs/METRICS.md): SC-001 is the North Star, in the partner's business terms;
+     each supporting SC explains or guards it. Targets: grounded (cite the constraint, benchmark or requirement),
+     aspirational or hard gate, with a review owner and cadence. -->
+
+- **SC-001** North Star: {{the one number that shows the core promise is kept}}. Target {{value}} ({{aspirational | hard gate}}), grounded in {{source}}; {{lagging}}; if bad we fix {{what}}; measured by {{method}}; reviewed by {{who}} every {{cadence}}. (GOAL-1)
+- **SC-002** Supporting ({{explains | guards}} SC-001): {{metric}}. Target {{value}} ({{aspirational | hard gate}}), grounded in {{source}}; {{leading}}; if bad we fix {{what}}; measured by {{method}}. (GOAL-1)
+
+Rejected as vanity: {{metric: why it tells nobody what to fix}}
 
 ## Acceptance examples
 

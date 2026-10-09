@@ -113,7 +113,12 @@ test it — and never how it will be built.
    unknown → write your recommended value and make the Source `⚠ <question> — Recommended: <value> — Blocks:
    NFR-###`. Success criteria: technology-free, each linked to a GOAL, each measuring a change in a person's or the
    business's outcome (time saved, money no longer fronted, adoption). An SC never restates an FR or NFR: if an AE
-   can prove it, it is not an SC.
+   can prove it, it is not an SC. Build them as a metric tree with `docs/METRICS.md` in software-factory-kit
+   (`${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/docs/METRICS.md`), starting from the brief's `## Value and metrics`:
+   SC-001 is the one North Star, in the partner's business terms; then 2-3 supporting SCs, each naming the job it
+   does (explains or guards SC-001); each SC tagged leading/lagging, with the "if bad, what would we fix?" answer,
+   a target grounded in a constraint, benchmark or requirement (never a round number), marked aspirational or hard
+   gate, and its review (who, how often). Vanity candidates are listed as rejected, with why.
 7. **Give examples, edges and open questions.** Acceptance examples in Given/When/Then with concrete fictional names
    and values, each citing the FR ids it exercises; every FR has at least one AE, and every [Unwanted] FR has its own
    AE that cites it first. Edge cases (empty, maximum, duplicate, simultaneous, half-finished, permission denied,

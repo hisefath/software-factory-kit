@@ -89,7 +89,10 @@ choice.
    read and dated mean). For each question write down, for yourself: its R id; the brief row's "Decision it
    unblocks" and "Answered when", copied verbatim (a follow-up: from the task's `## Done-when`, or asked in step
    4); why it is or is not load-bearing; and the Tier-A source most likely to settle it. Searching first finds the
-   loudest page, not the authoritative one.
+   loudest page, not the authoritative one. For a question about the hiring partner, Tier A is the partner's own
+   material (company site, product docs, job posts, the portal page the brief cites); for a metric question, grade
+   the candidate with `docs/METRICS.md` in software-factory-kit (`${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/docs/METRICS.md`) and find
+   the data that would measure it, never a target.
 4. **Interview (interactive only).** Ask one question at a time, each with your recommended answer, at most 4, and
    skip any the repo already answers:
    1. "Which research questions this pass?" Recommend: every unanswered one, load-bearing first. Say what that
