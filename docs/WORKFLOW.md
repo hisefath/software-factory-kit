@@ -252,6 +252,15 @@ harness → reset the worktree → `human_review` + one question. At most 2 veri
   with a merge commit (semi-linear), so `git log --first-parent main` reads as a list of milestones and one
   `git revert -m 1 <merge>` rolls a milestone back.
 - Stage files explicitly; never `git add -A`.
+- **Commits read as decisions and results** (owner's rule, 2026-10-10): one commit per decision or result (an
+  approved artifact, a squashed task, a set of review fixes), grouping small related edits; never one per tool
+  step. The subject is one line (at most 72 characters) saying what changed; the body names the D, FR and task ids.
+- **The MR is opened when the milestone branch is first pushed**, and its description fills
+  `.gitlab/merge_request_templates/Default.md`: the one-line TL;DR first, then every section answered, citing the
+  D-ids and the spec paths the milestone delivers.
+- **Auto-merge only on a standing yes:** when `## Approvals` holds the human's standing yes to auto-merge, the
+  supervisor merges the MR once G5 is approved (merge commit, TL;DR as its message) and pushes `main` to the
+  mirror; without that row, merging stays human-only (§2 rule 8).
 - Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
 
 ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)

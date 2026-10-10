@@ -4,6 +4,10 @@ Fill every section; write "n/a — <why>" instead of deleting one. Paste evidenc
 Title: M<N> <goal in a few words>
 -->
 
+## TL;DR
+
+<One line: what this milestone changes for a user or a reviewer, in plain words.>
+
 ## What
 
 - Milestone: **M<N>** — <one-sentence goal> · branch `milestone/m<N>-<slug>` · report `docs/milestones/M<N>.md`
