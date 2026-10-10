@@ -1605,3 +1605,33 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +  echo "decision-views: wrote $OUT"
 +fi
 ```
+
+### H15 Look up proposal fields without a SIGPIPE  [status: proposed]
+
+- F#: F26 · Layer: Script · Reach: factory script
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `scripts/apply-proposal.sh`
+- Root cause: the apply stopped half-done → `sed | grep -m1` under `set -o pipefail` → grep exits at its first match, sed's next write gets SIGPIPE, pipefail turns 141 into a failure and `set -e` exits → only blocks larger than the pipe buffer trigger it, so H4-H11 passed.
+- Why this layer: §10 "Mechanical step done wrong → Script": the script itself is wrong; one awk per lookup has no pipe to break.
+- Rules: `scripts/apply-proposal.sh` two lookups rewritten plus one comment line; pruned: none.
+- Guard: the old pipeline exits 141 in 2 of 3 runs on the H13 block today; the awk lookups print `Generate a weighted project review of decisions` and `F25` with exit 0, and `F8 and F9` for H8.
+- Teach: "Under pipefail, a reader that stops early can kill its writer, so lookups read the file themselves instead of through a pipe."
+- diff-sha256: 5fe6c05fbd96
+- Verdict: pending G-L5
+
+```diff
+--- a/scripts/apply-proposal.sh
++++ b/scripts/apply-proposal.sh
+@@ -46,8 +46,9 @@
+ printf '%s\n' "$d" | git -C "$dest" apply
+ paths=$(printf '%s\n' "$d" | git -C "$dest" apply --numstat -R | cut -f3)
+ 
+-title=$(grep -m1 "^### H$n " "$log" | sed -E "s/^### H$n //; s/ +\[status:.*//")
+-fs=$(sed -n "/^### H$n /,/^### /p" "$log" | grep -m1 -oE 'F#: F[0-9]+( and F[0-9]+)?' | sed 's/^F#: //')
++# One awk per lookup: an early-exiting reader in a pipe (grep -m1) kills its writer under pipefail (SIGPIPE, exit 141).
++title=$(awk -v h="### H$n " 'index($0,h)==1{t=substr($0,length(h)+1); sub(/ +\[status:.*/,"",t); print t; exit}' "$log")
++fs=$(awk -v h="### H$n " 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&match($0,/F#: F[0-9]+( and F[0-9]+)?/){print substr($0,RSTART+4,RLENGTH-4); exit}' "$log")
+ if [ "$dest" -ef "$kit" ]; then
+   if ! bash "$kit/scripts/test.sh" >/dev/null 2>&1; then
+     printf '%s\n' "$d" | git -C "$kit" apply -R
+```

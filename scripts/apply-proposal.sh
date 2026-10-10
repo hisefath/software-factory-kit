@@ -46,8 +46,9 @@ got=$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)
 printf '%s\n' "$d" | git -C "$dest" apply
 paths=$(printf '%s\n' "$d" | git -C "$dest" apply --numstat -R | cut -f3)
 
-title=$(grep -m1 "^### H$n " "$log" | sed -E "s/^### H$n //; s/ +\[status:.*//")
-fs=$(sed -n "/^### H$n /,/^### /p" "$log" | grep -m1 -oE 'F#: F[0-9]+( and F[0-9]+)?' | sed 's/^F#: //')
+# One awk per lookup: an early-exiting reader in a pipe (grep -m1) kills its writer under pipefail (SIGPIPE, exit 141).
+title=$(awk -v h="### H$n " 'index($0,h)==1{t=substr($0,length(h)+1); sub(/ +\[status:.*/,"",t); print t; exit}' "$log")
+fs=$(awk -v h="### H$n " 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&match($0,/F#: F[0-9]+( and F[0-9]+)?/){print substr($0,RSTART+4,RLENGTH-4); exit}' "$log")
 if [ "$dest" -ef "$kit" ]; then
   if ! bash "$kit/scripts/test.sh" >/dev/null 2>&1; then
     printf '%s\n' "$d" | git -C "$kit" apply -R
