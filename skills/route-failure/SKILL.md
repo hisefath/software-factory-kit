@@ -219,7 +219,8 @@ route-failure stopped (<date>). Project <PROJECT> (<project | software-factory-k
 Wrote: $KIT/FINDINGS.md F<a>…F<b> · $KIT/HARNESS_CHANGELOG.md H<x>…H<y> (status proposed) ·
   docs/learnings/<slug>.md | none
 Applied: nothing. No skill, AGENTS.md, CLAUDE.md, hook, script or setting was edited. Nothing was committed:
-  you commit $KIT/FINDINGS.md and $KIT/HARNESS_CHANGELOG.md (the factory's public record) when you are ready.
+  scripts/apply-proposal.sh commits and pushes $KIT/FINDINGS.md and $KIT/HARNESS_CHANGELOG.md with each
+  adopted change, or alone with `--record "route-failure: <summary>"` once G-L5 is answered.
 Earlier proposals: <H<n> → adopted | approved, waiting to be applied | rejected | revise | stale | still waiting>
   · waiting in other projects: <H<n> (<project>)> | none
 Metrics (whole tracker, not only this window): first-pass acceptance <x>/<y> tasks · fix loops <f> FAIL lines
@@ -233,11 +234,9 @@ Gate G-L5: "Which layer owns this, adopt this fix?"
 On Approve the supervisor writes | <time> | G-L5 | H<n>@<diff-sha256> | <your exact words> | to ## Approvals (the
 block decision for rows without a diff: artifact FINDINGS.md F<a>-F<b>) and runs log-decision; software-factory-kit mode: I
 write your words into H<n>'s Verdict line instead. Only you, or the supervisor after that record, apply it, and the
-command refuses unless the bytes are the ones you approved:
-  d=$(awk -v h='### H<n> ' 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&/^```diff$/{d=1;next} d&&/^```$/{exit} d' \
-    "<software-factory-kit path>/HARNESS_CHANGELOG.md") && [ "$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)" = <diff-sha256> ] &&
-  printf '%s\n' "$d" | git -C "<apply-in path>" apply
-The next route-failure pass records it as adopted.
+command refuses unless the bytes are the ones you approved, then runs the kit's tests, commits and pushes the kit:
+  bash "<software-factory-kit path>/scripts/apply-proposal.sh" <n> <diff-sha256> ["<apply-in path>"]
+The next route-failure pass records it as adopted and commits that record with `apply-proposal.sh --record`.
 Next skill (WORKFLOW §4 milestone close chain): `quiz-me`, once no G-L5 card of this pass is pending. I am not
 starting it.
 ```
