@@ -5,6 +5,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 | Date | Version | Change | F# | Approved by (exact words) |
 |---|---|---|---|---|
 | 2026-10-08 | 0.1 | Initial factory: WORKFLOW.md, skill standard, 22 skills, verifier, templates, scripts | — | "we are putting together the full ai native workflow today" |
+| 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
 
 ## Proposals
 
@@ -15,7 +16,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
      .handoff/TRACKER.md ## Approvals | time | G-L5 | H<n>@<diff-sha256> | exact words |
      (software-factory-kit mode: the block's Verdict line). Nothing here is applied before that record exists. -->
 
-### H1 Add North Star metrics and partner lens  [status: proposed]
+### H1 Add North Star metrics and partner lens  [status: adopted]
 
 - F#: F3 · Layer: Skill · Reach: factory skill (sharpen-brief, gather-evidence, write-prd) + WORKFLOW.md + new docs/METRICS.md
 - Proposed: 2026-10-09 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -26,7 +27,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 - Guard: sharpen-brief Done-when prints 1 for `| NS-` rows in Value and metrics; write-prd SC-001 line starts "North Star".
 - Teach: "My factory makes every project name one North Star in the partner's business terms before any design, because building is cheap and proving value is the job."
 - diff-sha256: 19d8e18b0765
-- Verdict: pending G-L5
+- Verdict: approved at G-L5 2026-10-09 17:27 CDT (cerbo-supplement-store TRACKER Approvals, H1@19d8e18b0765): "approved"; applied ee2e6a2
 
 ```diff
 --- a/docs/WORKFLOW.md
@@ -261,3 +262,280 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +- Is each target reasonable, or a round number that felt right?
 +- What would convince you a chosen metric is useless, and what would you do then?
 ```
+
+### H2 Add market and ideal-customer research  [status: superseded by H3]
+
+- F#: F4 · Layer: Skill · Reach: factory skill (sharpen-brief, gather-evidence) + WORKFLOW.md + new skills/gather-evidence/references/market-research.md
+- Proposed: 2026-10-09 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `skills/sharpen-brief/SKILL.md`, `skills/gather-evidence/SKILL.md`, `skills/gather-evidence/references/market-research.md` (new)
+- Root cause: PRD success targets had no market to ground them → no research question asked for one → sharpen-brief step 11 required partner and North Star-data questions but never the customer market → and gather-evidence had no method for sizing a market without false precision.
+- Why this layer: §10 "Built the wrong thing → Spec" and "Phase procedure botched → Skill": a required question plus a Done-when grep makes the gap loud at G0, and a reference loaded only for market questions keeps SKILL.md short; a sentence in AGENTS.md would not reach the brief.
+- Rules: `skills/sharpen-brief/SKILL.md` 247 → 249 lines, `skills/gather-evidence/SKILL.md` 248 → 252 (ceiling 300 lines); red-flag rows unchanged (6); pruned: none, below ceiling.
+- Guard: sharpen-brief Done-when `grep -ciE '^\| R[0-9]+ .*(ideal customer|market)' "$B"` prints ≥1; gather-evidence Done-when prints any market inference lacking `Formula:`, `Assumptions:`, `Range:`.
+- Teach: "Before setting success targets, my factory sizes the market bottom-up with stated assumptions and a range, so every target traces to evidence instead of a round number."
+- diff-sha256: 98f66b7c8c99
+- Verdict: revise at G-L5 2026-10-09 19:40 CDT (cerbo-supplement-store TRACKER Approvals, H2@98f66b7c8c99): the human added competitors, user counts, share, usage timing and load profile; superseded by H3
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -23,6 +23,8 @@
+ **Metrics and the partner lens (layer 1, F3).** Every product names one North Star and 2-3 supporting metrics,
+ each tested vanity vs actionable and leading vs lagging, with grounded targets (`docs/METRICS.md`). `sharpen-brief`
+ writes candidates and the hiring-partner lens, `gather-evidence` sources them, `write-prd` locks the tree at G1.
++Targets need a market: every brief asks who the ideal customer is, how big the market is, what share is winnable
++and where customers cluster; `gather-evidence` answers with `references/market-research.md` (F4).
+ 
+ Planning follows the Double Diamond (Design Council, 2003-04): Diamond 1 = Discover (brief, evidence) + Define
+ (PRD); Diamond 2 = Develop (UX, HLD, LLD) + Deliver (acceptance, tasks, build, ship). Spec-driven development maps
+--- a/skills/sharpen-brief/SKILL.md
++++ b/skills/sharpen-brief/SKILL.md
+@@ -148,7 +148,8 @@
+     or a ⚠ line). Ask about people, domain rules, constraints, mandated systems and assignment ambiguities; name a
+     technology only if the assignment or `AGENTS.md` mandates it. Aim for 8 or fewer; drop any that unblock
+     nothing. Always include one on the data that could measure the North Star candidate, and for a hiring-partner
+-    project one on the partner (product, customers, stack, what they hire for). `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
++    project one on the partner (product, customers, stack, what they hire for), plus one on the market: the
++    ideal customer, market size and share the product could capture, and where customers cluster. `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
+ 12. **Fill the template, then self-check** against `## Done when`. Fix and re-run the checks until all pass, then
+     send the STOP message.
+ 
+@@ -191,6 +192,7 @@
+       has a quote (uncleared source: `(paraphrase, U-##)`), a source location, a deliverable and an owner, or a
+       `⚠ (→ G0)`. No local paths: `grep -nE '/Users/|/home/' "$B"` prints nothing.
+ - [ ] Every deadline has a timezone and a local time produced by `date`, or `⚠ timezone? (→ G0)`.
++- [ ] A market question exists: `grep -ciE '^\| R[0-9]+ .*(ideal customer|market)' "$B"` prints 1 or more.
+ - [ ] Value and metrics is filled: `awk '/^## Value and metrics/{f=1;next} /^## /{f=0} f' "$B" | grep -c '^| NS-'`
+       prints 1, and every `| SM-` row there names a job (explains / guards).
+ - [ ] Every job story has all three clauses and a source id (`REQ-##` / `Q#`); every `R<NN>` names the decision it unblocks.
+--- a/skills/gather-evidence/SKILL.md
++++ b/skills/gather-evidence/SKILL.md
+@@ -92,7 +92,9 @@
+    loudest page, not the authoritative one. For a question about the hiring partner, Tier A is the partner's own
+    material (company site, product docs, job posts, the portal page the brief cites); for a metric question, grade
+    the candidate with `docs/METRICS.md` in software-factory-kit (`${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/docs/METRICS.md`) and find
+-   the data that would measure it, never a target.
++   the data that would measure it, never a target. For a market question (ideal customer, market size, share,
++   where customers cluster), also load `references/market-research.md`: sizes are inferences with a formula,
++   assumptions and a low-base-high range, never findings.
+ 4. **Interview (interactive only).** Ask one question at a time, each with your recommended answer, at most 4, and
+    skip any the repo already answers:
+    1. "Which research questions this pass?" Recommend: every unanswered one, load-bearing first. Say what that
+@@ -199,6 +201,8 @@
+       `sed -n '/^## Handoffs/,$p' <file> | grep '^- ' | grep -vE '^- (none|(write-prd|design-hld): .+\?)'`
+ - [ ] Every `[LB]` finding cites 1 `(A)` or 2 `(B)` from different publishers. Eyeball each line that
+       `grep '\[LB\]' <file> | grep -v '(A)'` prints.
++- [ ] Every market-size or share inference shows its working:
++      `grep -E '^- \*\*I[0-9]+\*\*' <file> | grep -iE 'TAM|SAM|SOM|market size|share' | grep -vE 'Formula:.*Assumptions:.*Range:'`
+ - [ ] Frontmatter `budget` shows used ≤ cap; `status` and `confidence` follow step 9's rules; `answered_when` is
+       filled.
+ - [ ] No secrets, credentials or PHI in anything you wrote.
+--- /dev/null
++++ b/skills/gather-evidence/references/market-research.md
+@@ -0,0 +1,51 @@
++# Market research: ideal customer, market size, share, clusters
++
++Loaded by `gather-evidence` at step 3 for any question about the ideal customer profile (ICP), market size, the
++share a company could capture, or where customers cluster. Same tiers and budget as every other question
++(`references/source-tiers.md`); these questions are broad, so they hit the cap more often.
++
++## 1. Ideal customer profile (ICP)
++
++Answer with the traits that make a customer most likely to buy and succeed, each sourced:
++- **Who:** practice or company type, specialty, size (people, locations), how they are paid (cash-pay vs
++  insurance), what they use today (tools, vendors, workarounds).
++- **Trigger and pain:** the moment they look for a fix, and what the problem costs them.
++- **Fit and disqualifiers:** who is a poor fit, and why.
++Tier A here is the partner's own material (who it says it serves, case studies, job posts), the brief, and public
++registries. Interviews and surveys you cannot read are gaps, not findings.
++
++## 2. Market size: TAM, SAM, SOM
++
++- **TAM** (total addressable market): everyone who could ever buy this. **SAM** (serviceable): the part this
++  company can actually reach (its segment, its country). **SOM** (obtainable): the part it can realistically win
++  in a stated period.
++- **Prefer bottom-up:** count of buyers × value per buyer per year (e.g. practitioners × patients per
++  practitioner × share of patients on the product × annual spend). Top-down (an analyst's total × a share) only as
++  a cross-check.
++- **Every input is a finding with its S-id**; the computed size is an **Inference**, never a Finding, written as:
++  `I<n> from F<a> + F<b>: Formula: <a> × <b> = <result>. Assumptions: <A-1 …>. Range: <low – high>, base <x>.`
++- **Ranges, not false precision:** give low, base and high, each changing one named assumption. Round to two
++  significant figures. State the year and currency of every money input.
++- A number from a paywalled report you could not open is unread: gap, not finding.
++
++## 3. Share the company could capture (SOM)
++
++Ground it in the company's own installed base and a cited adoption rate (a comparable product's published adoption,
++a pilot, a survey), never a round guess. No benchmark found → write the formula with the adoption rate as an open
++assumption and a `⚠` gap naming what would close it.
++
++## 4. Where customers cluster
++
++- **Count by place** from public registries: national provider or business registries (e.g. the US NPI registry
++  for clinicians, looked up by its official taxonomy codes), labour statistics by state, licensing boards.
++- Report counts **and per-capita rates** (count ÷ population from census data) by state or metro, top 10 with the
++  date of the data; per-capita shows density, raw counts show volume.
++- Note licensing differences that change who can practise where (some professions are licensed only in some states).
++
++## 5. Grading reminders
++
++- Government datasets and registries: Tier A. Trade associations and major industry analyses you read in full: B.
++  Vendor market claims, blogs, press releases and AI summaries: C, colour only.
++- Market figures date fast: record the "as of" year of every number.
++- Hand the choice back: Handoffs ask `write-prd` which segment to target first and which targets to set; never
++  pick the segment yourself.
+```
+
+### H3 Add market, competitor and load-profile research  [status: proposed]
+
+- F#: F4 · Layer: Skill · Reach: factory skill (sharpen-brief, gather-evidence) + WORKFLOW.md + new skills/gather-evidence/references/market-research.md · Supersedes: H2
+- Proposed: 2026-10-09 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `skills/sharpen-brief/SKILL.md`, `skills/gather-evidence/SKILL.md`, `skills/gather-evidence/references/market-research.md` (new)
+- Root cause: PRD targets and design sizing had no market or usage evidence → no research question asked for one → sharpen-brief step 11 never required competitor, market or usage questions → and gather-evidence had no method for sizing a market or a load profile without false precision.
+- Why this layer: §10 "Built the wrong thing → Spec" and "Phase procedure botched → Skill": required questions plus Done-when greps make the gap loud at G0, and a reference loaded only for market and usage questions keeps SKILL.md short; load numbers stay inferences handed to design-hld, so research never picks machines or stacks.
+- Rules: `skills/sharpen-brief/SKILL.md` 247 → 251 lines, `skills/gather-evidence/SKILL.md` 248 → 252 (ceiling 300 lines); red-flag rows unchanged (6); pruned: none, below ceiling.
+- Guard: sharpen-brief Done-when greps print ≥1 R row naming ideal customer or market, and ≥1 naming usage, peak or load; gather-evidence Done-when prints any market, share or load inference lacking `Formula:`, `Assumptions:`, `Range:`.
+- Teach: "Before design, my factory finds who already solves the problem, sizes the market and the expected load bottom-up with stated assumptions, so the PRD targets and the system sizing trace to evidence."
+- diff-sha256: 255e96814097
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -23,6 +23,10 @@
+ **Metrics and the partner lens (layer 1, F3).** Every product names one North Star and 2-3 supporting metrics,
+ each tested vanity vs actionable and leading vs lagging, with grounded targets (`docs/METRICS.md`). `sharpen-brief`
+ writes candidates and the hiring-partner lens, `gather-evidence` sources them, `write-prd` locks the tree at G1.
++Targets and sizing need a market: every brief asks who already solves the problem, who the ideal customer is, how
++big the market and winnable share are, where customers cluster, and when and how hard they will use the product;
++`gather-evidence` answers with `references/market-research.md` (F4), and `design-hld` sizes the system from that
++load profile.
+ 
+ Planning follows the Double Diamond (Design Council, 2003-04): Diamond 1 = Discover (brief, evidence) + Define
+ (PRD); Diamond 2 = Develop (UX, HLD, LLD) + Deliver (acceptance, tasks, build, ship). Spec-driven development maps
+--- a/skills/sharpen-brief/SKILL.md
++++ b/skills/sharpen-brief/SKILL.md
+@@ -148,7 +148,9 @@
+     or a ⚠ line). Ask about people, domain rules, constraints, mandated systems and assignment ambiguities; name a
+     technology only if the assignment or `AGENTS.md` mandates it. Aim for 8 or fewer; drop any that unblock
+     nothing. Always include one on the data that could measure the North Star candidate, and for a hiring-partner
+-    project one on the partner (product, customers, stack, what they hire for). `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
++    project one on the partner (product, customers, stack, what they hire for), plus one on the market (who
++    already solves this and how many users they have, the ideal customer, market size and winnable share, where
++    customers cluster) and one on usage (when and how much customers will use it: peak hours, volume, behaviour). `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
+ 12. **Fill the template, then self-check** against `## Done when`. Fix and re-run the checks until all pass, then
+     send the STOP message.
+ 
+@@ -191,6 +193,8 @@
+       has a quote (uncleared source: `(paraphrase, U-##)`), a source location, a deliverable and an owner, or a
+       `⚠ (→ G0)`. No local paths: `grep -nE '/Users/|/home/' "$B"` prints nothing.
+ - [ ] Every deadline has a timezone and a local time produced by `date`, or `⚠ timezone? (→ G0)`.
++- [ ] Market and usage questions exist: `grep -ciE '^\| R[0-9]+ .*(ideal customer|market)' "$B"` and
++      `grep -ciE '^\| R[0-9]+ .*(usage|peak|load)' "$B"` each print 1 or more.
+ - [ ] Value and metrics is filled: `awk '/^## Value and metrics/{f=1;next} /^## /{f=0} f' "$B" | grep -c '^| NS-'`
+       prints 1, and every `| SM-` row there names a job (explains / guards).
+ - [ ] Every job story has all three clauses and a source id (`REQ-##` / `Q#`); every `R<NN>` names the decision it unblocks.
+--- a/skills/gather-evidence/SKILL.md
++++ b/skills/gather-evidence/SKILL.md
+@@ -92,7 +92,9 @@
+    loudest page, not the authoritative one. For a question about the hiring partner, Tier A is the partner's own
+    material (company site, product docs, job posts, the portal page the brief cites); for a metric question, grade
+    the candidate with `docs/METRICS.md` in software-factory-kit (`${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/docs/METRICS.md`) and find
+-   the data that would measure it, never a target.
++   the data that would measure it, never a target. For a market or usage question (existing solutions, ideal
++   customer, market size, share, clusters, peak usage and load), also load `references/market-research.md`: sizes
++   and loads are inferences with a formula, assumptions and a low-base-high range, never findings.
+ 4. **Interview (interactive only).** Ask one question at a time, each with your recommended answer, at most 4, and
+    skip any the repo already answers:
+    1. "Which research questions this pass?" Recommend: every unanswered one, load-bearing first. Say what that
+@@ -199,6 +201,8 @@
+       `sed -n '/^## Handoffs/,$p' <file> | grep '^- ' | grep -vE '^- (none|(write-prd|design-hld): .+\?)'`
+ - [ ] Every `[LB]` finding cites 1 `(A)` or 2 `(B)` from different publishers. Eyeball each line that
+       `grep '\[LB\]' <file> | grep -v '(A)'` prints.
++- [ ] Every market-size, share or load inference shows its working:
++      `grep -E '^- \*\*I[0-9]+\*\*' <file> | grep -iE 'TAM|SAM|SOM|market size|share|per second|concurrent|peak' | grep -vE 'Formula:.*Assumptions:.*Range:'`
+ - [ ] Frontmatter `budget` shows used ≤ cap; `status` and `confidence` follow step 9's rules; `answered_when` is
+       filled.
+ - [ ] No secrets, credentials or PHI in anything you wrote.
+--- /dev/null
++++ b/skills/gather-evidence/references/market-research.md
+@@ -0,0 +1,77 @@
++# Market research: competitors, ideal customer, market size, share, clusters, usage and load
++
++Loaded by `gather-evidence` at step 3 for any question about existing solutions, the ideal customer profile (ICP),
++market size, the share a company could capture, where customers cluster, or how and when they will use the
++product (the load the design must carry). Same tiers and budget as every other question
++(`references/source-tiers.md`); these questions are broad, so they hit the cap more often.
++
++## 1. Has it been built already? (competitive landscape)
++
++Before sizing anything, find who already solves this problem:
++- **Direct:** products that do the same job in the same place (e.g. the same feature built into a rival product).
++- **Indirect:** what customers use instead today (the workaround the brief names, standalone tools, marketplaces).
++For each: what it does, who it serves, its pricing or take rate, its stated user or customer count (with the "as
++of" date), and what it leaves unsolved. A company's own count of its users is Tier A for "what they claim" and Tier
++C for the market's true size; public filings or registries are Tier A. Nobody found → say so: an empty market is a
++finding to explain, not a win to assume.
++
++## 2. Ideal customer profile (ICP)
++
++Answer with the traits that make a customer most likely to buy and succeed, each sourced:
++- **Who:** practice or company type, specialty, size (people, locations), how they are paid (cash-pay vs
++  insurance), what they use today (tools, vendors, workarounds).
++- **Trigger and pain:** the moment they look for a fix, and what the problem costs them.
++- **Fit and disqualifiers:** who is a poor fit, and why.
++Tier A here is the partner's own material (who it says it serves, case studies, job posts), the brief, and public
++registries. Interviews and surveys you cannot read are gaps, not findings.
++
++## 3. Market size: TAM, SAM, SOM
++
++- **TAM** (total addressable market): everyone who could ever buy this. **SAM** (serviceable): the part this
++  company can actually reach (its segment, its country). **SOM** (obtainable): the part it can realistically win
++  in a stated period.
++- **Prefer bottom-up:** count of buyers × value per buyer per year (e.g. practitioners × patients per
++  practitioner × share of patients on the product × annual spend). Top-down (an analyst's total × a share) only as
++  a cross-check.
++- **Every input is a finding with its S-id**; the computed size is an **Inference**, never a Finding, written as:
++  `I<n> from F<a> + F<b>: Formula: <a> × <b> = <result>. Assumptions: <A-1 …>. Range: <low – high>, base <x>.`
++- **Ranges, not false precision:** give low, base and high, each changing one named assumption. Round to two
++  significant figures. State the year and currency of every money input.
++- A number from a paywalled report you could not open is unread: gap, not finding.
++
++## 4. Share the company could capture (SOM)
++
++Ground it in the company's own installed base, the competitors' installed bases (§1) and a cited adoption rate (a
++comparable product's published adoption, a pilot, a survey), never a round guess. No benchmark found → write the formula with the adoption rate as an open
++assumption and a `⚠` gap naming what would close it.
++
++## 5. Where customers cluster
++
++- **Count by place** from public registries: national provider or business registries (e.g. the US NPI registry
++  for clinicians, looked up by its official taxonomy codes), labour statistics by state, licensing boards.
++- Report counts **and per-capita rates** (count ÷ population from census data) by state or metro, top 10 with the
++  date of the data; per-capita shows density, raw counts show volume.
++- Note licensing differences that change who can practise where (some professions are licensed only in some states).
++- The clusters' time zones feed §6: they decide when peak and quiet hours fall.
++
++## 6. Usage and load profile (input to design, not a design)
++
++Turn the expected users into the numbers `design-hld` sizes the system with. Each is an Inference with the same
++`Formula: … Assumptions: … Range: …` form, built from cited findings:
++- **Who uses it, when:** each user role's working hours and moments (e.g. clinicians during clinic hours, patients
++  in the evening), across the clusters' time zones, plus weekly and seasonal swings. The quietest common window is
++  the candidate maintenance window.
++- **How many:** expected users = SOM customers × users per customer × share active per day.
++- **How hard:** peak requests per second = peak-hour active users × actions per user per hour × requests per action
++  ÷ 3600 × a stated burst factor; also average, and peak concurrent users.
++- **What they do that stresses it:** behaviours that create edge cases or load spikes (double submits, retries,
++  many orders at month end, refills on a schedule).
++Never pick machine sizes, languages or tools here: hand each number to `design-hld` as a question. A missing input
++is an assumption with its own range, not a silent default.
++
++## 7. Grading reminders
++- Government datasets and registries: Tier A. Trade associations and major industry analyses you read in full: B.
++  Vendor market claims, blogs, press releases and AI summaries: C, colour only.
++- Market figures date fast: record the "as of" year of every number.
++- Hand the choice back: Handoffs ask `write-prd` which segment to target first and which targets to set, and
++  ask `design-hld` how to size for the load profile; never pick the segment, the stack or the machines yourself.
+```
+
