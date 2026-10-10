@@ -120,7 +120,9 @@ decision.
    `tests/acceptance/**` (so never `tests/*` or `*`), and never a dependency manifest or lockfile: a slice that
    needs a new package gets a `⚠ Ask-first: <package> for <why>` for G4 (the human adds it and commits before
    dispatch). Mark `parallel: true` only when the task's `Owns:` is disjoint from every other `parallel: true`
-   task; otherwise `parallel: false`, and the supervisor runs it alone.
+   task; otherwise `parallel: false`, and the supervisor runs it alone. Every file the Ask assigns is owned:
+   the component that holds a state the task builds (e.g. the shell that mounts a countdown) and any migration a
+   counter or table in the Ask needs; a missing one surfaces mid-task as an Owns gap and a relaunch.
 8. **Write Done-when before the rest of the body.** One `sh` line: the AT filter for this task, then
    `&& make check`. The filter command is a make target that passes a filter through (e.g.
    `make test FILTER=M1_AT_001`) when AGENTS.md or the Makefile has one; else acceptance.md's `Run one test`
@@ -131,7 +133,9 @@ decision.
      assuming its recommendation (acceptance joins `make check` only when the milestone lands). Put that Q-n under
      G4 questions and say the Done-when lines change if G4 picks otherwise (implement-task stops when base
      `make check` is red). If acceptance.md gives the joining config line to a task, give its file to one task that
-     is `after:` every other task, whose Done-when runs all of `tests/acceptance/M<N>` then `make check`.
+     is `after:` every other task, whose Done-when starts `make -n check | grep -q tests/acceptance &&`, then runs
+     all of `tests/acceptance/M<N>`, then `make check`. Without that first part it is green the moment the other
+     tasks land, so it cannot tell whether this task did its job.
    - **Runner outside make.** If a Done-when calls the runner directly, add an Open `⚠`: "scripts/delegate.sh's
      default claude allow-list runs only make/git/date: dispatch claude tasks as Agent-tool subagents, or extend
      DELEGATE_CLAUDE_ALLOWED_TOOLS with the runner (supervisor's call)."
