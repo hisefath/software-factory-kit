@@ -6,6 +6,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 |---|---|---|---|---|
 | 2026-10-08 | 0.1 | Initial factory: WORKFLOW.md, skill standard, 22 skills, verifier, templates, scripts | — | "we are putting together the full ai native workflow today" |
 | 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
+| 2026-10-09 | 0.1 | H3: Add market, competitor and load-profile research (docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence) | F4 | "approve, then /gather-evidence" |
 
 ## Proposals
 
@@ -386,7 +387,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +  pick the segment yourself.
 ```
 
-### H3 Add market, competitor and load-profile research  [status: proposed]
+### H3 Add market, competitor and load-profile research  [status: adopted]
 
 - F#: F4 · Layer: Skill · Reach: factory skill (sharpen-brief, gather-evidence) + WORKFLOW.md + new skills/gather-evidence/references/market-research.md · Supersedes: H2
 - Proposed: 2026-10-09 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -397,7 +398,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 - Guard: sharpen-brief Done-when greps print ≥1 R row naming ideal customer or market, and ≥1 naming usage, peak or load; gather-evidence Done-when prints any market, share or load inference lacking `Formula:`, `Assumptions:`, `Range:`.
 - Teach: "Before design, my factory finds who already solves the problem, sizes the market and the expected load bottom-up with stated assumptions, so the PRD targets and the system sizing trace to evidence."
 - diff-sha256: 255e96814097
-- Verdict: pending G-L5
+- Verdict: adopted 2026-10-10 (Approvals 2026-10-09 19:42 CDT, H3@255e96814097, "approve, then /gather-evidence"); applied 071beeb
 
 ```diff
 --- a/docs/WORKFLOW.md
@@ -539,3 +540,406 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +  ask `design-hld` how to size for the load profile; never pick the segment, the stack or the machines yourself.
 ```
 
+### H4 Read a bracket in Owns literally  [status: proposed]
+
+- F#: F5 · Layer: Policy (hard) · Reach: factory script
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `scripts/scope-guard.sh`, `scripts/test.sh`
+- Root cause: Owns named Nuxt route folders → scope-guard matches Owns as shell case patterns → `[orderId]` became a character class that no path matches → every route-folder file was out of scope.
+- Why this layer: §10 "Wrote outside its phase/task → Policy (hard)": the wall itself misread a legal path; a slice-tasks sentence ("avoid brackets") would fight the framework's own folder names.
+- Rules: `scripts/scope-guard.sh` and `scripts/test.sh`: no rule count; `bash scripts/test.sh` 119 → 120 passed; pruned: none.
+- Guard: `bash scripts/test.sh` prints `ok   scope-guard: a [ in Owns is literal (route folders)`; on today's scope-guard that case fails (checked in a scratch copy).
+- Teach: "The boundary check had to understand the framework's file names, because a wall that blocks legal work teaches people to go around it."
+- diff-sha256: 85c575806b75
+- Verdict: pending G-L5
+
+```diff
+--- a/scripts/scope-guard.sh
++++ b/scripts/scope-guard.sh
+@@ -17,6 +17,7 @@
+ 
+ Owns: line(s) in the task file hold comma/space separated globs. `*` matches across `/` (shell case
+ pattern), so `app/Services/**` and `app/Services/*` both cover every file below app/Services/.
++`[` is literal, so route folders like `server/api/orders/[orderId]/**` work (no character classes).
+ A rename counts as delete + add, so both paths must be owned.
+ 
+ Exit: 0 every changed path is owned · 1 a path is out of scope · 2 usage error, unknown ref, or no Owns:
+@@ -62,8 +63,9 @@
+   [ -n "$f" ] || continue
+   n=$((n + 1)) ok=0
+   for p in $owns; do
+-    # shellcheck disable=SC2254 # $p is deliberately a pattern
+-    case $f in $p) ok=1; break ;; esac
++    q=${p//\[/\\[} # a literal [ (Nuxt/Next route folders), never a character class
++    # shellcheck disable=SC2254 # $q is deliberately a pattern
++    case $f in $q) ok=1; break ;; esac
+   done
+   [ "$ok" = 1 ] || { echo "scope-guard: out of scope: $f" >&2; bad=1; }
+ done <<EOF
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -219,6 +219,11 @@
+ has "scope-guard staged: names the offending path" "$out" "out of scope: other.txt"
+ git reset -q -- other.txt && rm other.txt
+ rc 2 "scope-guard: task file without Owns: fails closed" bash scripts/scope-guard.sh specs/M1-demo/tasks/T003.md
++TB=specs/M1-demo/tasks/T090.md
++printf 'Owns: src/a.txt, src/[id]/**\n' >"$TB"
++mkdir -p 'src/[id]' && echo z >'src/[id]/b.txt' && git add 'src/[id]/b.txt'
++rc 0 "scope-guard: a [ in Owns is literal (route folders)" bash scripts/scope-guard.sh "$TB"
++git reset -q -- 'src/[id]/b.txt' && rm -r 'src/[id]' "$TB"
+ git commit -qm "a"
+ rc 0 "scope-guard branch mode: owned commit passes" bash scripts/scope-guard.sh "$T1" milestone/m1-demo
+ rc 0 "scope-guard branch mode: absolute task path works" bash scripts/scope-guard.sh "$repo/$T1" milestone/m1-demo
+```
+
+### H5 Commit per decision, MR per milestone, TL;DR  [status: proposed]
+
+- F#: F6 · Layer: Skill · Reach: WORKFLOW.md + factory template
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `templates/.gitlab/merge_request_templates/Default.md`
+- Root cause: main's history was unreadable → commits were made per tool step and MRs were left for the end → WORKFLOW §8 said how to branch and squash tasks, but not how big a supervisor commit is, when the MR opens, what its description must say, or when merging may be automatic.
+- Why this layer: §10 "Phase procedure botched → Skill", at WORKFLOW reach because every skill follows §8; the MR template's TL;DR heading is the checkable part. Not a check: commit size is a judgement no script can grade.
+- Rules: `docs/WORKFLOW.md` §8 bullets 6 → 9 (ceiling ~20 rules); pruned: none, below ceiling.
+- Guard: `grep -c '^## TL;DR' .gitlab/merge_request_templates/Default.md` prints 1 in a newly initialised repo; `git log --first-parent --format=%s main` reads one line per milestone.
+- Teach: "Each merge to main is one milestone with a one-line TL;DR, and each commit inside it is one decision or result, so a reviewer can read the history like a changelog."
+- diff-sha256: e6b50c35ca04
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -252,6 +252,15 @@
+   with a merge commit (semi-linear), so `git log --first-parent main` reads as a list of milestones and one
+   `git revert -m 1 <merge>` rolls a milestone back.
+ - Stage files explicitly; never `git add -A`.
++- **Commits read as decisions and results** (owner's rule, 2026-10-10): one commit per decision or result (an
++  approved artifact, a squashed task, a set of review fixes), grouping small related edits; never one per tool
++  step. The subject is one line (at most 72 characters) saying what changed; the body names the D, FR and task ids.
++- **The MR is opened when the milestone branch is first pushed**, and its description fills
++  `.gitlab/merge_request_templates/Default.md`: the one-line TL;DR first, then every section answered, citing the
++  D-ids and the spec paths the milestone delivers.
++- **Auto-merge only on a standing yes:** when `## Approvals` holds the human's standing yes to auto-merge, the
++  supervisor merges the MR once G5 is approved (merge commit, TL;DR as its message) and pushes `main` to the
++  mirror; without that row, merging stays human-only (§2 rule 8).
+ - Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
+ 
+ ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
+--- a/templates/.gitlab/merge_request_templates/Default.md
++++ b/templates/.gitlab/merge_request_templates/Default.md
+@@ -4,6 +4,10 @@
+ Title: M<N> <goal in a few words>
+ -->
+ 
++## TL;DR
++
++<One line: what this milestone changes for a user or a reviewer, in plain words.>
++
+ ## What
+ 
+ - Milestone: **M<N>** — <one-sentence goal> · branch `milestone/m<N>-<slug>` · report `docs/milestones/M<N>.md`
+```
+
+### H6 Add a TL;DR to this project's MR template  [status: proposed]
+
+- F#: F6 · Layer: Skill · Reach: project
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `.gitlab/merge_request_templates/Default.md`
+- Root cause: Same as H5: init-repo never overwrites, so this project keeps the old template until its own copy changes.
+- Why this layer: Same as H5; this is the project half the reach rule requires.
+- Rules: `.gitlab/merge_request_templates/Default.md`: no rules; one section added; pruned: none.
+- Guard: `grep -c '^## TL;DR' .gitlab/merge_request_templates/Default.md` prints 1.
+- Teach: "The M5 MR starts with a one-line TL;DR because the template asks for it, not because someone remembered."
+- diff-sha256: d14103b14077
+- Verdict: pending G-L5
+
+```diff
+--- a/.gitlab/merge_request_templates/Default.md
++++ b/.gitlab/merge_request_templates/Default.md
+@@ -4,6 +4,10 @@
+ Title: M<N> <goal in a few words>
+ -->
+ 
++## TL;DR
++
++<One line: what this milestone changes for a user or a reviewer, in plain words.>
++
+ ## What
+ 
+ - Milestone: **M<N>** — <one-sentence goal> · branch `milestone/m<N>-<slug>` · report `docs/milestones/M<N>.md`
+```
+
+### H7 Apply, test, commit and push kit changes  [status: proposed]
+
+- F#: F7 · Layer: Script · Reach: factory script + factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `scripts/apply-proposal.sh` (new), `skills/route-failure/SKILL.md`
+- Root cause: the human wanted every factory improvement committed to the kit repo → applying was a pasted awk pipeline, and committing and pushing were separate manual steps → nothing tied them together, so an applied change could sit uncommitted.
+- Why this layer: §10 "Mechanical step done wrong → Script": a script that refuses unless the approved hash matches, runs the kit tests, then commits and pushes makes the right path the only path. A git or Claude Code hook (option B) would fire on every edit in the kit, not only on approved proposals.
+- Rules: `skills/route-failure/SKILL.md` 254 → 253 lines (ceiling 300); new script, no rules; pruned: the 3-line apply pipeline, replaced by one command.
+- Guard: after each adoption `git -C "$KIT" status --porcelain` prints nothing and `git -C "$KIT" log -1 --format=%s` starts `Apply H`; in a scratch repo the script refused a wrong hash (exit 1), reverted a diff whose tests failed (exit 1) and committed and pushed a good one (exit 0).
+- Teach: "Factory changes are approved by fingerprint, and one script applies, tests, commits and pushes them, so an improvement can't sit uncommitted on one laptop."
+- diff-sha256: 0a9aa1f06a59
+- Verdict: pending G-L5
+
+```diff
+--- /dev/null
++++ b/scripts/apply-proposal.sh
+@@ -0,0 +1,62 @@
++#!/usr/bin/env bash
++# apply-proposal.sh — apply an approved route-failure proposal, then commit and push the factory record.
++#
++# Why this exists: a factory improvement left in a working copy never reaches the next project, so applying,
++# testing, committing and pushing are one command instead of four steps someone must remember (FINDINGS F7).
++# Run it only after the human's G-L5 yes is recorded; it refuses unless the diff bytes hash to the approved value.
++set -euo pipefail
++set -f
++
++usage() {
++  cat <<'EOF'
++usage: scripts/apply-proposal.sh <n> <diff-sha256> [<apply-in path>]
++         apply H<n> from HARNESS_CHANGELOG.md, then commit and push this kit
++       scripts/apply-proposal.sh --record "<message>"
++         commit and push FINDINGS.md and HARNESS_CHANGELOG.md only (a route-failure pass's record)
++
++<apply-in path> defaults to this kit. A project path applies the diff there and commits only the kit's record;
++the project's own commit stays with its supervisor. In the kit, scripts/test.sh must pass or the diff is reverted.
++Exit: 0 done · 1 hash mismatch, apply or test failure · 2 usage error.
++EOF
++}
++
++kit=$(cd "$(dirname "$0")/.." && pwd)
++log=$kit/HARNESS_CHANGELOG.md
++
++commit_push() { # <message> <path>...
++  msg=$1; shift
++  git -C "$kit" add -- "$@"
++  if git -C "$kit" diff --cached --quiet; then echo "apply-proposal: nothing to commit"; return 0; fi
++  git -C "$kit" commit -q -m "$msg"
++  git -C "$kit" push -q origin HEAD
++  echo "apply-proposal: committed and pushed $(git -C "$kit" rev-parse --short HEAD): $msg"
++}
++
++case "${1:-}" in
++  -h | --help) usage; exit 0 ;;
++  --record) [ -n "${2:-}" ] || { usage >&2; exit 2; }; commit_push "$2" FINDINGS.md HARNESS_CHANGELOG.md; exit 0 ;;
++esac
++[ $# -ge 2 ] && [ $# -le 3 ] || { usage >&2; exit 2; }
++n=$1 want=$2 dest=${3:-$kit}
++
++d=$(awk -v h="### H$n " 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&/^```diff$/{d=1;next} d&&/^```$/{exit} d' "$log")
++[ -n "$d" ] || { echo "apply-proposal: no diff for H$n in $log" >&2; exit 1; }
++got=$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)
++[ "$got" = "$want" ] || { echo "apply-proposal: H$n hashes to $got, not the approved $want; ask again" >&2; exit 1; }
++printf '%s\n' "$d" | git -C "$dest" apply
++paths=$(printf '%s\n' "$d" | git -C "$dest" apply --numstat -R | cut -f3)
++
++title=$(grep -m1 "^### H$n " "$log" | sed -E "s/^### H$n //; s/ +\[status:.*//")
++fs=$(sed -n "/^### H$n /,/^### /p" "$log" | grep -m1 -oE 'F#: F[0-9]+( and F[0-9]+)?' | sed 's/^F#: //')
++if [ "$dest" -ef "$kit" ]; then
++  if ! bash "$kit/scripts/test.sh" >/dev/null 2>&1; then
++    printf '%s\n' "$d" | git -C "$kit" apply -R
++    echo "apply-proposal: scripts/test.sh failed with H$n applied; reverted it" >&2
++    exit 1
++  fi
++  # shellcheck disable=SC2086 # paths from git apply --numstat, one per line, no spaces in this kit
++  commit_push "Apply H$n: $title ($fs)" FINDINGS.md HARNESS_CHANGELOG.md $paths
++else
++  commit_push "Record H$n applied in $(basename "$dest"): $title ($fs)" FINDINGS.md HARNESS_CHANGELOG.md
++  echo "apply-proposal: applied H$n in $dest; its supervisor commits: $(printf '%s ' $paths)"
++fi
+--- a/skills/route-failure/SKILL.md
++++ b/skills/route-failure/SKILL.md
+@@ -219,7 +219,8 @@
+ Wrote: $KIT/FINDINGS.md F<a>…F<b> · $KIT/HARNESS_CHANGELOG.md H<x>…H<y> (status proposed) ·
+   docs/learnings/<slug>.md | none
+ Applied: nothing. No skill, AGENTS.md, CLAUDE.md, hook, script or setting was edited. Nothing was committed:
+-  you commit $KIT/FINDINGS.md and $KIT/HARNESS_CHANGELOG.md (the factory's public record) when you are ready.
++  scripts/apply-proposal.sh commits and pushes $KIT/FINDINGS.md and $KIT/HARNESS_CHANGELOG.md with each
++  adopted change, or alone with `--record "route-failure: <summary>"` once G-L5 is answered.
+ Earlier proposals: <H<n> → adopted | approved, waiting to be applied | rejected | revise | stale | still waiting>
+   · waiting in other projects: <H<n> (<project>)> | none
+ Metrics (whole tracker, not only this window): first-pass acceptance <x>/<y> tasks · fix loops <f> FAIL lines
+@@ -233,11 +234,9 @@
+ On Approve the supervisor writes | <time> | G-L5 | H<n>@<diff-sha256> | <your exact words> | to ## Approvals (the
+ block decision for rows without a diff: artifact FINDINGS.md F<a>-F<b>) and runs log-decision; software-factory-kit mode: I
+ write your words into H<n>'s Verdict line instead. Only you, or the supervisor after that record, apply it, and the
+-command refuses unless the bytes are the ones you approved:
+-  d=$(awk -v h='### H<n> ' 'index($0,h)==1{f=1;next} f&&/^### /{exit} f&&/^```diff$/{d=1;next} d&&/^```$/{exit} d' \
+-    "<software-factory-kit path>/HARNESS_CHANGELOG.md") && [ "$(printf '%s\n' "$d" | shasum -a 256 | cut -c1-12)" = <diff-sha256> ] &&
+-  printf '%s\n' "$d" | git -C "<apply-in path>" apply
+-The next route-failure pass records it as adopted.
++command refuses unless the bytes are the ones you approved, then runs the kit's tests, commits and pushes the kit:
++  bash "<software-factory-kit path>/scripts/apply-proposal.sh" <n> <diff-sha256> ["<apply-in path>"]
++The next route-failure pass records it as adopted and commits that record with `apply-proposal.sh --record`.
+ Next skill (WORKFLOW §4 milestone close chain): `quiz-me`, once no G-L5 card of this pass is pending. I am not
+ starting it.
+ ```
+```
+
+### H8 Done-when only this task can pass; full Owns  [status: proposed]
+
+- F#: F8 and F9 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/slice-tasks/SKILL.md`
+- Root cause: T009's Done-when was green at dispatch → its parts were the suite (turned green by earlier tasks) and make check → slice-tasks step 8's suite-joining recipe told it to run exactly those. T006's Owns missed AppShell and a migration → step 7 says what Owns must not hold but not that it must hold every file the Ask assigns.
+- Why this layer: §10 "Phase procedure botched → Skill": the recipe itself produced both defects. implement-task's baseline (a check) already stopped T009; this removes the cause so the check stops firing.
+- Rules: `skills/slice-tasks/SKILL.md` 279 → 283 lines (ceiling 300); red-flag rows unchanged (6); pruned: none, below ceiling.
+- Guard: F8: `grep -l 'make -n check' specs/M*/tasks/T*.md` names the suite-joining task. F9: ⚠ no mechanical guard; the verifier's spec-fidelity axis is the backstop.
+- Teach: "A task's check must be one only that task can turn green; otherwise it passes because of a neighbour's work."
+- diff-sha256: d830e46064b7
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/slice-tasks/SKILL.md
++++ b/skills/slice-tasks/SKILL.md
+@@ -120,7 +120,9 @@
+    `tests/acceptance/**` (so never `tests/*` or `*`), and never a dependency manifest or lockfile: a slice that
+    needs a new package gets a `⚠ Ask-first: <package> for <why>` for G4 (the human adds it and commits before
+    dispatch). Mark `parallel: true` only when the task's `Owns:` is disjoint from every other `parallel: true`
+-   task; otherwise `parallel: false`, and the supervisor runs it alone.
++   task; otherwise `parallel: false`, and the supervisor runs it alone. Every file the Ask assigns is owned:
++   the component that holds a state the task builds (e.g. the shell that mounts a countdown) and any migration a
++   counter or table in the Ask needs; a missing one surfaces mid-task as an Owns gap and a relaunch.
+ 8. **Write Done-when before the rest of the body.** One `sh` line: the AT filter for this task, then
+    `&& make check`. The filter command is a make target that passes a filter through (e.g.
+    `make test FILTER=M1_AT_001`) when AGENTS.md or the Makefile has one; else acceptance.md's `Run one test`
+@@ -131,7 +133,9 @@
+      assuming its recommendation (acceptance joins `make check` only when the milestone lands). Put that Q-n under
+      G4 questions and say the Done-when lines change if G4 picks otherwise (implement-task stops when base
+      `make check` is red). If acceptance.md gives the joining config line to a task, give its file to one task that
+-     is `after:` every other task, whose Done-when runs all of `tests/acceptance/M<N>` then `make check`.
++     is `after:` every other task, whose Done-when starts `make -n check | grep -q tests/acceptance &&`, then runs
++     all of `tests/acceptance/M<N>`, then `make check`. Without that first part it is green the moment the other
++     tasks land, so it cannot tell whether this task did its job.
+    - **Runner outside make.** If a Done-when calls the runner directly, add an Open `⚠`: "scripts/delegate.sh's
+      default claude allow-list runs only make/git/date: dispatch claude tasks as Agent-tool subagents, or extend
+      DELEGATE_CLAUDE_ALLOWED_TOOLS with the runner (supervisor's call)."
+```
+
+### H9 Cite a registry check for every version  [status: proposed]
+
+- F#: F10 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/design-hld/SKILL.md`, `skills/design-lld/SKILL.md`
+- Root cause: D38 named Nuxt 3 → the model wrote the version it remembered → neither design skill asked for evidence that a named version is current.
+- Why this layer: §10 "Phase procedure botched → Skill", as a Done-when command (a check inside the skill), not a sentence: it prints any decision that names a version without a registry citation.
+- Rules: `skills/design-hld/SKILL.md` 226 → 229, `skills/design-lld/SKILL.md` 274 → 277 lines (ceiling 300); red-flag rows unchanged; pruned: none, below ceiling.
+- Guard: the awk in the new Done-when prints `### D38 Web framework for the one deployable` on this project's lld.md today, and nothing once a decision cites `npm view <pkg> dist-tags`.
+- Teach: "AI picks versions from memory, so every version in a design decision has to cite the registry check that proves it is current."
+- diff-sha256: bb53b6150e83
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/design-hld/SKILL.md
++++ b/skills/design-hld/SKILL.md
+@@ -140,6 +140,9 @@
+ 
+ - [ ] Headings match the template, in order: `diff <(grep '^## ' "$S/assets/template.md") <(grep '^## ' $H)`
+       prints nothing.
++- [ ] Every decision whose recommendation names a version cites the registry check you ran this session (model
++      memory lags the current major), e.g. `npm view <pkg> dist-tags` and its date, in that decision's block:
++      `awk '/^### D[0-9]+ /{if(v&&!r)print d;d=$0;v=r=0;next} /^## /{if(v&&!r)print d;d="";v=r=0} d&&/^- \*\*Recommendation:\*\*.*[0-9]/{v=1} d&&/(registry|npm view|pip index|go list -m|cargo search|composer show)/{r=1} END{if(v&&!r)print d}' $H` prints nothing.
+ - [ ] Filled, with no guide residue: `grep -nE '\{\{|<!-- guide:' $H` prints nothing, and
+       ``awk '/^```mermaid/{f=1} /^```$/{f=0;next} !f' $H | grep -E -- '-->' | grep -vxE '<!-- (diagram: [a-z-]+|/diagram) -->'``
+       prints nothing.
+--- a/skills/design-lld/SKILL.md
++++ b/skills/design-lld/SKILL.md
+@@ -196,6 +196,9 @@
+       `grep -q '^openapi: 3\.1\.' "$O" || echo "not 3.1"; grep -q 'application/problem+json' "$O" || echo "no problem+json"`
+ - [ ] Every problem type used is in the registry:
+       `comm -23 <(grep -oE '/problems/[a-z0-9-]+' "$L" | sort -u) <(sed -n '/^### Problem types/,/^### Idempotency/p' "$L" | grep -oE '^\| `/problems/[a-z0-9-]+' | grep -oE '/problems/[a-z0-9-]+' | sort -u)`
++- [ ] Every decision whose recommendation names a version cites the registry check you ran this session (model
++      memory lags the current major), e.g. `npm view <pkg> dist-tags` and its date, in that decision's block:
++      `awk '/^### D[0-9]+ /{if(v&&!r)print d;d=$0;v=r=0;next} /^## /{if(v&&!r)print d;d="";v=r=0} d&&/^- \*\*Recommendation:\*\*.*[0-9]/{v=1} d&&/(registry|npm view|pip index|go list -m|cargo search|composer show)/{r=1} END{if(v&&!r)print d}' "$L"`
+ - [ ] Every diagram job has exactly one placeholder:
+       ``diff <(grep -oE '<!-- diagram: [a-z0-9-]+ -->' "$L" | awk '{print $3}' | sort) <(sed -n '/^## 10\./,/^## Decisions/p' "$L" | grep -oE '`draw-diagrams [a-z0-9-]+`' | tr -d '`' | awk '{print $2}' | sort)``
+ - [ ] §10 is complete:
+```
+
+### H10 Prove each test fails on broken code  [status: proposed]
+
+- F#: F11 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/implement-task/SKILL.md`
+- Root cause: tests passed while the code could be wrong → red-first proves a test fails when the code is missing, not that it pins the right code → fakes that ignore WHERE clauses or locks, and tests that compare a value with itself, go green for any implementation.
+- Why this layer: §10 "Phase procedure botched → Skill". A check would be mutation testing (option B), which needs a new dependency and an Ask-first decision; this step costs nothing to try first.
+- Rules: `skills/implement-task/SKILL.md` 275 → 278 lines (ceiling 300); red-flag rows unchanged (6); pruned: none, below ceiling.
+- Guard: verifier tests-that-lie rows: 4 with a disposition in M4 (pass5 R1, pass6 R1, pass7 R1, R2); M5 should have 0-1, else move to option B.
+- Teach: "A test is only evidence if I have seen it fail when the code is wrong, so I break the line once, watch it go red, and only then trust the green."
+- diff-sha256: 50ef7d53d151
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/implement-task/SKILL.md
++++ b/skills/implement-task/SKILL.md
+@@ -145,7 +145,10 @@
+    Writing the test first proves it can fail, so its later green means something.
+ 8. **Green.** Write the smallest code inside `Owns:` that makes the unit tests pass, ported from the map in step 6.
+    Re-run the unit tests, then the Done-when. Refactor only while green and only inside `Owns:`. Never weaken an
+-   assertion, add a skip, or special-case a test's input to get green.
++   assertion, add a skip, or special-case a test's input to get green. Then break each guarded line once (flip a
++   comparison, drop a WHERE clause, change the hashed string) and paste the red run before restoring it. A test
++   that stays green is checking a fake or itself: test against the real dependency instead (the test database
++   for SQL and locks, the built output for generated config), or name the gap as a question.
+ 9. **Count corrections.** An attempt to fix a failing check is a correction. If the same error (same test, same
+    message) survives 2 corrections, stop: `human_review`, reason "stuck: <error> after 2 corrections", the exact
+    output pasted and one question. A different error starts a new count. A third guess usually digs deeper into a
+```
+
+### H11 Start worker worktrees from the milestone branch  [status: proposed]
+
+- F#: F12 · Layer: Environment · Reach: factory template (project already does it)
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `templates/CLAUDE.md`
+- Root cause: M1 workers started on main → the Agent tool's `isolation: worktree` branches from the default branch → the CLAUDE.md template told the supervisor to use it for code.
+- Why this layer: §10 "Flaky setup → Environment": the setup step itself was wrong. No project block: this project's supervisor has created worktrees from the milestone branch since M4 (every M4 DISPATCH line says `from milestone/...`).
+- Rules: `templates/CLAUDE.md` list items 12 → 12 (ceiling ~20); pruned: none, one rule rewritten in place.
+- Guard: every DISPATCH line names `from milestone/...`, and `git -C <worktree> merge-base --is-ancestor <milestone branch> HEAD` exits 0.
+- Teach: "Each worker starts from the milestone branch, so it builds on its teammates' merged work instead of an old main."
+- diff-sha256: dfce8aaa4377
+- Verdict: pending G-L5
+
+```diff
+--- a/templates/CLAUDE.md
++++ b/templates/CLAUDE.md
+@@ -63,8 +63,10 @@
+ **parallelizable**. Every dispatch needs a contract file with `Owns:` and a runnable Done-when: a task file from
+ `slice-tasks`, or for other jobs (diagrams, demo script) a job file you write at `.handoff/runs/<id>/task.md` in the
+ same format. Commit the inputs it reads first (workers see the branch, not your working tree).
+-- Claude subagent (default): Agent tool, `isolation: worktree` for code; prompt = "Read <abs path>/SKILL.md and
+-  follow it for <task file>. HANDOFF_DIR=<abs>/.handoff". Pass paths, never summaries.
++- Claude subagent (default): for code, first `git worktree add .claude/worktrees/<id> -b <task branch>
++  <milestone branch>` (the Agent tool's `isolation: worktree` starts from the default branch, not the milestone);
++  prompt = "Read <abs path>/SKILL.md and follow it for <task file> in <worktree>. HANDOFF_DIR=<abs>/.handoff".
++  Pass paths, never summaries.
+ - Other harness: `bash scripts/delegate.sh <task-file>`.
+ - Log `DISPATCH <id> harness=<h> why=<one line>` for every job. Never show the verifier a worker's self-report.
+ 
+```
+
+### H12 Let log-decision create a missing journal  [status: proposed]
+
+- F#: F13 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/log-decision/SKILL.md`
+- Root cause: log-decision stopped on a new repo → its Inputs row stops when no journal is committed → nothing creates the journal before the first gate on a brownfield repo or before the G-init commit.
+- Why this layer: §10 "Phase procedure botched → Skill": the input row's stop made a normal first run fail; copying the kit's template is the tool the row already names.
+- Rules: `skills/log-decision/SKILL.md` 267 → 267 lines (ceiling 300); one Inputs row rewritten; pruned: none.
+- Guard: ⚠ no mechanical guard: log-decision has no test harness; its STOP line "created the journal" shows the path ran.
+- Teach: "The decision log is created by the first decision, so recording never waits on setup."
+- diff-sha256: 562b8efd0be7
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/log-decision/SKILL.md
++++ b/skills/log-decision/SKILL.md
+@@ -48,7 +48,7 @@
+ | Artifact at the approved version (required) | the row's `artifact@sha`, read with `git show <sha>:<path>`, never from the working tree; G-L5 is checked by hash (Gate sources) | `git cat-file -e <sha>:<path>` fails: stop: "<path> is not committed at <sha>. Commit it and re-record the approval." |
+ | Options shown (required) | per Gate sources: the decision's section at that sha, else the owner skill's STOP message or card exactly as the human saw it (the supervisor pastes it verbatim) | Stop: "Which options were shown? Pass the path#section or the exact STOP/card text." |
+ | Phase, milestone, gate id (required) | the call; else the artifact's header and the Approvals row. Gate id = the row's gate cell, verbatim | Ask (step 4). |
+-| Journal (required) | `docs/decisions/DECISION_JOURNAL.md`, committed: `git cat-file -e HEAD:docs/decisions/DECISION_JOURNAL.md` | Stop: "No committed decision journal. Run scripts/init-repo.sh and commit it; log-decision never creates it." |
++| Journal | `docs/decisions/DECISION_JOURNAL.md`, committed: `git cat-file -e HEAD:docs/decisions/DECISION_JOURNAL.md` | Create it: copy `"${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}"/templates/docs/decisions/DECISION_JOURNAL.md` to that path, append as usual (every entry is uncommitted, `L=0`), and say in STOP "created the journal; the supervisor commits it with this entry". No template there: stop and name both paths. |
+ | Superseded decision | the call, the human's words, or the option text ("replaces D<k>") | Ask (step 4) when the words hint at one. |
+ | Reflection | private words the human offered with the answer | Write none. Never ask. |
+ | Proposer harness and model | the artifact's `Written by` row, else the `DISPATCH` line in `.handoff/TRACKER.md ## Log` | `⚠ not recorded` |
+```
