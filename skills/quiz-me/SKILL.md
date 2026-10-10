@@ -130,7 +130,7 @@ EOF
    shipped design element with no D-row (table, endpoint, state owner, sequence, invariant, trust boundary): G3
    asks the human to defend every one. Order:
    (a) never taught: the id is on no `^Taught:` line (`grep '^Taught:' <F> | grep -cE '\b<id>\b'` prints 0);
-   (b) Type 1 (one-way door); (c) low confidence; (d) most depended on: the higher
+   (b) weight ●●● in `docs/decisions/REVIEW.md` (when it exists), then Type 1 (one-way door); (c) low confidence; (d) most depended on: the higher
    `cat docs/architecture/hld.md docs/architecture/lld.md docs/milestones/M<N>.md 2>/dev/null | grep -cE '\b<id>\b'`;
    (e) due rows. Take at most 6 topics per session; the rest go to "Not yet taught" in STOP.
 4. **Teach, one topic card per message** (template Part 1, Teach card), then wait. Write middle-school clear:

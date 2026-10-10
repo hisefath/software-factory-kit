@@ -53,7 +53,7 @@ echo "# software-factory-kit self-test ($tmp)"
 for f in "$kit"/scripts/*.sh "$kit/templates/.githooks/pre-push"; do
   rc 0 "bash -n ${f#"$kit"/}" bash -n "$f"
 done
-for s in scope-guard delegate embed-diagrams init-repo install test; do
+for s in scope-guard delegate embed-diagrams decision-views init-repo install test; do
   rc 0 "$s.sh -h prints usage" bash "$kit/scripts/$s.sh" -h
   has "$s.sh -h starts with usage:" "$out" "usage: scripts/$s.sh"
 done
@@ -76,7 +76,7 @@ for f in .claude/settings.json .claude/agents/verifier.md .githooks/pre-push \
   .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
   .handoff/reviews/.gitkeep MILESTONES.md docs/README.md docs/decisions/DECISION_JOURNAL.md \
   specs/_templates/task.md specs/_templates/result.md Makefile scripts/scope-guard.sh scripts/delegate.sh \
-  scripts/embed-diagrams.sh; do
+  scripts/embed-diagrams.sh scripts/decision-views.sh docs/decisions/REVIEW.md; do
   [ -f "$repo/$f" ] || missing="$missing $f"
 done
 for f in AGENTS.md CLAUDE.md; do
@@ -276,6 +276,24 @@ rc 1 "embed: missing .mmd fails" bash scripts/embed-diagrams.sh docs/x.md
 hasnt "embed: doc untouched when .mmd is missing" docs/x.md '```mermaid'
 printf '<!-- diagram: ../../etc/passwd -->\n' >docs/y.md
 rc 1 "embed: path-like diagram type is rejected" bash scripts/embed-diagrams.sh docs/y.md
+
+# ---- 3b. decision-views ----------------------------------------------------------------------------------
+rc 0 "decision-views: the scaffolded REVIEW.md is current" bash scripts/decision-views.sh --check
+cp docs/decisions/DECISION_JOURNAL.md "$tmp/journal.bak"
+cat >>docs/decisions/DECISION_JOURNAL.md <<'EOF'
+
+### D1 Charge once per order  [status: accepted]
+- Date 2026-10-10 18:00 CDT · phase 6 design-lld · milestone M1
+- Review: Topic Money · Weight ●●● · One-liner: One charge per order, guarded by an idempotency key.
+EOF
+rc 1 "decision-views: --check fails when REVIEW.md is stale" bash scripts/decision-views.sh --check
+rc 0 "decision-views: regenerates REVIEW.md" bash scripts/decision-views.sh
+has "decision-views: groups by topic and weight" docs/decisions/REVIEW.md "- ●●● D1 — One charge per order, guarded by an idempotency key."
+has "decision-views: lists decisions by day" docs/decisions/REVIEW.md "- D1 · Money · ●●● — One charge per order"
+rc 0 "decision-views: --check passes once regenerated" bash scripts/decision-views.sh --check
+replace_line docs/decisions/DECISION_JOURNAL.md 'Topic Money' 'Topic Billing'
+rc 1 "decision-views: refuses a topic missing from the Topics: line" bash scripts/decision-views.sh
+cp "$tmp/journal.bak" docs/decisions/DECISION_JOURNAL.md && bash scripts/decision-views.sh >/dev/null
 
 # ---- 4. delegate -----------------------------------------------------------------------------------------
 tracker=.handoff/TRACKER.md

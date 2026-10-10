@@ -147,6 +147,9 @@ covers.
      Evidence = `file:line`, R/S ids, `proposed as <path> D<k>` (artifacts with D sections),
      `approval <gate id> <row time>`.
    - Interview line: one sentence of at most 30 words the human could say out loud: what, why, at what cost.
+   - Review line, for the project review: Topic = one name from the journal's `Topics:` line (none fits: the closest,
+     plus an Open ⚠ asking whether to add a topic); Weight = ●●● critical (Type 1, or touches money, personal data
+     or sign-in), ●●○ important, ●○○ minor; One-liner = what was chosen, over what, at what cost, in ≤ 15 words.
    - Secrets, credentials, PHI or personal data inside a quote → `[redacted: <kind>]`, and tell the human why (the
      repo is public).
 6. **Write the journal.** Right before each write, recompute the next id:
@@ -173,7 +176,8 @@ covers.
 8. **Private reflection, only if offered.**
    `R=~/software-factory-kit-private/$(basename "$(git rev-parse --show-toplevel)"); mkdir -p "$R"`, then append Part 3 to
    `$R/REFLECTIONS.md` with the human's words verbatim.
-9. **Verify.** Run every Done-when check; fix and re-run until all pass. Then send STOP.
+9. **Verify.** Regenerate the project review with `bash scripts/decision-views.sh` (when the script exists), then
+   run every Done-when check; fix and re-run until all pass. Then send STOP.
 
 ## Output
 
@@ -187,7 +191,9 @@ covers.
 
 Start each check's shell call with the step-1 check prelude (`J=…; L=…`). Each check states what it must print.
 
-- [ ] Only owned paths changed: `git status --porcelain` = the step-1 output plus `$J`, new
+- [ ] Every uncommitted entry has a Review line, and the review view is current; prints nothing:
+      `awk -v l="$L" '/^### D[0-9]+ /{if(n>l&&!r)print "D" n ": no Review line"; n=substr($2,2)+0; r=0} /^- Review: Topic /{r=1} END{if(n>l&&!r)print "D" n ": no Review line"}' "$J"; [ ! -f scripts/decision-views.sh ] || bash scripts/decision-views.sh --check >/dev/null`
+- [ ] Only owned paths changed: `git status --porcelain` = the step-1 output plus `$J`, `docs/decisions/REVIEW.md`, new
       `docs/decisions/[0-9][0-9][0-9][0-9]-*.md`, and an older record only when it was superseded.
 - [ ] Committed history intact: `diff <(git show HEAD:"$J") "$J" | grep '^<'` prints only `### D` heading lines and
       lines containing `pending — no quoted words yet`.
@@ -239,7 +245,7 @@ log-decision recorded (<date>) your answer at <gate id> on <artifact>: "<exact w
 Wrote: docs/decisions/DECISION_JOURNAL.md (+D<a>…D<b> | nothing appended); status edits: <D<k> proposed→accepted | D<k> superseded-by D<m> | none>
        <docs/decisions/NNNN-<slug>.md (Type 1 record) | no record: no accepted Type 1>
        <reflection appended to ~/software-factory-kit-private/<repo>/REFLECTIONS.md (outside the repo) | no reflection offered>
-- D<n> <title> [<status>] · <Type 1 one-way | Type 2 two-way>
+- D<n> <title> [<status>] · <Type 1 one-way | Type 2 two-way> · <Topic> <Weight>: <One-liner>
   You chose <X> over <Y>; you pay <W>; revisit if <trigger>.
   Interview line: "<...>"
 Nothing recorded for: <what and why, e.g. "Revise asked for a fourth option; nothing chosen yet" | none>

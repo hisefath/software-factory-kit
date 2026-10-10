@@ -8,6 +8,10 @@ Why each design choice was made and what it cost (software-factory-kit WORKFLOW.
   `superseded-by D<m>`. Rejected options stay visible.
 - One-way (Type 1) decisions are also promoted to `docs/decisions/NNNN-<slug>.md`.
 - Who said yes, word for word, lives in `.handoff/TRACKER.md ## Approvals`; this file holds the reasoning.
+- Topics group decisions in the project review, `docs/decisions/REVIEW.md`, which
+  `scripts/decision-views.sh` generates from this ledger. Changing the list is itself a decision.
+
+Topics: Product · Data · Security · Money · Infrastructure · Process
 
 ## Entry schema
 
@@ -21,6 +25,7 @@ Copy this block for each new entry (D-ids increase by one, starting at D1):
 - Choice · Why (Y-statement: in context C, facing F, we chose X over Y to get Z, accepting W)
 - Cost accepted · Reversibility (Type 1 one-way / Type 2 two-way) · Confidence (low/med/high)
 - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
+- Review: Topic <topic> · Weight <●●●|●●○|●○○> · One-liner: <at most 15 words>
 ```
 
 ## Entries

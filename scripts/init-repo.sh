@@ -12,11 +12,11 @@ usage: scripts/init-repo.sh <repo-dir> [--brownfield]
 Scaffolds into <repo-dir> (must be the root of a git repository):
   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
                                        .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md, MILESTONES.md,
-                                       docs/README.md, docs/decisions/DECISION_JOURNAL.md, specs/_templates/*)
+                                       docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
                                        Makefile.example when a Makefile exists without a `check:` target
   agents/verifier.md                → .claude/agents/verifier.md
-  scripts/{scope-guard,delegate,embed-diagrams}.sh → scripts/
+  scripts/{scope-guard,delegate,embed-diagrams,decision-views}.sh → scripts/
   .handoff/{inbox,runs,reviews}/    (with .gitkeep so git tracks them)
   git config core.hooksPath .githooks   (only if hooksPath is unset or already .githooks)
   .gitignore lines: .handoff/runs/*/events.jsonl  .handoff/runs/*/stderr.log  docs/demo/raw/
@@ -89,7 +89,7 @@ while IFS= read -r f; do
 done < <(find "$tpl" -type f ! -name .DS_Store | LC_ALL=C sort)
 
 put "$kit/agents/verifier.md" .claude/agents/verifier.md
-for s in scope-guard.sh delegate.sh embed-diagrams.sh; do
+for s in scope-guard.sh delegate.sh embed-diagrams.sh decision-views.sh; do
   put "$kit/scripts/$s" "scripts/$s" 755
 done
 

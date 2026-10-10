@@ -273,7 +273,14 @@ harness → reset the worktree → `human_review` + one question. At most 2 veri
 - Choice · Why (Y-statement: in context C, facing F, we chose X over Y to get Z, accepting W)
 - Cost accepted · Reversibility (Type 1 one-way / Type 2 two-way) · Confidence (low/med/high)
 - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
+- Review: Topic <from the journal's Topics: line> · Weight ●●● critical / ●●○ important / ●○○ minor · One-liner (≤ 15 words)
 ```
+
+The journal is the chronological ledger, for reviewing how AI was used. `scripts/decision-views.sh` generates
+`docs/decisions/REVIEW.md` from it for project review: decisions by topic and weight, how the workflow improved,
+and decisions by day (standups); `make check` fails when it is stale. Topics start from the factory default
+(Product, Data, Security, Money, Infrastructure, Process); changing the list is a decision. A project that adopts
+this mid-stream may tag older entries in `docs/decisions/backfill-tags.md` instead of rewriting them.
 
 Private reflections and quiz notes live outside the repo in `~/software-factory-kit-private/<repo>/`.
 

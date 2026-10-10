@@ -943,3 +943,665 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  | Reflection | private words the human offered with the answer | Write none. Never ask. |
  | Proposer harness and model | the artifact's `Written by` row, else the `DISPATCH` line in `.handoff/TRACKER.md ## Log` | `⚠ not recorded` |
 ```
+
+### H13 Generate a weighted project review of decisions  [status: proposed]
+
+- F#: F25 · Layer: Script · Reach: factory script + WORKFLOW.md + factory skills + templates
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `scripts/decision-views.sh` (new), `scripts/init-repo.sh`, `scripts/test.sh`, `skills/log-decision/SKILL.md`, `skills/log-decision/assets/template.md`, `skills/quiz-me/SKILL.md`, `templates/Makefile.example`, `templates/docs/decisions/DECISION_JOURNAL.md`, `templates/docs/decisions/REVIEW.md` (new)
+- Root cause: the human wanted decisions grouped by umbrella topic and weight for project review, a daily standup view and one-liners → the journal is one chronological ledger with no topic, weight or summary field → no script or skill produced any other view.
+- Why this layer: §10 "Mechanical step done wrong → Script": a generated view cannot drift from the ledger, and `--check` in `make check` makes a stale view fail. log-decision gains one Review line per entry (Skill) because only it writes entries; quiz-me reads the weights to order teaching.
+- Rules: `skills/log-decision/SKILL.md` 267 → 273, `skills/quiz-me/SKILL.md` 295 → 295 (one line rewritten), ceiling 300; WORKFLOW §9 schema 6 → 7 bullets; `scripts/test.sh` 121 → 131 passed with this diff applied in a scratch clone; pruned: none, below ceilings.
+- Guard: `bash scripts/test.sh` section 3b passes (stale view and unknown topic both exit 1); in every scaffolded repo `make check` runs `bash scripts/decision-views.sh --check`.
+- Teach: "The ledger keeps every decision in time order for reviewing how AI was used, and one script turns it into a topic-and-weight review, so the two views never disagree."
+- diff-sha256: 732be0c264af
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -273,8 +273,15 @@
+ - Choice · Why (Y-statement: in context C, facing F, we chose X over Y to get Z, accepting W)
+ - Cost accepted · Reversibility (Type 1 one-way / Type 2 two-way) · Confidence (low/med/high)
+ - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
++- Review: Topic <from the journal's Topics: line> · Weight ●●● critical / ●●○ important / ●○○ minor · One-liner (≤ 15 words)
+ ```
+ 
++The journal is the chronological ledger, for reviewing how AI was used. `scripts/decision-views.sh` generates
++`docs/decisions/REVIEW.md` from it for project review: decisions by topic and weight, how the workflow improved,
++and decisions by day (standups); `make check` fails when it is stale. Topics start from the factory default
++(Product, Data, Security, Money, Infrastructure, Process); changing the list is a decision. A project that adopts
++this mid-stream may tag older entries in `docs/decisions/backfill-tags.md` instead of rewriting them.
++
+ Private reflections and quiz notes live outside the repo in `~/software-factory-kit-private/<repo>/`.
+ 
+ ## 10. Failure routing (layer 5)
+--- /dev/null
++++ b/scripts/decision-views.sh
+@@ -0,0 +1,137 @@
++#!/usr/bin/env bash
++# decision-views.sh — generate docs/decisions/REVIEW.md, the project review of decisions (by topic and weight, how
++# the workflow improved, by day), from the chronological ledger docs/decisions/DECISION_JOURNAL.md.
++#
++# Why this exists: the journal is the AI-usage ledger, in time order; a project review needs the same decisions
++# grouped by topic and importance. Generating the view means it never disagrees with the ledger, and `--check` in
++# `make check` makes a stale view fail loudly (FINDINGS F25).
++set -euo pipefail
++
++usage() {
++  cat <<'EOF'
++usage: scripts/decision-views.sh [--check]
++
++  Writes docs/decisions/REVIEW.md from docs/decisions/DECISION_JOURNAL.md (plus docs/decisions/backfill-tags.md
++  when it exists). Run from the repo root.
++  --check  writes nothing; fails if REVIEW.md is missing or stale.
++
++Tags: each entry has a bullet `- Review: Topic <topic> · Weight <●●●|●●○|●○○> · One-liner: <at most 15 words>`.
++Entries written before tags existed can be tagged in backfill-tags.md rows `| D<n> | <topic> | <weight> | <one-liner> |`;
++an entry's own Review line wins. Topics come from the journal's `Topics:` line. Untagged entries are listed as such.
++Exit: 0 ok · 1 stale view, unknown topic or weight, or an over-long one-liner · 2 usage error or no journal.
++EOF
++}
++
++check=0
++case "${1:-}" in
++  -h | --help) usage; exit 0 ;;
++  --check) check=1 ;;
++  "") ;;
++  *) usage >&2; exit 2 ;;
++esac
++
++J=docs/decisions/DECISION_JOURNAL.md
++B=docs/decisions/backfill-tags.md
++OUT=docs/decisions/REVIEW.md
++[ -f "$J" ] || { echo "decision-views: no $J (run from the repo root)" >&2; exit 2; }
++[ -f "$B" ] || B=/dev/null
++
++tmp=$(mktemp)
++trap 'rm -f "$tmp"' EXIT
++
++awk -v bf="$B" '
++function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
++function wn(w) { return w == "●●●" ? 3 : w == "●●○" ? 2 : w == "●○○" ? 1 : 0 }
++function err(m) { print "decision-views: " m > "/dev/stderr"; bad = 1 }
++function mark(i) {
++  if (st[i] ~ /^superseded-by/) { r = st[i]; sub(/superseded-by /, "", r); return " (replaced by " r ")" }
++  if (st[i] == "rejected") return " (rejected)"
++  if (st[i] == "proposed") return " (proposed)"
++  return ""
++}
++function line(i) { return (st[i] ~ /^superseded-by/ ? "~~D" id[i] "~~" : "D" id[i]) " — " one[i] mark(i) }
++FILENAME == bf {
++  if ($0 ~ /^\| D[0-9]+ \|/) {
++    split($0, cc, "|"); k = trim(cc[2]); sub(/^D/, "", k)
++    btop[k] = trim(cc[3]); bw[k] = trim(cc[4]); bone[k] = trim(cc[5])
++  }
++  next
++}
++/^Topics:/ && !nt {
++  s = $0; sub(/^Topics:[ \t]*/, "", s); nt = split(s, tl, / · /)
++  for (t = 1; t <= nt; t++) { tl[t] = trim(tl[t]); known[tl[t]] = 1 }
++  next
++}
++/^### D[0-9]+ / {
++  n++; d = $2; sub(/^D/, "", d); id[n] = d
++  s = $0; sub(/^### D[0-9]+ /, "", s); title[n] = s; sub(/ +\[status:.*/, "", title[n])
++  sub(/.*\[status: /, "", s); sub(/\].*/, "", s); st[n] = s
++  next
++}
++n && date[n] == "" && match($0, /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) { date[n] = substr($0, RSTART, RLENGTH) }
++n && /^- Review: / {
++  s = $0; sub(/^- Review: /, "", s); split(s, p, / · /)
++  top[n] = trim(p[1]); sub(/^Topic /, "", top[n])
++  w[n] = trim(p[2]); sub(/^Weight /, "", w[n])
++  one[n] = trim(p[3]); sub(/^One-liner: /, "", one[n])
++}
++n && match($0, /HARNESS_CHANGELOG\.md H[0-9]+/) { h[n] = substr($0, RSTART + 21, RLENGTH - 21) }
++n && match($0, /FINDINGS\.md F[0-9]+(, F[0-9]+)*/) { f[n] = substr($0, RSTART + 12, RLENGTH - 12) }
++END {
++  for (i = 1; i <= n; i++) {
++    k = id[i]
++    if (top[i] == "" && (k in btop)) { top[i] = btop[k]; w[i] = bw[k]; one[i] = bone[k] }
++    if (one[i] == "") one[i] = title[i]
++    if (top[i] == "") { top[i] = "Untagged"; continue }
++    if (!(top[i] in known)) err("D" k ": unknown topic \"" top[i] "\" (journal Topics: line)")
++    if (!wn(w[i])) err("D" k ": weight must be ●●●, ●●○ or ●○○")
++    if (split(one[i], x, / +/) > 15) err("D" k ": one-liner over 15 words")
++  }
++  if (bad) exit 1
++  print "# Project review"
++  print ""
++  print "<!-- Generated by scripts/decision-views.sh from DECISION_JOURNAL.md (and backfill-tags.md). Do not edit:"
++  print "     change the journal or the backfill table, then run the script. make check fails when this file is stale. -->"
++  print ""
++  print "Every decision grouped by topic, most important first. The chronological ledger, with every option, cost and"
++  print "quote, is [DECISION_JOURNAL.md](DECISION_JOURNAL.md)."
++  print "Weight: ●●● critical (hard to undo, or touches money, personal data or sign-in) · ●●○ important · ●○○ minor."
++  print ""
++  print "## By topic"
++  if (!n) { print ""; print "- none yet" }
++  tl[++nt] = "Untagged"
++  for (t = 1; t <= nt; t++) {
++    c = 0
++    for (i = 1; i <= n; i++) if (top[i] == tl[t]) c++
++    if (!c) continue
++    print ""; print "### " tl[t] " (" c ")"; print ""
++    for (v = 3; v >= 0; v--) for (old = 0; old <= 1; old++) for (i = 1; i <= n; i++)
++      if (top[i] == tl[t] && wn(w[i]) == v && (st[i] ~ /^superseded-by/) == old) print "- " (v ? w[i] " " : "") line(i)
++  }
++  print ""
++  print "## How the workflow improved"
++  print ""
++  print "Decisions that adopted a software-factory-kit change (H) and the finding (F) behind it, oldest first."
++  print ""
++  c = 0
++  for (i = 1; i <= n; i++) if (h[i] != "") { c++; print "- " date[i] " · D" id[i] " · " h[i] (f[i] != "" ? " · " f[i] : "") " — " one[i] mark(i) }
++  if (!c) print "- none yet"
++  print ""
++  print "## By day"
++  if (!n) { print ""; print "- none yet" }
++  for (i = n; i >= 1; i--) {
++    if (date[i] != last) { print ""; print "### " (date[i] == "" ? "undated" : date[i]); print ""; last = date[i] }
++    print "- D" id[i] " · " top[i] (wn(w[i]) ? " · " w[i] : "") " — " one[i] mark(i)
++  }
++}' "$B" "$J" >"$tmp"
++
++if [ "$check" = 1 ]; then
++  if ! cmp -s "$tmp" "$OUT"; then
++    echo "decision-views: $OUT is missing or stale; run: bash scripts/decision-views.sh" >&2
++    exit 1
++  fi
++  echo "decision-views: $OUT is current"
++else
++  cp "$tmp" "$OUT"
++  echo "decision-views: wrote $OUT"
++fi
+--- a/scripts/init-repo.sh
++++ b/scripts/init-repo.sh
+@@ -12,11 +12,11 @@
+ Scaffolds into <repo-dir> (must be the root of a git repository):
+   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
+                                        .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md, MILESTONES.md,
+-                                       docs/README.md, docs/decisions/DECISION_JOURNAL.md, specs/_templates/*)
++                                       docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
+   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
+                                        Makefile.example when a Makefile exists without a `check:` target
+   agents/verifier.md                → .claude/agents/verifier.md
+-  scripts/{scope-guard,delegate,embed-diagrams}.sh → scripts/
++  scripts/{scope-guard,delegate,embed-diagrams,decision-views}.sh → scripts/
+   .handoff/{inbox,runs,reviews}/    (with .gitkeep so git tracks them)
+   git config core.hooksPath .githooks   (only if hooksPath is unset or already .githooks)
+   .gitignore lines: .handoff/runs/*/events.jsonl  .handoff/runs/*/stderr.log  docs/demo/raw/
+@@ -89,7 +89,7 @@
+ done < <(find "$tpl" -type f ! -name .DS_Store | LC_ALL=C sort)
+ 
+ put "$kit/agents/verifier.md" .claude/agents/verifier.md
+-for s in scope-guard.sh delegate.sh embed-diagrams.sh; do
++for s in scope-guard.sh delegate.sh embed-diagrams.sh decision-views.sh; do
+   put "$kit/scripts/$s" "scripts/$s" 755
+ done
+ 
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -53,7 +53,7 @@
+ for f in "$kit"/scripts/*.sh "$kit/templates/.githooks/pre-push"; do
+   rc 0 "bash -n ${f#"$kit"/}" bash -n "$f"
+ done
+-for s in scope-guard delegate embed-diagrams init-repo install test; do
++for s in scope-guard delegate embed-diagrams decision-views init-repo install test; do
+   rc 0 "$s.sh -h prints usage" bash "$kit/scripts/$s.sh" -h
+   has "$s.sh -h starts with usage:" "$out" "usage: scripts/$s.sh"
+ done
+@@ -76,7 +76,7 @@
+   .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
+   .handoff/reviews/.gitkeep MILESTONES.md docs/README.md docs/decisions/DECISION_JOURNAL.md \
+   specs/_templates/task.md specs/_templates/result.md Makefile scripts/scope-guard.sh scripts/delegate.sh \
+-  scripts/embed-diagrams.sh; do
++  scripts/embed-diagrams.sh scripts/decision-views.sh docs/decisions/REVIEW.md; do
+   [ -f "$repo/$f" ] || missing="$missing $f"
+ done
+ for f in AGENTS.md CLAUDE.md; do
+@@ -276,6 +276,24 @@
+ hasnt "embed: doc untouched when .mmd is missing" docs/x.md '```mermaid'
+ printf '<!-- diagram: ../../etc/passwd -->\n' >docs/y.md
+ rc 1 "embed: path-like diagram type is rejected" bash scripts/embed-diagrams.sh docs/y.md
++
++# ---- 3b. decision-views ----------------------------------------------------------------------------------
++rc 0 "decision-views: the scaffolded REVIEW.md is current" bash scripts/decision-views.sh --check
++cp docs/decisions/DECISION_JOURNAL.md "$tmp/journal.bak"
++cat >>docs/decisions/DECISION_JOURNAL.md <<'EOF'
++
++### D1 Charge once per order  [status: accepted]
++- Date 2026-10-10 18:00 CDT · phase 6 design-lld · milestone M1
++- Review: Topic Money · Weight ●●● · One-liner: One charge per order, guarded by an idempotency key.
++EOF
++rc 1 "decision-views: --check fails when REVIEW.md is stale" bash scripts/decision-views.sh --check
++rc 0 "decision-views: regenerates REVIEW.md" bash scripts/decision-views.sh
++has "decision-views: groups by topic and weight" docs/decisions/REVIEW.md "- ●●● D1 — One charge per order, guarded by an idempotency key."
++has "decision-views: lists decisions by day" docs/decisions/REVIEW.md "- D1 · Money · ●●● — One charge per order"
++rc 0 "decision-views: --check passes once regenerated" bash scripts/decision-views.sh --check
++replace_line docs/decisions/DECISION_JOURNAL.md 'Topic Money' 'Topic Billing'
++rc 1 "decision-views: refuses a topic missing from the Topics: line" bash scripts/decision-views.sh
++cp "$tmp/journal.bak" docs/decisions/DECISION_JOURNAL.md && bash scripts/decision-views.sh >/dev/null
+ 
+ # ---- 4. delegate -----------------------------------------------------------------------------------------
+ tracker=.handoff/TRACKER.md
+--- a/skills/log-decision/SKILL.md
++++ b/skills/log-decision/SKILL.md
+@@ -147,6 +147,9 @@
+      Evidence = `file:line`, R/S ids, `proposed as <path> D<k>` (artifacts with D sections),
+      `approval <gate id> <row time>`.
+    - Interview line: one sentence of at most 30 words the human could say out loud: what, why, at what cost.
++   - Review line, for the project review: Topic = one name from the journal's `Topics:` line (none fits: the closest,
++     plus an Open ⚠ asking whether to add a topic); Weight = ●●● critical (Type 1, or touches money, personal data
++     or sign-in), ●●○ important, ●○○ minor; One-liner = what was chosen, over what, at what cost, in ≤ 15 words.
+    - Secrets, credentials, PHI or personal data inside a quote → `[redacted: <kind>]`, and tell the human why (the
+      repo is public).
+ 6. **Write the journal.** Right before each write, recompute the next id:
+@@ -173,7 +176,8 @@
+ 8. **Private reflection, only if offered.**
+    `R=~/software-factory-kit-private/$(basename "$(git rev-parse --show-toplevel)"); mkdir -p "$R"`, then append Part 3 to
+    `$R/REFLECTIONS.md` with the human's words verbatim.
+-9. **Verify.** Run every Done-when check; fix and re-run until all pass. Then send STOP.
++9. **Verify.** Regenerate the project review with `bash scripts/decision-views.sh` (when the script exists), then
++   run every Done-when check; fix and re-run until all pass. Then send STOP.
+ 
+ ## Output
+ 
+@@ -187,7 +191,9 @@
+ 
+ Start each check's shell call with the step-1 check prelude (`J=…; L=…`). Each check states what it must print.
+ 
+-- [ ] Only owned paths changed: `git status --porcelain` = the step-1 output plus `$J`, new
++- [ ] Every uncommitted entry has a Review line, and the review view is current; prints nothing:
++      `awk -v l="$L" '/^### D[0-9]+ /{if(n>l&&!r)print "D" n ": no Review line"; n=substr($2,2)+0; r=0} /^- Review: Topic /{r=1} END{if(n>l&&!r)print "D" n ": no Review line"}' "$J"; [ ! -f scripts/decision-views.sh ] || bash scripts/decision-views.sh --check >/dev/null`
++- [ ] Only owned paths changed: `git status --porcelain` = the step-1 output plus `$J`, `docs/decisions/REVIEW.md`, new
+       `docs/decisions/[0-9][0-9][0-9][0-9]-*.md`, and an older record only when it was superseded.
+ - [ ] Committed history intact: `diff <(git show HEAD:"$J") "$J" | grep '^<'` prints only `### D` heading lines and
+       lines containing `pending — no quoted words yet`.
+@@ -239,7 +245,7 @@
+ Wrote: docs/decisions/DECISION_JOURNAL.md (+D<a>…D<b> | nothing appended); status edits: <D<k> proposed→accepted | D<k> superseded-by D<m> | none>
+        <docs/decisions/NNNN-<slug>.md (Type 1 record) | no record: no accepted Type 1>
+        <reflection appended to ~/software-factory-kit-private/<repo>/REFLECTIONS.md (outside the repo) | no reflection offered>
+-- D<n> <title> [<status>] · <Type 1 one-way | Type 2 two-way>
++- D<n> <title> [<status>] · <Type 1 one-way | Type 2 two-way> · <Topic> <Weight>: <One-liner>
+   You chose <X> over <Y>; you pay <W>; revisit if <trigger>.
+   Interview line: "<...>"
+ Nothing recorded for: <what and why, e.g. "Revise asked for a fourth option; nothing chosen yet" | none>
+--- a/skills/log-decision/assets/template.md
++++ b/skills/log-decision/assets/template.md
+@@ -43,6 +43,7 @@
+ - Choice: {{option | none}} · Why: In the context of {{C}}, facing {{F}}, we chose {{X}} over {{Y}} to get {{Z}}, accepting {{W}}.
+ - Cost accepted: {{W in plain words}} · Reversibility: {{Type 1 one-way | Type 2 two-way}} — {{why, in plain words}} · Confidence: {{low | med | high}}
+ - Revisit if: {{observable trigger, ideally a metric or signal | ⚠ <question>}} · Evidence: {{file:line; R<NN>/S ids}}; {{proposed as <path> D<k>; }}approval {{gate id}} {{Approvals row time}}{{; ADR: docs/decisions/NNNN-slug.md}} · Interview line: "{{one sentence ≤ 30 words: what you chose, why, what it cost}}"
++- Review: Topic {{one name from the journal's Topics: line}} · Weight {{●●● | ●●○ | ●○○}} · One-liner: {{≤ 15 words: chosen, over what, at what cost}}
+ 
+ ## Part 2 — one-way decision record `docs/decisions/{{NNNN}}-{{slug}}.md` (MADR 4)
+ 
+--- a/skills/quiz-me/SKILL.md
++++ b/skills/quiz-me/SKILL.md
+@@ -130,7 +130,7 @@
+    shipped design element with no D-row (table, endpoint, state owner, sequence, invariant, trust boundary): G3
+    asks the human to defend every one. Order:
+    (a) never taught: the id is on no `^Taught:` line (`grep '^Taught:' <F> | grep -cE '\b<id>\b'` prints 0);
+-   (b) Type 1 (one-way door); (c) low confidence; (d) most depended on: the higher
++   (b) weight ●●● in `docs/decisions/REVIEW.md` (when it exists), then Type 1 (one-way door); (c) low confidence; (d) most depended on: the higher
+    `cat docs/architecture/hld.md docs/architecture/lld.md docs/milestones/M<N>.md 2>/dev/null | grep -cE '\b<id>\b'`;
+    (e) due rows. Take at most 6 topics per session; the rest go to "Not yet taught" in STOP.
+ 4. **Teach, one topic card per message** (template Part 1, Teach card), then wait. Write middle-school clear:
+--- a/templates/Makefile.example
++++ b/templates/Makefile.example
+@@ -6,10 +6,10 @@
+ # Commands table in AGENTS.md). Until then they fail on purpose, so an unconfigured repo can never look green.
+ # Keep the target names: skills and hooks call `make check`, not the tools directly.
+ 
+-.PHONY: check lint types test
++.PHONY: check lint types test decisions
+ 
+-## check: lint + types + tests — the gate
+-check: lint types test
++## check: lint + types + tests + decision review in sync — the gate
++check: lint types test decisions
+ 	@echo "make check: OK"
+ 
+ ## lint: formatting / style, in check-only mode (never rewrite files here)
+@@ -24,6 +24,10 @@
+ test:
+ 	@echo "make test: not configured — edit Makefile (see the Laravel example below)" >&2; exit 1
+ 
++## decisions: docs/decisions/REVIEW.md matches the decision journal (works as is; no adapting needed)
++decisions:
++	bash scripts/decision-views.sh --check
++
+ # --- Example: Laravel 13 / PHP 8.5 (Pint + Larastan/PHPStan + Pest or PHPUnit) -------------------------------
+ # Replace the three recipes above with these (recipe lines must start with a TAB):
+ #
+--- a/templates/docs/decisions/DECISION_JOURNAL.md
++++ b/templates/docs/decisions/DECISION_JOURNAL.md
+@@ -8,7 +8,11 @@
+   `superseded-by D<m>`. Rejected options stay visible.
+ - One-way (Type 1) decisions are also promoted to `docs/decisions/NNNN-<slug>.md`.
+ - Who said yes, word for word, lives in `.handoff/TRACKER.md ## Approvals`; this file holds the reasoning.
++- Topics group decisions in the project review, `docs/decisions/REVIEW.md`, which
++  `scripts/decision-views.sh` generates from this ledger. Changing the list is itself a decision.
+ 
++Topics: Product · Data · Security · Money · Infrastructure · Process
++
+ ## Entry schema
+ 
+ Copy this block for each new entry (D-ids increase by one, starting at D1):
+@@ -21,6 +25,7 @@
+ - Choice · Why (Y-statement: in context C, facing F, we chose X over Y to get Z, accepting W)
+ - Cost accepted · Reversibility (Type 1 one-way / Type 2 two-way) · Confidence (low/med/high)
+ - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
++- Review: Topic <topic> · Weight <●●●|●●○|●○○> · One-liner: <at most 15 words>
+ ```
+ 
+ ## Entries
+--- /dev/null
++++ b/templates/docs/decisions/REVIEW.md
+@@ -0,0 +1,22 @@
++# Project review
++
++<!-- Generated by scripts/decision-views.sh from DECISION_JOURNAL.md (and backfill-tags.md). Do not edit:
++     change the journal or the backfill table, then run the script. make check fails when this file is stale. -->
++
++Every decision grouped by topic, most important first. The chronological ledger, with every option, cost and
++quote, is [DECISION_JOURNAL.md](DECISION_JOURNAL.md).
++Weight: ●●● critical (hard to undo, or touches money, personal data or sign-in) · ●●○ important · ●○○ minor.
++
++## By topic
++
++- none yet
++
++## How the workflow improved
++
++Decisions that adopted a software-factory-kit change (H) and the finding (F) behind it, oldest first.
++
++- none yet
++
++## By day
++
++- none yet
+```
+
+### H14 Add the review view and D1-D64 backfill here  [status: proposed]
+
+- F#: F25 · Layer: Script · Reach: project
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `Makefile`, `docs/decisions/DECISION_JOURNAL.md`, `docs/decisions/backfill-tags.md` (new), `scripts/decision-views.sh` (new)
+- Root cause: Same as H13: init-repo never overwrites, so this project needs its own script copy, the Topics line, the check target, and a backfill table for the 64 decisions written before Review lines existed.
+- Why this layer: Same as H13; the backfill table tags old entries without rewriting the append-only journal.
+- Rules: `Makefile` check gains one target; `docs/decisions/DECISION_JOURNAL.md` header gains the Topics line and the schema's Review bullet (no entry changes); new `docs/decisions/backfill-tags.md` with 64 rows; pruned: none.
+- Guard: `make decisions` exits 0 after `bash scripts/decision-views.sh`; in a scratch copy REVIEW.md lists Product 10, Data 8, Security 6, Money 8, Infrastructure 9, Process 23, Untagged 0.
+- Teach: "Cerbo's whole decision history, D1 to D64, now reads by topic and weight, including how the workflow itself improved."
+- diff-sha256: eb8d763f6268
+- Verdict: pending G-L5
+
+```diff
+--- a/Makefile
++++ b/Makefile
+@@ -6,10 +6,10 @@
+ # Commands table in AGENTS.md). Until then they fail on purpose, so an unconfigured repo can never look green.
+ # Keep the target names: skills and hooks call `make check`, not the tools directly.
+ 
+-.PHONY: check lint types test setup db-test-up test-acceptance test-acceptance-m4
++.PHONY: check lint types test setup db-test-up test-acceptance test-acceptance-m4 decisions
+ 
+-## check: lint + types + tests + M4 acceptance suite — the gate
+-check: lint types test test-acceptance-m4
++## check: lint + types + tests + M4 acceptance suite + decision review in sync — the gate
++check: lint types test test-acceptance-m4 decisions
+ 	@echo "make check: OK"
+ 
+ ## lint: workflow scripts must parse (docs-only phase: no product code yet; stack tools are added at M3 design)
+@@ -25,6 +25,10 @@
+ 	npx vitest run --dir tests/unit --passWithNoTests
+ 	@set -- docs/architecture/*.md; if [ -e "$$1" ]; then bash scripts/embed-diagrams.sh --check "$$@"; fi
+ 
++## decisions: docs/decisions/REVIEW.md matches the decision journal and backfill-tags.md
++decisions:
++	bash scripts/decision-views.sh --check
++
+ ## setup: install the pinned dependencies (package-lock.json)
+ setup:
+ 	npm ci
+--- a/docs/decisions/DECISION_JOURNAL.md
++++ b/docs/decisions/DECISION_JOURNAL.md
+@@ -8,7 +8,11 @@
+   `superseded-by D<m>`. Rejected options stay visible.
+ - One-way (Type 1) decisions are also promoted to `docs/decisions/NNNN-<slug>.md`.
+ - Who said yes, word for word, lives in `.handoff/TRACKER.md ## Approvals`; this file holds the reasoning.
++- Topics group decisions in the project review, `docs/decisions/REVIEW.md`, which
++  `scripts/decision-views.sh` generates from this ledger. Changing the list is itself a decision.
+ 
++Topics: Product · Data · Security · Money · Infrastructure · Process
++
+ ## Entry schema
+ 
+ Copy this block for each new entry (D-ids increase by one, starting at D1):
+@@ -21,6 +25,7 @@
+ - Choice · Why (Y-statement: in context C, facing F, we chose X over Y to get Z, accepting W)
+ - Cost accepted · Reversibility (Type 1 one-way / Type 2 two-way) · Confidence (low/med/high)
+ - Revisit if · Evidence (file:line, R/S ids) · Interview line (one sentence you'd say out loud)
++- Review: Topic <topic> · Weight <●●●|●●○|●○○> · One-liner: <at most 15 words>
+ ```
+ 
+ ## Entries
+--- /dev/null
++++ b/docs/decisions/backfill-tags.md
+@@ -0,0 +1,73 @@
++# Backfill tags for D1–D64
++
++Topic, weight and one-liner for the decisions written before journal entries carried a `- Review:` line
++(software-factory-kit WORKFLOW.md §9). `scripts/decision-views.sh` reads this table as if each line were in its
++entry, so the project review (`REVIEW.md`) covers the whole history while the journal stays untouched. Approved once
++as a whole; a correction is a new decision. Weight: ●●● critical · ●●○ important · ●○○ minor.
++
++| D | Topic | Weight | One-liner |
++|---|---|---|---|
++| D1 | Infrastructure | ●●● | v1: Laravel 13 on PHP 8.5, set aside with the v1 build. |
++| D2 | Data | ●●● | v1: Postgres in production, SQLite in tests, suite run on both. |
++| D3 | Money | ●●● | v1: 75 bps fee on the subtotal, once per order, rounded half-up. |
++| D4 | Money | ●●● | v1: split stored on the order plus a settlement ledger. |
++| D5 | Money | ●●● | v1: reserve, charge outside a transaction, then settle. |
++| D6 | Data | ●●○ | v1: stock column plus movement log, decremented at payment. |
++| D7 | Infrastructure | ●○○ | v1: outside services stubbed behind seams. |
++| D8 | Product | ●●○ | v1: an explicit out-of-scope list. |
++| D9 | Process | ●○○ | v1: diagrams as .mmd sources with embedded copies. |
++| D10 | Process | ●○○ | v1: changes from a design-review panel accepted. |
++| D11 | Data | ●○○ | v1: one stock path through a single method. |
++| D12 | Product | ●○○ | v1: order cancel added to scope. |
++| D13 | Infrastructure | ●●○ | v1: Railway with a Dockerfile and Railway Postgres. |
++| D14 | Product | ●○○ | v1: neutral branding on the public demo. |
++| D15 | Process | ●○○ | v1: repo visibility stays the human's step. |
++| D16 | Process | ●○○ | v1: changes from a code-review panel accepted. |
++| D17 | Data | ●●○ | v1: never edit a migration that already ran in production. |
++| D18 | Process | ●●● | Restarted from scratch on a milestone branch with the gated workflow. |
++| D19 | Process | ●○○ | Docs-only rules until the stack was designed. |
++| D20 | Process | ●○○ | Harness findings F1–F3 routed at M1 close. |
++| D21 | Process | ●●○ | Briefs and PRDs name a North Star and the hiring partner's lens. |
++| D22 | Process | ●●● | The v1 build in main is set aside: never read, cited or reused. |
++| D23 | Process | ●○○ | Full track for the M1 brief. |
++| D24 | Process | ●●○ | Research sizes market, competitors and load before design. |
++| D25 | Product | ●●● | Money path first, HIPAA-ready, campaigns later. |
++| D26 | Security | ●●● | Sign-in, notices without health details, no patient identity for platform staff. |
++| D27 | Product | ●●○ | Live payout builder, two-step patient checkout, equation-first audit. |
++| D28 | Product | ●●○ | UX contract: 9 screens, six states each, 90-second demo. |
++| D29 | Money | ●●○ | Financial report with gross and net; four least-privilege operations roles. |
++| D30 | Product | ●○○ | Operations layouts: order funnel, balance-first report, people-list access. |
++| D31 | Product | ●○○ | UX contract extended to M6: 14 screens, every key screen demoed. |
++| D32 | Infrastructure | ●●● | TypeScript on Node.js with server-rendered Vue, matching Cerbo's front end. |
++| D33 | Data | ●●● | PostgreSQL managed by the host. |
++| D34 | Infrastructure | ●●○ | Pages and logic deploy together as one app. |
++| D35 | Money | ●●● | Split stored on the paid order plus an append-only ledger. |
++| D36 | Infrastructure | ●●● | One deployable, built API-first. |
++| D37 | Security | ●●○ | Seeded test accounts with server-side sessions. |
++| D38 | Infrastructure | ●●● | Nuxt 3 as the web framework, named from model memory. |
++| D39 | Data | ●●○ | Kysely queries with plain SQL migrations. |
++| D40 | Data | ●●○ | Bigint identity keys, order number = id, random tokens for outside links. |
++| D41 | Money | ●●● | One idempotency_keys table plus database backstops stop double charges. |
++| D42 | Money | ●●● | Synchronous charge between short transactions; webhooks for production. |
++| D43 | Product | ●○○ | Broader holistic-care products parked as a future non-goal. |
++| D44 | Infrastructure | ●●● | Nuxt 4, the current major per the npm registry. |
++| D45 | Process | ●●○ | M4 built as 9 vertical slices, tracer bullet first. |
++| D46 | Process | ●○○ | App code type-checked with vue-tsc inside make check. |
++| D47 | Money | ●●○ | A negative payout at payment sends the order to review. |
++| D48 | Process | ●○○ | Stacked milestones M1 to M4 merge in order. |
++| D49 | Security | ●○○ | node-forge advisory accepted: Nuxt dev tooling only. |
++| D50 | Security | ●○○ | braces advisory accepted: build tooling only. |
++| D51 | Security | ●○○ | simple-git advisory accepted: Nuxt devtools only. |
++| D52 | Security | ●●○ | SameSite cookies plus JSON-only requests as the CSRF defence. |
++| D53 | Product | ●○○ | Order quantity unbounded until stock limits exist. |
++| D54 | Process | ●○○ | M4 keeps 11 tasks as a one-time exception. |
++| D55 | Infrastructure | ●●○ | Demo deployed from the M4 branch before the merge chain. |
++| D56 | Data | ●○○ | Demo database runs PostgreSQL 18 while tests run 16. |
++| D57 | Process | ●●○ | One script applies, tests, commits and pushes factory changes. |
++| D58 | Process | ●●○ | Commit per decision, one MR per milestone, TL;DR first. |
++| D59 | Process | ●○○ | This repo's MR template starts with a TL;DR. |
++| D60 | Process | ●●○ | A test counts only after it is seen failing on broken code. |
++| D61 | Process | ●○○ | scope-guard reads brackets in Owns literally. |
++| D62 | Process | ●●○ | Each task's check is one only that task can pass. |
++| D63 | Process | ●●○ | Versions in design decisions cite a registry check. |
++| D64 | Process | ●○○ | Worker worktrees start from the milestone branch. |
+--- /dev/null
++++ b/scripts/decision-views.sh
+@@ -0,0 +1,137 @@
++#!/usr/bin/env bash
++# decision-views.sh — generate docs/decisions/REVIEW.md, the project review of decisions (by topic and weight, how
++# the workflow improved, by day), from the chronological ledger docs/decisions/DECISION_JOURNAL.md.
++#
++# Why this exists: the journal is the AI-usage ledger, in time order; a project review needs the same decisions
++# grouped by topic and importance. Generating the view means it never disagrees with the ledger, and `--check` in
++# `make check` makes a stale view fail loudly (FINDINGS F25).
++set -euo pipefail
++
++usage() {
++  cat <<'EOF'
++usage: scripts/decision-views.sh [--check]
++
++  Writes docs/decisions/REVIEW.md from docs/decisions/DECISION_JOURNAL.md (plus docs/decisions/backfill-tags.md
++  when it exists). Run from the repo root.
++  --check  writes nothing; fails if REVIEW.md is missing or stale.
++
++Tags: each entry has a bullet `- Review: Topic <topic> · Weight <●●●|●●○|●○○> · One-liner: <at most 15 words>`.
++Entries written before tags existed can be tagged in backfill-tags.md rows `| D<n> | <topic> | <weight> | <one-liner> |`;
++an entry's own Review line wins. Topics come from the journal's `Topics:` line. Untagged entries are listed as such.
++Exit: 0 ok · 1 stale view, unknown topic or weight, or an over-long one-liner · 2 usage error or no journal.
++EOF
++}
++
++check=0
++case "${1:-}" in
++  -h | --help) usage; exit 0 ;;
++  --check) check=1 ;;
++  "") ;;
++  *) usage >&2; exit 2 ;;
++esac
++
++J=docs/decisions/DECISION_JOURNAL.md
++B=docs/decisions/backfill-tags.md
++OUT=docs/decisions/REVIEW.md
++[ -f "$J" ] || { echo "decision-views: no $J (run from the repo root)" >&2; exit 2; }
++[ -f "$B" ] || B=/dev/null
++
++tmp=$(mktemp)
++trap 'rm -f "$tmp"' EXIT
++
++awk -v bf="$B" '
++function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
++function wn(w) { return w == "●●●" ? 3 : w == "●●○" ? 2 : w == "●○○" ? 1 : 0 }
++function err(m) { print "decision-views: " m > "/dev/stderr"; bad = 1 }
++function mark(i) {
++  if (st[i] ~ /^superseded-by/) { r = st[i]; sub(/superseded-by /, "", r); return " (replaced by " r ")" }
++  if (st[i] == "rejected") return " (rejected)"
++  if (st[i] == "proposed") return " (proposed)"
++  return ""
++}
++function line(i) { return (st[i] ~ /^superseded-by/ ? "~~D" id[i] "~~" : "D" id[i]) " — " one[i] mark(i) }
++FILENAME == bf {
++  if ($0 ~ /^\| D[0-9]+ \|/) {
++    split($0, cc, "|"); k = trim(cc[2]); sub(/^D/, "", k)
++    btop[k] = trim(cc[3]); bw[k] = trim(cc[4]); bone[k] = trim(cc[5])
++  }
++  next
++}
++/^Topics:/ && !nt {
++  s = $0; sub(/^Topics:[ \t]*/, "", s); nt = split(s, tl, / · /)
++  for (t = 1; t <= nt; t++) { tl[t] = trim(tl[t]); known[tl[t]] = 1 }
++  next
++}
++/^### D[0-9]+ / {
++  n++; d = $2; sub(/^D/, "", d); id[n] = d
++  s = $0; sub(/^### D[0-9]+ /, "", s); title[n] = s; sub(/ +\[status:.*/, "", title[n])
++  sub(/.*\[status: /, "", s); sub(/\].*/, "", s); st[n] = s
++  next
++}
++n && date[n] == "" && match($0, /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/) { date[n] = substr($0, RSTART, RLENGTH) }
++n && /^- Review: / {
++  s = $0; sub(/^- Review: /, "", s); split(s, p, / · /)
++  top[n] = trim(p[1]); sub(/^Topic /, "", top[n])
++  w[n] = trim(p[2]); sub(/^Weight /, "", w[n])
++  one[n] = trim(p[3]); sub(/^One-liner: /, "", one[n])
++}
++n && match($0, /HARNESS_CHANGELOG\.md H[0-9]+/) { h[n] = substr($0, RSTART + 21, RLENGTH - 21) }
++n && match($0, /FINDINGS\.md F[0-9]+(, F[0-9]+)*/) { f[n] = substr($0, RSTART + 12, RLENGTH - 12) }
++END {
++  for (i = 1; i <= n; i++) {
++    k = id[i]
++    if (top[i] == "" && (k in btop)) { top[i] = btop[k]; w[i] = bw[k]; one[i] = bone[k] }
++    if (one[i] == "") one[i] = title[i]
++    if (top[i] == "") { top[i] = "Untagged"; continue }
++    if (!(top[i] in known)) err("D" k ": unknown topic \"" top[i] "\" (journal Topics: line)")
++    if (!wn(w[i])) err("D" k ": weight must be ●●●, ●●○ or ●○○")
++    if (split(one[i], x, / +/) > 15) err("D" k ": one-liner over 15 words")
++  }
++  if (bad) exit 1
++  print "# Project review"
++  print ""
++  print "<!-- Generated by scripts/decision-views.sh from DECISION_JOURNAL.md (and backfill-tags.md). Do not edit:"
++  print "     change the journal or the backfill table, then run the script. make check fails when this file is stale. -->"
++  print ""
++  print "Every decision grouped by topic, most important first. The chronological ledger, with every option, cost and"
++  print "quote, is [DECISION_JOURNAL.md](DECISION_JOURNAL.md)."
++  print "Weight: ●●● critical (hard to undo, or touches money, personal data or sign-in) · ●●○ important · ●○○ minor."
++  print ""
++  print "## By topic"
++  if (!n) { print ""; print "- none yet" }
++  tl[++nt] = "Untagged"
++  for (t = 1; t <= nt; t++) {
++    c = 0
++    for (i = 1; i <= n; i++) if (top[i] == tl[t]) c++
++    if (!c) continue
++    print ""; print "### " tl[t] " (" c ")"; print ""
++    for (v = 3; v >= 0; v--) for (old = 0; old <= 1; old++) for (i = 1; i <= n; i++)
++      if (top[i] == tl[t] && wn(w[i]) == v && (st[i] ~ /^superseded-by/) == old) print "- " (v ? w[i] " " : "") line(i)
++  }
++  print ""
++  print "## How the workflow improved"
++  print ""
++  print "Decisions that adopted a software-factory-kit change (H) and the finding (F) behind it, oldest first."
++  print ""
++  c = 0
++  for (i = 1; i <= n; i++) if (h[i] != "") { c++; print "- " date[i] " · D" id[i] " · " h[i] (f[i] != "" ? " · " f[i] : "") " — " one[i] mark(i) }
++  if (!c) print "- none yet"
++  print ""
++  print "## By day"
++  if (!n) { print ""; print "- none yet" }
++  for (i = n; i >= 1; i--) {
++    if (date[i] != last) { print ""; print "### " (date[i] == "" ? "undated" : date[i]); print ""; last = date[i] }
++    print "- D" id[i] " · " top[i] (wn(w[i]) ? " · " w[i] : "") " — " one[i] mark(i)
++  }
++}' "$B" "$J" >"$tmp"
++
++if [ "$check" = 1 ]; then
++  if ! cmp -s "$tmp" "$OUT"; then
++    echo "decision-views: $OUT is missing or stale; run: bash scripts/decision-views.sh" >&2
++    exit 1
++  fi
++  echo "decision-views: $OUT is current"
++else
++  cp "$tmp" "$OUT"
++  echo "decision-views: wrote $OUT"
++fi
+```

@@ -6,10 +6,10 @@
 # Commands table in AGENTS.md). Until then they fail on purpose, so an unconfigured repo can never look green.
 # Keep the target names: skills and hooks call `make check`, not the tools directly.
 
-.PHONY: check lint types test
+.PHONY: check lint types test decisions
 
-## check: lint + types + tests — the gate
-check: lint types test
+## check: lint + types + tests + decision review in sync — the gate
+check: lint types test decisions
 	@echo "make check: OK"
 
 ## lint: formatting / style, in check-only mode (never rewrite files here)
@@ -23,6 +23,10 @@ types:
 ## test: the whole test suite, including tests/acceptance/**
 test:
 	@echo "make test: not configured — edit Makefile (see the Laravel example below)" >&2; exit 1
+
+## decisions: docs/decisions/REVIEW.md matches the decision journal (works as is; no adapting needed)
+decisions:
+	bash scripts/decision-views.sh --check
 
 # --- Example: Laravel 13 / PHP 8.5 (Pint + Larastan/PHPStan + Pest or PHPUnit) -------------------------------
 # Replace the three recipes above with these (recipe lines must start with a TAB):

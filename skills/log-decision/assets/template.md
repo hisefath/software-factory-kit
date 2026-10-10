@@ -43,6 +43,7 @@
 - Choice: {{option | none}} · Why: In the context of {{C}}, facing {{F}}, we chose {{X}} over {{Y}} to get {{Z}}, accepting {{W}}.
 - Cost accepted: {{W in plain words}} · Reversibility: {{Type 1 one-way | Type 2 two-way}} — {{why, in plain words}} · Confidence: {{low | med | high}}
 - Revisit if: {{observable trigger, ideally a metric or signal | ⚠ <question>}} · Evidence: {{file:line; R<NN>/S ids}}; {{proposed as <path> D<k>; }}approval {{gate id}} {{Approvals row time}}{{; ADR: docs/decisions/NNNN-slug.md}} · Interview line: "{{one sentence ≤ 30 words: what you chose, why, what it cost}}"
+- Review: Topic {{one name from the journal's Topics: line}} · Weight {{●●● | ●●○ | ●○○}} · One-liner: {{≤ 15 words: chosen, over what, at what cost}}
 
 ## Part 2 — one-way decision record `docs/decisions/{{NNNN}}-{{slug}}.md` (MADR 4)
 
