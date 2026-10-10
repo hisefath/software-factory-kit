@@ -148,7 +148,9 @@ and turn every unknown into a question, never into a guess or a solution.
     or a ⚠ line). Ask about people, domain rules, constraints, mandated systems and assignment ambiguities; name a
     technology only if the assignment or `AGENTS.md` mandates it. Aim for 8 or fewer; drop any that unblock
     nothing. Always include one on the data that could measure the North Star candidate, and for a hiring-partner
-    project one on the partner (product, customers, stack, what they hire for). `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
+    project one on the partner (product, customers, stack, what they hire for), plus one on the market (who
+    already solves this and how many users they have, the ideal customer, market size and winnable share, where
+    customers cluster) and one on usage (when and how much customers will use it: peak hours, volume, behaviour). `gather-evidence` writes each answer to `docs/research/R<NN>-<slug>.md`.
 12. **Fill the template, then self-check** against `## Done when`. Fix and re-run the checks until all pass, then
     send the STOP message.
 
@@ -191,6 +193,8 @@ Run each check against `specs/M<N>-<slug>/brief.md` (call it `$B`); every box mu
       has a quote (uncleared source: `(paraphrase, U-##)`), a source location, a deliverable and an owner, or a
       `⚠ (→ G0)`. No local paths: `grep -nE '/Users/|/home/' "$B"` prints nothing.
 - [ ] Every deadline has a timezone and a local time produced by `date`, or `⚠ timezone? (→ G0)`.
+- [ ] Market and usage questions exist: `grep -ciE '^\| R[0-9]+ .*(ideal customer|market)' "$B"` and
+      `grep -ciE '^\| R[0-9]+ .*(usage|peak|load)' "$B"` each print 1 or more.
 - [ ] Value and metrics is filled: `awk '/^## Value and metrics/{f=1;next} /^## /{f=0} f' "$B" | grep -c '^| NS-'`
       prints 1, and every `| SM-` row there names a job (explains / guards).
 - [ ] Every job story has all three clauses and a source id (`REQ-##` / `Q#`); every `R<NN>` names the decision it unblocks.

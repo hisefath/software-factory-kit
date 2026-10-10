@@ -92,7 +92,9 @@ choice.
    loudest page, not the authoritative one. For a question about the hiring partner, Tier A is the partner's own
    material (company site, product docs, job posts, the portal page the brief cites); for a metric question, grade
    the candidate with `docs/METRICS.md` in software-factory-kit (`${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/docs/METRICS.md`) and find
-   the data that would measure it, never a target.
+   the data that would measure it, never a target. For a market or usage question (existing solutions, ideal
+   customer, market size, share, clusters, peak usage and load), also load `references/market-research.md`: sizes
+   and loads are inferences with a formula, assumptions and a low-base-high range, never findings.
 4. **Interview (interactive only).** Ask one question at a time, each with your recommended answer, at most 4, and
    skip any the repo already answers:
    1. "Which research questions this pass?" Recommend: every unanswered one, load-bearing first. Say what that
@@ -199,6 +201,8 @@ Run each command against every R file written this pass (`<file>`). Each must pr
       `sed -n '/^## Handoffs/,$p' <file> | grep '^- ' | grep -vE '^- (none|(write-prd|design-hld): .+\?)'`
 - [ ] Every `[LB]` finding cites 1 `(A)` or 2 `(B)` from different publishers. Eyeball each line that
       `grep '\[LB\]' <file> | grep -v '(A)'` prints.
+- [ ] Every market-size, share or load inference shows its working:
+      `grep -E '^- \*\*I[0-9]+\*\*' <file> | grep -iE 'TAM|SAM|SOM|market size|share|per second|concurrent|peak' | grep -vE 'Formula:.*Assumptions:.*Range:'`
 - [ ] Frontmatter `budget` shows used ≤ cap; `status` and `confidence` follow step 9's rules; `answered_when` is
       filled.
 - [ ] No secrets, credentials or PHI in anything you wrote.

@@ -23,6 +23,10 @@ Five layers the factory is designed around:
 **Metrics and the partner lens (layer 1, F3).** Every product names one North Star and 2-3 supporting metrics,
 each tested vanity vs actionable and leading vs lagging, with grounded targets (`docs/METRICS.md`). `sharpen-brief`
 writes candidates and the hiring-partner lens, `gather-evidence` sources them, `write-prd` locks the tree at G1.
+Targets and sizing need a market: every brief asks who already solves the problem, who the ideal customer is, how
+big the market and winnable share are, where customers cluster, and when and how hard they will use the product;
+`gather-evidence` answers with `references/market-research.md` (F4), and `design-hld` sizes the system from that
+load profile.
 
 Planning follows the Double Diamond (Design Council, 2003-04): Diamond 1 = Discover (brief, evidence) + Define
 (PRD); Diamond 2 = Develop (UX, HLD, LLD) + Deliver (acceptance, tasks, build, ship). Spec-driven development maps
