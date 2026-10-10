@@ -17,6 +17,7 @@ usage: scripts/scope-guard.sh <task-file> [BASE_REF [HEAD_REF]]
 
 Owns: line(s) in the task file hold comma/space separated globs. `*` matches across `/` (shell case
 pattern), so `app/Services/**` and `app/Services/*` both cover every file below app/Services/.
+`[` is literal, so route folders like `server/api/orders/[orderId]/**` work (no character classes).
 A rename counts as delete + add, so both paths must be owned.
 
 Exit: 0 every changed path is owned · 1 a path is out of scope · 2 usage error, unknown ref, or no Owns:
@@ -62,8 +63,9 @@ while IFS= read -r f; do
   [ -n "$f" ] || continue
   n=$((n + 1)) ok=0
   for p in $owns; do
-    # shellcheck disable=SC2254 # $p is deliberately a pattern
-    case $f in $p) ok=1; break ;; esac
+    q=${p//\[/\\[} # a literal [ (Nuxt/Next route folders), never a character class
+    # shellcheck disable=SC2254 # $q is deliberately a pattern
+    case $f in $q) ok=1; break ;; esac
   done
   [ "$ok" = 1 ] || { echo "scope-guard: out of scope: $f" >&2; bad=1; }
 done <<EOF

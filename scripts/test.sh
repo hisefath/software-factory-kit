@@ -219,6 +219,11 @@ rc 1 "scope-guard staged: unowned path fails" bash scripts/scope-guard.sh "$T1"
 has "scope-guard staged: names the offending path" "$out" "out of scope: other.txt"
 git reset -q -- other.txt && rm other.txt
 rc 2 "scope-guard: task file without Owns: fails closed" bash scripts/scope-guard.sh specs/M1-demo/tasks/T003.md
+TB=specs/M1-demo/tasks/T090.md
+printf 'Owns: src/a.txt, src/[id]/**\n' >"$TB"
+mkdir -p 'src/[id]' && echo z >'src/[id]/b.txt' && git add 'src/[id]/b.txt'
+rc 0 "scope-guard: a [ in Owns is literal (route folders)" bash scripts/scope-guard.sh "$TB"
+git reset -q -- 'src/[id]/b.txt' && rm -r 'src/[id]' "$TB"
 git commit -qm "a"
 rc 0 "scope-guard branch mode: owned commit passes" bash scripts/scope-guard.sh "$T1" milestone/m1-demo
 rc 0 "scope-guard branch mode: absolute task path works" bash scripts/scope-guard.sh "$repo/$T1" milestone/m1-demo
