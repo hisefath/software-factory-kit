@@ -145,7 +145,10 @@ fresh pasted command output; anything that needs a decision goes to a human, nev
    Writing the test first proves it can fail, so its later green means something.
 8. **Green.** Write the smallest code inside `Owns:` that makes the unit tests pass, ported from the map in step 6.
    Re-run the unit tests, then the Done-when. Refactor only while green and only inside `Owns:`. Never weaken an
-   assertion, add a skip, or special-case a test's input to get green.
+   assertion, add a skip, or special-case a test's input to get green. Then break each guarded line once (flip a
+   comparison, drop a WHERE clause, change the hashed string) and paste the red run before restoring it. A test
+   that stays green is checking a fake or itself: test against the real dependency instead (the test database
+   for SQL and locks, the built output for generated config), or name the gap as a question.
 9. **Count corrections.** An attempt to fix a failing check is a correction. If the same error (same test, same
    message) survives 2 corrections, stop: `human_review`, reason "stuck: <error> after 2 corrections", the exact
    output pasted and one question. A different error starts a new count. A third guess usually digs deeper into a
