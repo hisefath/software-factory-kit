@@ -63,8 +63,10 @@ Dispatch only a job that is **one skill**, **isolated** (disjoint `Owns:`, needs
 **parallelizable**. Every dispatch needs a contract file with `Owns:` and a runnable Done-when: a task file from
 `slice-tasks`, or for other jobs (diagrams, demo script) a job file you write at `.handoff/runs/<id>/task.md` in the
 same format. Commit the inputs it reads first (workers see the branch, not your working tree).
-- Claude subagent (default): Agent tool, `isolation: worktree` for code; prompt = "Read <abs path>/SKILL.md and
-  follow it for <task file>. HANDOFF_DIR=<abs>/.handoff". Pass paths, never summaries.
+- Claude subagent (default): for code, first `git worktree add .claude/worktrees/<id> -b <task branch>
+  <milestone branch>` (the Agent tool's `isolation: worktree` starts from the default branch, not the milestone);
+  prompt = "Read <abs path>/SKILL.md and follow it for <task file> in <worktree>. HANDOFF_DIR=<abs>/.handoff".
+  Pass paths, never summaries.
 - Other harness: `bash scripts/delegate.sh <task-file>`.
 - Log `DISPATCH <id> harness=<h> why=<one line>` for every job. Never show the verifier a worker's self-report.
 
