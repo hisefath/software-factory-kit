@@ -196,6 +196,9 @@ Each command must print nothing.
       `grep -q '^openapi: 3\.1\.' "$O" || echo "not 3.1"; grep -q 'application/problem+json' "$O" || echo "no problem+json"`
 - [ ] Every problem type used is in the registry:
       `comm -23 <(grep -oE '/problems/[a-z0-9-]+' "$L" | sort -u) <(sed -n '/^### Problem types/,/^### Idempotency/p' "$L" | grep -oE '^\| `/problems/[a-z0-9-]+' | grep -oE '/problems/[a-z0-9-]+' | sort -u)`
+- [ ] Every decision whose recommendation names a version cites the registry check you ran this session (model
+      memory lags the current major), e.g. `npm view <pkg> dist-tags` and its date, in that decision's block:
+      `awk '/^### D[0-9]+ /{if(v&&!r)print d;d=$0;v=r=0;next} /^## /{if(v&&!r)print d;d="";v=r=0} d&&/^- \*\*Recommendation:\*\*.*[0-9]/{v=1} d&&/(registry|npm view|pip index|go list -m|cargo search|composer show)/{r=1} END{if(v&&!r)print d}' "$L"`
 - [ ] Every diagram job has exactly one placeholder:
       ``diff <(grep -oE '<!-- diagram: [a-z0-9-]+ -->' "$L" | awk '{print $3}' | sort) <(sed -n '/^## 10\./,/^## Decisions/p' "$L" | grep -oE '`draw-diagrams [a-z0-9-]+`' | tr -d '`' | awk '{print $2}' | sort)``
 - [ ] §10 is complete:

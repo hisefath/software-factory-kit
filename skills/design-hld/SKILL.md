@@ -140,6 +140,9 @@ Run from the project root, with `H=docs/architecture/hld.md`, `J=docs/decisions/
 
 - [ ] Headings match the template, in order: `diff <(grep '^## ' "$S/assets/template.md") <(grep '^## ' $H)`
       prints nothing.
+- [ ] Every decision whose recommendation names a version cites the registry check you ran this session (model
+      memory lags the current major), e.g. `npm view <pkg> dist-tags` and its date, in that decision's block:
+      `awk '/^### D[0-9]+ /{if(v&&!r)print d;d=$0;v=r=0;next} /^## /{if(v&&!r)print d;d="";v=r=0} d&&/^- \*\*Recommendation:\*\*.*[0-9]/{v=1} d&&/(registry|npm view|pip index|go list -m|cargo search|composer show)/{r=1} END{if(v&&!r)print d}' $H` prints nothing.
 - [ ] Filled, with no guide residue: `grep -nE '\{\{|<!-- guide:' $H` prints nothing, and
       ``awk '/^```mermaid/{f=1} /^```$/{f=0;next} !f' $H | grep -E -- '-->' | grep -vxE '<!-- (diagram: [a-z-]+|/diagram) -->'``
       prints nothing.
