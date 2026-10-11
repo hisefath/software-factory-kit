@@ -9,9 +9,11 @@
 #        task branch m<N>/t###-<slug>        -> specs/M<N>-*/tasks/T###.md
 #        job branch  m<N>/<letters><nn>-<slug> (e.g. m0/d01-…, a supervisor job such as draw-diagrams)
 #                                            -> .handoff/runs/M<N>-<LETTERS><nn>/task.md (scripts/delegate.sh)
+#   4. no pushed commit changes tests/acceptance/** together with product code (QA-owned: the test lands first,
+#      in its own commit, so a fix can never write the test that grades it)
 #
 # Why local and not only CI: origin pushes to GitLab AND the GitHub mirror at once, before any CI runs.
-# All three checks run even after one fails, so you see every problem at once.
+# All four checks run even after one fails, so you see every problem at once.
 # Bypass: `git push --no-verify` is a human-only action — record the yes in .handoff/TRACKER.md first.
 # Run by hand (no stdin): checks the current branch.
 set -euo pipefail
@@ -20,6 +22,9 @@ set -f # branch names and refs are data, never globs
 remote=${1:-origin}
 top=$(git rev-parse --show-toplevel)
 cd "$top"
+# git sets GIT_DIR (and friends) for hooks; inside a worktree that makes `git -C <dir> rev-parse --show-toplevel`
+# answer the current directory, so scripts resolve doubled paths. Run make check like a person would.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
 fail=0
 pushes=() # "<branch> <local sha> <remote sha>"
 
@@ -104,6 +109,23 @@ for p in ${pushes[@]+"${pushes[@]}"}; do
   fi
   echo "pre-push: scope-guard $task $base ($1)"
   scripts/scope-guard.sh "$task" "$base" "$2" || fail=1
+done
+
+# ---- 4. acceptance tests never ride with product code ----------------------------------------------------
+# Allowed beside tests/acceptance/**: other tests, specs, docs, .handoff, MILESTONES.md and the Makefile target
+# that runs the suite. Merge commits are skipped (their parents were checked when they were pushed).
+for p in ${pushes[@]+"${pushes[@]}"}; do
+  set -- $p
+  if [ "${3//0/}" != "" ] && git cat-file -e "$3^{commit}" 2>/dev/null; then range="$3..$2"; else range="$2 --not --remotes=$remote"; fi
+  for c in $(git rev-list --no-merges $range); do
+    files=$(git diff-tree --no-commit-id --name-only -r "$c")
+    printf '%s\n' "$files" | grep -q '^tests/acceptance/' || continue
+    other=$(printf '%s\n' "$files" | grep -vE '^(tests/|specs/|docs/|\.handoff/|MILESTONES\.md$|Makefile$)' || true)
+    [ -z "$other" ] || {
+      echo "pre-push: BLOCKED — $(git log -1 --format='%h %s' "$c") changes tests/acceptance/** with $(echo $other) (commit the acceptance test on its own, first)" >&2
+      fail=1
+    }
+  done
 done
 
 [ "$fail" = 0 ] || { echo "pre-push: push blocked — fix the above (or a human records a yes and uses --no-verify)" >&2; exit 1; }

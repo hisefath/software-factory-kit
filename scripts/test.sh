@@ -381,7 +381,17 @@ git checkout -q -b feature/red milestone/m1-demo
 printf 'check:\n\t@echo check-red; exit 1\n' >Makefile && git add Makefile && git commit -qm "red"
 rc 1 "pre-push: failing make check blocks the push" git push -q origin feature/red
 has "pre-push: says make check failed" "$out" "make check failed"
+git checkout -q -b feature/mixed milestone/m1-demo
+mkdir -p tests/acceptance src && echo t >tests/acceptance/x.test && echo c >src/fix.txt
+git add tests/acceptance/x.test src/fix.txt && git commit -qm "fix: code and its acceptance test together"
+rc 1 "pre-push: an acceptance test committed with product code is blocked" git push -q origin feature/mixed
+has "pre-push: names the mixed commit" "$out" "changes tests/acceptance/** with src/fix.txt"
 git checkout -q milestone/m1-demo
+git worktree add -q "$tmp/wt-gitdir" -b feature/gitdir milestone/m1-demo
+printf 'check:\n\t@mkdir -p sub && test "$$(git -C sub rev-parse --show-toplevel)" = "$$(pwd -P)" && echo top-ok\n' >"$tmp/wt-gitdir/Makefile"
+git -C "$tmp/wt-gitdir" commit -qam "check: run git from a subdirectory"
+rc 0 "pre-push: make check in a linked worktree sees that worktree (GIT_DIR unset)" git -C "$tmp/wt-gitdir" push -q origin feature/gitdir
+has "pre-push: worktree make check ran" "$out" "top-ok"
 is "pre-push tests left the supervisor's TRACKER Log intact" "$(grep -c ' DISPATCH M1-T00' "$tracker")" 9
 
 # ---- 6. install.sh (dry run only, fake HOME) -------------------------------------------------------------
