@@ -14,7 +14,7 @@ Five layers the factory is designed around:
 
 | Layer | Question | Where it lives |
 |---|---|---|
-| 1 Product intent | What problem, what does success mean? | `sharpen-brief`, `gather-evidence`, `write-prd`, `clarify-spec` |
+| 1 Product intent | What problem, what does success mean? | `decode-prompt`, `sharpen-brief`, `gather-evidence`, `write-prd`, `clarify-spec` |
 | 2 System design | Architecture, interfaces, invariants | `design-hld`, `design-lld`, `draw-diagrams`, `map-ux-flows` |
 | 3 Agent orchestration | Which agent, which tools/context/permissions | supervisor (CLAUDE.md), `slice-tasks`, `scripts/delegate.sh` |
 | 4 Verification | What evidence proves it's correct | `define-acceptance`, `scope-guard.sh`, `make check`, `verifier`, `check-security` |
@@ -66,7 +66,7 @@ Validate = `define-acceptance` + verifier + `report-milestone`.
 |---|---|---|
 | **Fix** | Diff fits in one sentence, ≤2 files, has a repro, touches no API / data model / dependency / auth / payment / migration | `fix-bug` → verifier → G5 |
 | **Standard** | One milestone of a product whose PRD already exists | (`clarify-spec`) → `design-lld` delta → `draw-diagrams` → G3 → `define-acceptance` → `slice-tasks` → G4 → build → G5 |
-| **Full** | New product, graded project, or capstone | Everything from `sharpen-brief` |
+| **Full** | New product, graded project, or capstone | Everything from `decode-prompt` |
 
 Auth, payments, migrations and public contracts are never Fix. A task may move up a track mid-flight, never down.
 Brownfield (inherited code) adds `audit-codebase` before `write-prd`, and `design-lld` writes a change plan.
@@ -78,6 +78,7 @@ Paths are relative to the project repo. `M<N>` = milestone number, `T###` = task
 | # | Skill | Single responsibility | Output (only these paths) | Must not | Gate / question |
 |---|---|---|---|---|---|
 | 0 | `scripts/init-repo.sh` | Scaffold the constitution | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.claude/agents/verifier.md`, `.handoff/TRACKER.md`, `.handoff/{inbox,runs,reviews}/.gitkeep`, `MILESTONES.md`, `docs/README.md`, `docs/decisions/DECISION_JOURNAL.md`, `specs/_templates/task.md`, `specs/_templates/result.md`, `.githooks/pre-push` (+ `git config core.hooksPath .githooks`), `.gitlab/merge_request_templates/Default.md`, `scripts/scope-guard.sh`, `scripts/delegate.sh`, `scripts/embed-diagrams.sh`, `Makefile` (from `Makefile.example`; written as `Makefile.example` when a `Makefile` without `check:` exists), `.gitignore` lines (`.handoff/runs/*/events.jsonl`, `.handoff/runs/*/stderr.log`, `docs/demo/raw/`) | Overwrite an existing file | **G-init** "Are these the rules every agent here must obey?" |
+| 0.5 | `decode-prompt` | Find the question behind the question and the traps a one-shot build would fall into | `specs/M<N>-<slug>/decode.md` | Design a solution, write the brief, state a hypothesis as fact | **G-decode** "Is this the question behind the question, and do I accept these trap guards?" |
 | 1 | `sharpen-brief` | Turn the ask into a brief; plan *with* the human | `specs/M<N>-<slug>/brief.md` | Propose solutions/stack (park them), write requirements, guess | **G0** (Full only) "Right problem, appetite, track?" |
 | 2 | `gather-evidence` | Answer the brief's research questions with cited evidence | `docs/research/R<NN>-<slug>.md`, `docs/research/sources.md` | Recommend product/architecture, cite unread sources | none (feeds G1) |
 | 2b | `audit-codebase` | Brownfield: what risk do we inherit? | `docs/audit/AUDIT.md` | Modify code, run the target's toolchain on the host | **G-audit** "Which findings constrain the build, which do I accept?" |

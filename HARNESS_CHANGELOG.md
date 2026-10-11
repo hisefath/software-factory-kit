@@ -6,6 +6,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 |---|---|---|---|---|
 | 2026-10-08 | 0.1 | Initial factory: WORKFLOW.md, skill standard, 22 skills, verifier, templates, scripts | — | "we are putting together the full ai native workflow today" |
 | 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
+| 2026-10-11 | 0.1 | H19: Add `decode-prompt` (phase 0.5, gate G-decode) before sharpen-brief (skills/decode-prompt, skills/sharpen-brief, docs/WORKFLOW.md, templates/CLAUDE.md, README.md) | F28 | "build a skill for this, and this should be before the sharpen brief stage" |
 | 2026-10-09 | 0.1 | H3: Add market, competitor and load-profile research (docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence) | F4 | "approve, then /gather-evidence" |
 
 ## Proposals

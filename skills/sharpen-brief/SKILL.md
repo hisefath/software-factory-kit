@@ -45,6 +45,9 @@ Read these first, in this order. If a MUST is missing, stop and name it. Never g
    the brief quote <source> word for word, and may a copy be committed? ⚠ confidential? (→ G0)". Until the human
    says yes, everything taken from it is a short paraphrase plus its page/section, written
    `(paraphrase, U-##) <text>`, never a verbatim quote (partner documents may be confidential; the repo is public).
+1b. **`specs/M<N>-<slug>/decode.md` (MUST on the Full track).** The approved question behind the question and
+   trap guards from `decode-prompt` (G-decode). Build the brief's framing on its recommended QB and carry every
+   accepted guard into the brief. Missing on Full → stop: "Run `/decode-prompt` first (gate G-decode)."
 2. **`AGENTS.md` (MUST).** The constitution: commands, stack and constraints already decided. Missing → stop:
    "Run `scripts/init-repo.sh` first (gate G-init)."
 3. `.handoff/TRACKER.md`: `## Resume` and `## Tasks`, for what the supervisor routed and the track it announced.

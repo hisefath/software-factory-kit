@@ -27,6 +27,7 @@ one command the human should type next.
 ## Phase routing
 | Phase | Human types | Then you | Output that must exist | Gate |
 |---|---|---|---|---|
+| Decode | `/decode-prompt` | — | `specs/M<N>-<slug>/decode.md` | G-decode |
 | Brief | `/sharpen-brief` | — | `specs/M<N>-<slug>/brief.md` | G0 (Full) |
 | Evidence | `/gather-evidence` | may dispatch per question | `docs/research/R<NN>-*.md` | — |
 | Audit (brownfield) | `/audit-codebase` | — | `docs/audit/AUDIT.md` | G-audit |

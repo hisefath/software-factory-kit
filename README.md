@@ -21,7 +21,7 @@ bash scripts/init-repo.sh ../my-project   # scaffold AGENTS.md, CLAUDE.md, .hand
 ## Phases at a glance
 
 ```
-/sharpen-brief → /gather-evidence → /write-prd ─G1─ /design-hld ─(draw-diagrams ∥)─G2─ /design-lld ─(draw-diagrams ∥)─G3─
+/decode-prompt ─G-decode─ /sharpen-brief → /gather-evidence → /write-prd ─G1─ /design-hld ─(draw-diagrams ∥)─G2─ /design-lld ─(draw-diagrams ∥)─G3─
 /define-acceptance → /slice-tasks ─G4─ implement-task ∥ (worktrees, any harness) → verifier ∥ /check-security →
 /report-milestone ─G5 merge─ /ship-milestone ─G-live─ /garden-docs · /route-failure · /quiz-me · /write-demo-script → /record-demo
 ```
