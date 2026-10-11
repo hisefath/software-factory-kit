@@ -541,7 +541,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +  ask `design-hld` how to size for the load profile; never pick the segment, the stack or the machines yourself.
 ```
 
-### H4 Read a bracket in Owns literally  [status: proposed]
+### H4 Read a bracket in Owns literally  [status: adopted]
 
 - F#: F5 · Layer: Policy (hard) · Reach: factory script
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -593,7 +593,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  rc 0 "scope-guard branch mode: absolute task path works" bash scripts/scope-guard.sh "$repo/$T1" milestone/m1-demo
 ```
 
-### H5 Commit per decision, MR per milestone, TL;DR  [status: proposed]
+### H5 Commit per decision, MR per milestone, TL;DR  [status: adopted]
 
 - F#: F6 · Layer: Skill · Reach: WORKFLOW.md + factory template
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -669,7 +669,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  - Milestone: **M<N>** — <one-sentence goal> · branch `milestone/m<N>-<slug>` · report `docs/milestones/M<N>.md`
 ```
 
-### H7 Apply, test, commit and push kit changes  [status: proposed]
+### H7 Apply, test, commit and push kit changes  [status: adopted]
 
 - F#: F7 · Layer: Script · Reach: factory script + factory skill
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -777,7 +777,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  ```
 ```
 
-### H8 Done-when only this task can pass; full Owns  [status: proposed]
+### H8 Done-when only this task can pass; full Owns  [status: adopted]
 
 - F#: F8 and F9 · Layer: Skill · Reach: factory skill
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -817,7 +817,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
       DELEGATE_CLAUDE_ALLOWED_TOOLS with the runner (supervisor's call)."
 ```
 
-### H9 Cite a registry check for every version  [status: proposed]
+### H9 Cite a registry check for every version  [status: adopted]
 
 - F#: F10 · Layer: Skill · Reach: factory skill
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -857,7 +857,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  - [ ] §10 is complete:
 ```
 
-### H10 Prove each test fails on broken code  [status: proposed]
+### H10 Prove each test fails on broken code  [status: adopted]
 
 - F#: F11 · Layer: Skill · Reach: factory skill
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -887,7 +887,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
     output pasted and one question. A different error starts a new count. A third guess usually digs deeper into a
 ```
 
-### H11 Start worker worktrees from the milestone branch  [status: proposed]
+### H11 Start worker worktrees from the milestone branch  [status: adopted]
 
 - F#: F12 · Layer: Environment · Reach: factory template (project already does it)
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -918,7 +918,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  
 ```
 
-### H12 Let log-decision create a missing journal  [status: proposed]
+### H12 Let log-decision create a missing journal  [status: adopted]
 
 - F#: F13 · Layer: Skill · Reach: factory skill
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -945,7 +945,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  | Proposer harness and model | the artifact's `Written by` row, else the `DISPATCH` line in `.handoff/TRACKER.md ## Log` | `⚠ not recorded` |
 ```
 
-### H13 Generate a weighted project review of decisions  [status: proposed]
+### H13 Generate a weighted project review of decisions  [status: adopted]
 
 - F#: F25 · Layer: Script · Reach: factory script + WORKFLOW.md + factory skills + templates
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -1607,7 +1607,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +fi
 ```
 
-### H15 Look up proposal fields without a SIGPIPE  [status: proposed]
+### H15 Look up proposal fields without a SIGPIPE  [status: adopted]
 
 - F#: F26 · Layer: Script · Reach: factory script
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -1761,7 +1761,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  
 ```
 
-### H18 Check CI every push on the shell runner; link every deploy  [status: proposed]
+### H18 Check CI every push on the shell runner; link every deploy  [status: adopted]
 
 - F#: F27 · Layer: Verification/hooks · Reach: WORKFLOW.md + factory template + factory skill · Supersedes: H16
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
