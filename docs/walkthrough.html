@@ -78,10 +78,10 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
   <p class="lede">A software factory where I set intent and approve decisions, agents do the investigating, planning, building and testing, and scripts check the work continuously. Each phase is a single-purpose skill with one declared output. The phase stops when its output is written, and I'm the one who starts the next phase.</p>
   <div class="thesis"><span class="pill h">Human approval gates catch wrong</span><span class="pill m">Automated quality gates catch broken</span></div>
   <div class="stats">
-    <div><strong>22</strong><span>phase skills, verb-object names</span></div>
-    <div><strong>6</strong><span>core human gates (G0–G5) + 5 situational</span></div>
+    <div><strong>23</strong><span>phase skills, verb-object names</span></div>
+    <div><strong>6</strong><span>core human gates (G0–G5) + 6 situational</span></div>
     <div><strong>1</strong><span>read-only verifier subagent</span></div>
-    <div><strong>119</strong><span>passing self-tests for the scripts</span></div>
+    <div><strong>131</strong><span>passing self-tests for the scripts</span></div>
   </div>
 </section>
 
@@ -90,7 +90,8 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
   <p>Diamond 1 decides <em>what</em> to build: discover, then define. Diamond 2 decides <em>how</em>: develop, then deliver. Spec-driven development fits on top of the diamonds: <code>AGENTS.md</code> plays the role of the constitution, followed by specify, clarify, plan, tasks, implement and validate. <span class="src">from Double Diamond</span><span class="src">from spec-kit</span></p>
 <pre class="mermaid">
 flowchart LR
-  A([Your ask]) --> B[sharpen-brief]
+  A([Your ask]) --> A2[decode-prompt]
+  A2 -->|G-decode| B[sharpen-brief]
   B -->|G0| C[gather-evidence]
   C --> D[write-prd]
   D -->|G1 · hard stop| E[design-hld]
@@ -154,6 +155,7 @@ flowchart LR
   <p>Each skill writes only its declared paths, then stops with the gate question and the one next command. <span class="gate">Gn</span> marks a human approval gate; <span class="auto">auto</span> marks an automated quality gate.</p>
   <div class="tbl"><table>
     <tr><th>Skill</th><th>Writes</th><th>Never</th><th>Gate</th></tr>
+    <tr><td><code>decode-prompt</code></td><td><code>specs/M&lt;N&gt;-*/decode.md</code>: the question behind the question + traps with guards</td><td>design a solution</td><td><span class="gate">G-decode</span></td></tr>
     <tr><td><code>sharpen-brief</code></td><td><code>specs/M&lt;N&gt;-*/brief.md</code></td><td>propose solutions</td><td><span class="gate">G0</span></td></tr>
     <tr><td><code>gather-evidence</code></td><td><code>docs/research/R&lt;NN&gt;-*.md</code>, <code>sources.md</code></td><td>cite an unread source</td><td>—</td></tr>
     <tr><td><code>audit-codebase</code></td><td><code>docs/audit/AUDIT.md</code></td><td>modify code</td><td><span class="gate">G-audit</span></td></tr>
@@ -214,6 +216,7 @@ flowchart LR
     <li><strong>Scaffold a project.</strong> Then fill in the Commands table in <code>AGENTS.md</code> and copy <code>Makefile.example</code> to a real <code>make check</code>.
       <div class="cmd"><code>bash ~/Desktop/gauntlet_workbench/software-factory-kit/scripts/init-repo.sh ~/Desktop/gauntlet_workbench/my-project</code><button type="button" data-copy>Copy</button></div></li>
     <li><strong>Open Claude Code in the repo.</strong> The SessionStart hook prints the Resume block. Describe what you want in plain words; the supervisor picks a track, adds a tracker row and tells you the next command.</li>
+    <li><strong>Decode the prompt first.</strong> Type <code>/decode-prompt</code>. It finds what the project is really testing (the question behind the question) and the traps a one-shot build would fall into, with a guard for each, then stops at G-decode.</li>
     <li><strong>Plan, one phase at a time.</strong> Type <code>/sharpen-brief</code>. It asks one question at a time, each with a recommended answer, then stops at G0. Answer Approve / Revise / Stop, and the supervisor records your words and runs <code>log-decision</code>. Do the same with <code>/write-prd</code> (G1), <code>/design-hld</code> (G2) and <code>/design-lld</code> (G3).</li>
     <li><strong>Let diagrams fan out.</strong> After each design draft, the supervisor commits it, dispatches one <code>draw-diagrams</code> job per diagram type, then embeds the results:
       <div class="cmd"><code>bash scripts/embed-diagrams.sh docs/architecture/lld.md</code><button type="button" data-copy>Copy</button></div></li>
@@ -276,7 +279,7 @@ flowchart LR
 <section id="status">
   <h2>Status and next</h2>
   <ul class="status">
-    <li><strong>Done:</strong> the spec, 22 skills (each reviewed adversarially and revised; the 5 riskiest were also test-run on a Cerbo fixture), the verifier, templates, scripts (119/119 tests), and skills installed for Claude, Codex, Cursor and Chops.</li>
+    <li><strong>Done:</strong> the spec, 23 skills (the original 22 reviewed adversarially and revised, the 5 riskiest test-run on a Cerbo fixture; <code>decode-prompt</code> added 2026-10-11 from finding F28), the verifier, templates, scripts (131/131 tests), and skills installed for Claude, Codex, Cursor and Chops.</li>
     <li><strong>Not yet proven:</strong> no skill has run end to end on a real project. Cerbo v2 is the first real run: same repo, a new branch with the old code removed, M1 research first.</li>
     <li><strong>Missing tools</strong> (your install call): <code>mmdc</code>, so diagrams are marked unverified for now; <code>gitleaks</code>; the Cursor and Antigravity CLIs.</li>
     <li><strong>v1:</strong> 3 evals for the supervisor (doesn't code inline, waits for a yes, records the yes word for word); package software-factory-kit as a plugin once a second repo uses it unchanged; push to GitLab + GitHub; a website page.</li>
