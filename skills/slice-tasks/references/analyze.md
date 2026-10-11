@@ -11,7 +11,8 @@ It exits 0 and prints `RESULT: PASS` only when every check holds. Paste its plan
 `Analyze:` line verbatim into the STOP message; never retype or round them.
 
 **Scope** = the FR/AE ids in the PRD `## Milestone cut` row for `M<N>` (its Scope and Proves cells) plus the ids in
-the Covers column of `acceptance.md ## Traceability`. Nothing else in `acceptance.md` counts: its
+the Covers column of `acceptance.md ## Traceability`, plus the NFR ids in that row's Proves cell (a restyle or
+hardening milestone proves NFRs and may have no AE). Milestone ids may be dotted (`M5.1`). Nothing else in `acceptance.md` counts: its
 `Out of scope this milestone:` line names later milestones' FRs.
 
 ## What it checks
@@ -24,7 +25,7 @@ the Covers column of `acceptance.md ## Traceability`. Nothing else in `acceptanc
 | Coverage | an in-scope FR/AE is covered by no task |
 | Owns | not exactly one `Owns:` line before `## Ask`; an empty entry or one containing a space; any glob that matches `tests/acceptance/**`, `specs/**`, `docs/**`, `.handoff/**`, `.claude/**`, `.githooks/**`, `AGENTS.md`, `CLAUDE.md`, `MILESTONES.md` or `scripts/scope-guard.sh`; any entry that is or covers a dependency manifest or lockfile (implementers never install) |
 | Parallel | two `parallel: true` tasks own overlapping globs (conservative: literal prefixes nest) |
-| Order | an `after:` id has no task file; a cycle; more than one task in wave 1, or wave 1 is not `T001`; `T001` covers no AE |
+| Order | an `after:` id has no task file; a cycle; more than one task in wave 1, or wave 1 is not `T001`; `T001` covers no AE while the scope has one |
 | Harness | a `codex` task with `hitl: true` or `parallel: false` |
 | Sections | `## ` headings are not exactly Ask, Done-when, Must not change, Consumes / Produces, Context manifest, Return; the first line under `## Ask` is not a title of at most 6 words (delegate.sh and implement-task turn it into the branch name); Done-when lacks `make check`; Return lacks `runs/<id>/result.md`; a `- Consumes:` line names a task id missing from `after:` |
 | Leftovers | `{{` or `<!-- guide:` remains; a fenced code block other than `sh`/`bash` (no code in task files) |
@@ -42,7 +43,7 @@ Glob semantics match `scripts/scope-guard.sh`: shell `case` patterns, where `*` 
 set -u
 D=${1:?usage: sh -s -- specs/M<N>-<slug> [prd path]}; D=${D%/}; P=${2:-docs/product/prd.md}
 T=$D/tasks; A=$D/acceptance.md
-N=$(basename "$D" | sed -n 's/^M\([0-9][0-9]*\)-.*/\1/p')
+N=$(basename "$D" | sed -n 's/^M\([0-9][0-9.]*\)-.*/\1/p')
 [ -n "$N" ] || { echo "FAIL: $D is not specs/M<N>-<slug>"; exit 2; }
 fail=0; bad() { echo "FAIL: $*"; fail=1; }
 idsof() { grep -oE '(^|[^N])(FR|AE)-[0-9]{3}' | grep -oE '(FR|AE)-[0-9]{3}' | sort -u; }
@@ -66,7 +67,8 @@ DEPS="composer.json composer.lock package.json package-lock.json npm-shrinkwrap.
 files=$(ls "$T"/T[0-9][0-9][0-9].md 2>/dev/null)
 [ -n "$files" ] || { echo "FAIL: no task files in $T"; exit 1; }
 set -f
-scope=$( { grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $4; print $5}'; trace | awk -F'|' '{print $3}'; } | idsof)
+scope=$( { grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $4; print $5}'; trace | awk -F'|' '{print $3}'; } | idsof
+  grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $5}' | grep -oE 'NFR-[0-9]{3}' | sort -u)
 [ -n "$scope" ] || bad "no FR/AE ids for M$N in the Milestone cut row of $P or the Traceability Covers of $A"
 k=0; pc=0; cc=0; xc=0; hc=0; bm=0; ec=0; ua=0; ao=0; ov=0; bl=0
 all=""; edges=""; cov=""; par=""
@@ -95,7 +97,7 @@ $c $t"
     else bad "$t: covers $c, not in M$N scope"; fi
   done
   [ -z "$covers" ] || [ "$n_in" -gt 0 ] || { bad "$t: covers no in-scope FR/AE"; ec=$((ec+1)); }
-  after=$(fm "$f" after | lst | sed 's/^M[0-9]*-//')
+  after=$(fm "$f" after | lst | sed 's/^M[0-9.]*-//')
   for a in $after; do case " $all " in *" $a "*) ;; *) bad "$t: after $a has no task file"; ua=$((ua+1));; esac; done
   edges="$edges
 $t $(printf '%s ' $after)"
@@ -123,7 +125,7 @@ $t $p"
     *) [ "$tw" -le 6 ] || bad "$t: Ask title has $tw words, at most 6 (it becomes the branch name)";; esac
   sec "$f" Done-when | grep -q 'make check' || bad "$t: Done-when must end with make check"
   sec "$f" Return | grep -q "runs/$id/result.md" || bad "$t: Return must name \$HANDOFF_DIR/runs/$id/result.md"
-  for u in $(sec "$f" 'Consumes / Produces' | grep -E '^- Consumes' | grep -oE 'M[0-9]+-T[0-9]{3}' | sed 's/^M[0-9]*-//'); do
+  for u in $(sec "$f" 'Consumes / Produces' | grep -E '^- Consumes' | grep -oE 'M[0-9.]+-T[0-9]{3}' | sed 's/^M[0-9.]*-//'); do
     printf '%s\n' "$after" | grep -qx "$u" || bad "$t: consumes from $u but after: lacks it"
   done
   grep -nE '\{\{|<!-- guide:' "$f" >/dev/null && bad "$t: unfilled {{placeholder}} or guide comment"
@@ -142,7 +144,7 @@ END { left=n
 cy=$(printf '%s\n' "$waves" | grep -c ' CYCLE$'); [ "$cy" = 0 ] || bad "after: cycle or unknown dep: $(printf '%s\n' "$waves" | grep ' CYCLE$' | cut -d' ' -f1 | tr '\n' ' ')"
 w1=$(printf '%s\n' "$waves" | awk '$2==1{print $1}' | tr '\n' ' ')
 [ "$w1" = "T001 " ] || bad "wave 1 must be the tracer bullet T001 alone (got: $w1)"
-[ -f "$T/T001.md" ] && { fm "$T/T001.md" covers | lst | grep -q '^AE-' || bad "T001 (tracer bullet) covers no AE"; }
+[ -f "$T/T001.md" ] && printf '%s\n' "$scope" | grep -q '^AE-' && { fm "$T/T001.md" covers | lst | grep -q '^AE-' || bad "T001 (tracer bullet) covers no AE"; }
 pl=$(printf '%s\n' "$par" | sed '/^$/d')
 if [ -n "$pl" ]; then
   ovl=$(printf '%s\n' "$pl" | { i=0; while read -r t1 g1; do i=$((i+1))
