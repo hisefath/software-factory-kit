@@ -68,7 +68,7 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
   <b>Open</b><a href="#thesis">Thesis</a><a href="#loop">The loop</a>
   <b>What changed</b><a href="#added">Added to Claude</a><a href="#repo">The repo</a>
   <b>Walk it</b><a href="#phases">Phases &amp; gates</a><a href="#tracks">Tracks</a><a href="#dispatch">Dispatch</a><a href="#use">How to use it</a>
-  <b>Then</b><a href="#verify">Verification</a><a href="#routing">Failure routing</a><a href="#glossary">Primitives</a><a href="#status">Status &amp; next</a>
+  <b>Then</b><a href="#verify">Verification</a><a href="#routing">Failure routing</a><a href="#findings">What it learned</a><a href="#glossary">Primitives</a><a href="#status">Status &amp; next</a>
 </nav>
 
 <main>
@@ -146,7 +146,7 @@ flowchart LR
   agents/verifier.md        read-only reviewer subagent
   templates/                what init-repo.sh copies into a project
   scripts/                  install.sh · init-repo.sh · delegate.sh · scope-guard.sh · embed-diagrams.sh · test.sh
-  FINDINGS.md               layer-5 failure log (F1, F2 already)
+  FINDINGS.md               layer-5 failure log (F1–F28)
   HARNESS_CHANGELOG.md      every adopted change + who approved it</pre>
 </section>
 
@@ -257,6 +257,35 @@ flowchart LR
     <tr><td>Plugin hijacked the session</td><td>settings: turn it off per repo (F1)</td></tr>
     <tr><td>One-off quirk</td><td>log it; don't make it a rule</td></tr>
   </table></div>
+</section>
+
+<section id="findings">
+  <h2>What the factory learned</h2>
+  <p>28 findings from the research run and the first real project (Cerbo v2). <strong>Adopted</strong> means the fix landed in the kit; <strong>logged</strong> means a one-off, deliberately not turned into a rule; <strong>routed</strong> means it was sent back to a phase of that project.</p>
+  <div class="tbl"><table>
+    <tr><th>Finding</th><th>What went wrong</th><th>What changed</th><th>Status</th></tr>
+    <tr><td><code>F1</code></td><td>A plugin's session rules leaked into a research agent</td><td>Plugins off in factory repos</td><td><span class="auto">adopted</span></td></tr>
+    <tr><td><code>F2</code></td><td>Codex used a skill marked hidden</td><td>Treat manual-only as a convenience; scripts are the walls</td><td><span class="auto">adopted</span></td></tr>
+    <tr><td><code>F3</code></td><td>No North Star metric or hiring-partner lens; v1 never read the partner portal</td><td>METRICS.md + partner and metrics sections in brief, research and PRD</td><td><span class="auto">adopted · H1</span></td></tr>
+    <tr><td><code>F4</code></td><td>PRD set success targets with no market evidence</td><td>Market research: competitors, ideal customer, bottom-up TAM/SAM/SOM, load profile</td><td><span class="auto">adopted · H3</span></td></tr>
+    <tr><td><code>F5</code></td><td>scope-guard read <code>[orderId]</code> folders as a pattern</td><td>Brackets in Owns are literal</td><td><span class="auto">adopted · H4</span></td></tr>
+    <tr><td><code>F6</code></td><td>A commit per tool step, no MR per milestone</td><td>Commit per decision or result; one MR per milestone with a TL;DR</td><td><span class="auto">adopted · H5</span></td></tr>
+    <tr><td><code>F7</code></td><td>Kit fixes were committed by hand</td><td><code>apply-proposal.sh</code> applies, tests, commits, pushes</td><td><span class="auto">adopted · H7</span></td></tr>
+    <tr><td><code>F8–F9</code></td><td>A Done-when was green before work began; Owns missed files the task needed</td><td>Done-when only this task can pass; Owns covers every assigned file</td><td><span class="auto">adopted · H8</span></td></tr>
+    <tr><td><code>F10</code></td><td>Design named Nuxt 3 from memory; Nuxt 4 was current</td><td>Every version cites a registry check</td><td><span class="auto">adopted · H9</span></td></tr>
+    <tr><td><code>F11</code></td><td>Tests passed while code could be wrong (fake DB, self-hashing test)</td><td>Break each guarded line once and show the red run</td><td><span class="auto">adopted · H10</span></td></tr>
+    <tr><td><code>F12</code></td><td>Worker worktrees started from main</td><td>Start worktrees from the milestone branch</td><td><span class="auto">adopted · H11</span></td></tr>
+    <tr><td><code>F13</code></td><td>log-decision stopped with no journal</td><td>It creates the journal from the template</td><td><span class="auto">adopted · H12</span></td></tr>
+    <tr><td><code>F14–F19, F23–F24</code></td><td>One-off slips (stale approval, missing options card, misread price cap…)</td><td>No new rule: avoid over-fitting</td><td><span class="gate">logged</span></td></tr>
+    <tr><td><code>F20</code></td><td>LLD and API contract drifted from the build</td><td>design-lld catch-up</td><td><span class="gate">routed</span></td></tr>
+    <tr><td><code>F21</code></td><td>Verifier found defects the task checks missed</td><td>New acceptance tests</td><td><span class="gate">routed</span></td></tr>
+    <tr><td><code>F22</code></td><td>M4 shipped missing screens</td><td>clarify-spec for the M5 cut</td><td><span class="gate">routed</span></td></tr>
+    <tr><td><code>F25</code></td><td>Decision journal was only chronological</td><td><code>decision-views.sh</code>: by topic, weight and day</td><td><span class="auto">adopted · H13</span></td></tr>
+    <tr><td><code>F26</code></td><td>apply-proposal.sh died of SIGPIPE</td><td>Field lookups with awk, no early-exit pipe</td><td><span class="auto">adopted · H15</span></td></tr>
+    <tr><td><code>F27</code></td><td>No CI record; deploys had no review link</td><td>CI on every push (MacBook runner) + link and walkthrough per deploy</td><td><span class="auto">adopted · H18</span></td></tr>
+    <tr><td><code>F28</code></td><td>Planning read prompts literally</td><td>New first phase: <code>decode-prompt</code></td><td><span class="auto">adopted · H19</span></td></tr>
+  </table></div>
+  <p>The pattern so far: most fixes landed in skills and scripts, not in the supervisor prompt. When something breaks, a better recipe or a check that can't be skipped usually fixes it; more words in the prompt rarely do.</p>
 </section>
 
 <section id="glossary">
