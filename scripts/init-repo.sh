@@ -11,7 +11,8 @@ usage: scripts/init-repo.sh <repo-dir> [--brownfield]
 
 Scaffolds into <repo-dir> (must be the root of a git repository):
   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
-                                       .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md, MILESTONES.md,
+                                       .gitlab-ci.yml, .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md,
+                                       MILESTONES.md,
                                        docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
                                        Makefile.example when a Makefile exists without a `check:` target

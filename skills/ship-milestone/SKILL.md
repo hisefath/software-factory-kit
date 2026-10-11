@@ -219,6 +219,9 @@ Evidence (pasted, not summarized):
 - `bash scripts/smoke.sh <url> <sha>` → <its last line>
 - Probe: <name> on <path> every <interval>, first pass <time> (seen in <where>)
 - SLO-1: <one line> · Logs: <command> · Rollback: <RB-n one line> (<safe | not safe: why>)
+Review it: <url>. Demo sign-in: <where the password lives (a git-ignored file the human reads), never the value>.
+  Walkthrough, from acceptance.md ## Demo smoke, one numbered step per line: <step>. <user (role)>: <exact page path>
+  → <what they see>. Pages that do not exist yet are named, with the direct path to use instead.
 Not verified: <non-blocking GAP-n and anything else unproven, or "none">
 
 Gate G-live — "/version = merged SHA, smoke green with TLS verified?" (plus: one probe has passed)

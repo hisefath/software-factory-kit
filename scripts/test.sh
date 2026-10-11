@@ -73,7 +73,7 @@ git -C "$repo" commit -qm init
 rc 0 "init-repo: scaffolds a fresh repo" bash "$kit/scripts/init-repo.sh" "$repo"
 missing=""
 for f in .claude/settings.json .claude/agents/verifier.md .githooks/pre-push \
-  .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
+  .gitlab-ci.yml .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
   .handoff/reviews/.gitkeep MILESTONES.md docs/README.md docs/decisions/DECISION_JOURNAL.md \
   specs/_templates/task.md specs/_templates/result.md Makefile scripts/scope-guard.sh scripts/delegate.sh \
   scripts/embed-diagrams.sh scripts/decision-views.sh docs/decisions/REVIEW.md; do

@@ -1635,3 +1635,231 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
    if ! bash "$kit/scripts/test.sh" >/dev/null 2>&1; then
      printf '%s\n' "$d" | git -C "$kit" apply -R
 ```
+
+### H16 Check CI every push; link every deploy  [status: superseded by H18]
+
+- F#: F27 · Layer: Verification/hooks · Reach: WORKFLOW.md + factory template + factory skill
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `scripts/init-repo.sh`, `scripts/test.sh`, `skills/ship-milestone/SKILL.md`, `templates/.gitlab-ci.yml` (new), `templates/.gitlab/merge_request_templates/Default.md`
+- Root cause: "checked" meant a local make check with no shared record, and a deploy ended with evidence but no way for the human to try it → no pipeline existed in the factory's templates and no rule said to read one → ship-milestone's STOP had no review link or walkthrough.
+- Why this layer: §10 "Done claimed but broken → Verification/hooks": a pipeline on the human's runner is a check that runs whatever the model does; the rules and STOP line tell the supervisor to read it and to hand over a walkthrough.
+- Rules: WORKFLOW §8 bullets 9 → 11 (ceiling ~20); `skills/ship-milestone/SKILL.md` 276 → 279 (ceiling 300); new fail-closed `templates/.gitlab-ci.yml`; `scripts/test.sh` 131 passed with this diff applied in a scratch clone; pruned: none.
+- Guard: init-repo scaffolds `.gitlab-ci.yml` (test.sh "every constitution file exists"); each MR's Verification names its pipeline, green before merge.
+- Teach: "Every push runs the same gate in CI on my own runner, so 'it passed' has a shared record, and every deploy ends with a link and a walkthrough I can click through."
+- diff-sha256: 23429c81fb1f
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -261,6 +261,11 @@
+ - **Auto-merge only on a standing yes:** when `## Approvals` holds the human's standing yes to auto-merge, the
+   supervisor merges the MR once G5 is approved (merge commit, TL;DR as its message) and pushes `main` to the
+   mirror; without that row, merging stays human-only (§2 rule 8).
++- **CI checks every push** (owner's rule, 2026-10-10): `.gitlab-ci.yml` runs `make check` on the human's own
++  runner. After every push the supervisor reads the pipeline (`glab ci status`) and reports it; an MR merges only on
++  a green pipeline. A job stuck at `pending` means no runner is online: say so, and never merge on a local run alone.
++- **Every deploy ends with a review link** (owner's rule, 2026-10-10): once `/version` shows the deployed SHA, the
++  human gets the URL and a numbered walkthrough per demo user (ship-milestone STOP A).
+ - Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
+ 
+ ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
+--- a/scripts/init-repo.sh
++++ b/scripts/init-repo.sh
+@@ -11,7 +11,8 @@
+ 
+ Scaffolds into <repo-dir> (must be the root of a git repository):
+   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
+-                                       .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md, MILESTONES.md,
++                                       .gitlab-ci.yml, .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md,
++                                       MILESTONES.md,
+                                        docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
+   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
+                                        Makefile.example when a Makefile exists without a `check:` target
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -73,7 +73,7 @@
+ rc 0 "init-repo: scaffolds a fresh repo" bash "$kit/scripts/init-repo.sh" "$repo"
+ missing=""
+ for f in .claude/settings.json .claude/agents/verifier.md .githooks/pre-push \
+-  .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
++  .gitlab-ci.yml .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
+   .handoff/reviews/.gitkeep MILESTONES.md docs/README.md docs/decisions/DECISION_JOURNAL.md \
+   specs/_templates/task.md specs/_templates/result.md Makefile scripts/scope-guard.sh scripts/delegate.sh \
+   scripts/embed-diagrams.sh scripts/decision-views.sh docs/decisions/REVIEW.md; do
+--- a/skills/ship-milestone/SKILL.md
++++ b/skills/ship-milestone/SKILL.md
+@@ -219,6 +219,9 @@
+ - `bash scripts/smoke.sh <url> <sha>` → <its last line>
+ - Probe: <name> on <path> every <interval>, first pass <time> (seen in <where>)
+ - SLO-1: <one line> · Logs: <command> · Rollback: <RB-n one line> (<safe | not safe: why>)
++Review it: <url>. Demo sign-in: <where the password lives (a git-ignored file the human reads), never the value>.
++  Walkthrough, from acceptance.md ## Demo smoke, one numbered step per line: <step>. <user (role)>: <exact page path>
++  → <what they see>. Pages that do not exist yet are named, with the direct path to use instead.
+ Not verified: <non-blocking GAP-n and anything else unproven, or "none">
+ 
+ Gate G-live — "/version = merged SHA, smoke green with TLS verified?" (plus: one probe has passed)
+--- /dev/null
++++ b/templates/.gitlab-ci.yml
+@@ -0,0 +1,20 @@
++# GitLab CI: one job, the same gate as local and the pre-push hook (`make check`), on the human's own runner
++# (software-factory-kit WORKFLOW.md §8). If a job sits at "pending", no runner is online for this project.
++#
++# ADAPT PER STACK: set `image` to the stack's toolchain and add the `services` make check needs (e.g. a test
++# database). Until the Makefile is adapted, make check fails on purpose, so an unconfigured repo never looks green.
++
++workflow:
++  rules:
++    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
++    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
++      when: never # the merge request pipeline covers this push
++    - if: $CI_COMMIT_BRANCH
++
++stages: [check]
++
++check:
++  stage: check
++  image: buildpack-deps:bookworm # ADAPT: make, git and bash are here; add the stack's toolchain
++  script:
++    - make check
+--- a/templates/.gitlab/merge_request_templates/Default.md
++++ b/templates/.gitlab/merge_request_templates/Default.md
+@@ -42,6 +42,7 @@
+ ```
+ 
+ - [ ] `scripts/scope-guard.sh <task-file> milestone/m<N>-<slug>` exited 0 for every task (paste the OK lines)
++- [ ] This MR's pipeline is green on the human's runner: <pipeline link>
+ - [ ] Acceptance tests in `tests/acceptance/**` were written before the code and now pass (counts from the output above)
+ - [ ] `scripts/embed-diagrams.sh --check` is clean for every changed design doc
+ 
+```
+
+### H17 Add a pipeline line to this MR template  [status: proposed]
+
+- F#: F27 · Layer: Verification/hooks · Reach: project
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `.gitlab/merge_request_templates/Default.md`
+- Root cause: Same as H16: init-repo never overwrites, so this project's MR template needs its own pipeline line.
+- Why this layer: Same as H16; this is the project half.
+- Rules: `.gitlab/merge_request_templates/Default.md`: one checklist line added; pruned: none.
+- Guard: `grep -c 'pipeline is green' .gitlab/merge_request_templates/Default.md` prints 1.
+- Teach: "Each Cerbo MR shows its CI pipeline before it merges."
+- diff-sha256: 1730d3f72cea
+- Verdict: pending G-L5
+
+```diff
+--- a/.gitlab/merge_request_templates/Default.md
++++ b/.gitlab/merge_request_templates/Default.md
+@@ -42,6 +42,7 @@
+ ```
+ 
+ - [ ] `scripts/scope-guard.sh <task-file> milestone/m<N>-<slug>` exited 0 for every task (paste the OK lines)
++- [ ] This MR's pipeline is green on the human's runner: <pipeline link>
+ - [ ] Acceptance tests in `tests/acceptance/**` were written before the code and now pass (counts from the output above)
+ - [ ] `scripts/embed-diagrams.sh --check` is clean for every changed design doc
+ 
+```
+
+### H18 Check CI every push on the shell runner; link every deploy  [status: proposed]
+
+- F#: F27 · Layer: Verification/hooks · Reach: WORKFLOW.md + factory template + factory skill · Supersedes: H16
+- Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `scripts/init-repo.sh`, `scripts/test.sh`, `skills/ship-milestone/SKILL.md`, `templates/.gitlab-ci.yml` (new), `templates/.gitlab/merge_request_templates/Default.md`
+- Root cause: as H16, plus: the first pipeline used a Docker-executor runner whose container VM disk was full, and the human declined to grow the VM (TRACKER Log 2026-10-10 CI pipeline 48487 failed) → CI must run on the human's macOS shell runner, enabled per project without a new token ("could you do this for me on all future projects in gauntlet?").
+- Why this layer: §10 "Done claimed but broken → Verification/hooks": a pipeline on the human's runner is a check that runs whatever the model does; a shell executor reuses the machine's tools and running services, so CI adds nothing to the container VM.
+- Rules: WORKFLOW §8 bullets 9 → 11 (ceiling ~20); `skills/ship-milestone/SKILL.md` 276 → 279 (ceiling 300); new `templates/.gitlab-ci.yml` (tag `macbook-shell`); `scripts/test.sh` 131 passed with this diff applied in a scratch clone; pruned: none.
+- Guard: init-repo scaffolds `.gitlab-ci.yml` (test.sh "every constitution file exists"); Cerbo pipeline 48540 on the shell runner passed (122 unit, 43 acceptance, make check OK) before MR !6 merged.
+- Teach: "Every push runs the same gate in CI on my own Mac's runner, switched on per project with one API call, so 'it passed' has a shared record without filling a VM."
+- diff-sha256: 0ee4f6f2422d
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -261,6 +261,14 @@
+ - **Auto-merge only on a standing yes:** when `## Approvals` holds the human's standing yes to auto-merge, the
+   supervisor merges the MR once G5 is approved (merge commit, TL;DR as its message) and pushes `main` to the
+   mirror; without that row, merging stays human-only (§2 rule 8).
++- **CI checks every push** (owner's rule, 2026-10-10): `.gitlab-ci.yml` runs `make check` on the human's own
++  shell runner (tag `macbook-shell`; no Docker executor, so CI never grows the container VM). When a project's
++  GitLab repo is created, the supervisor enables that runner for it (`glab api -X POST projects/<id>/runners -f
++  runner_id=<id>`; no new token). After every push it reads the pipeline and reports the job's test counts; an MR
++  merges only on a green pipeline. A job stuck at `pending` means the runner is offline: say so, and never merge on
++  a local run alone.
++- **Every deploy ends with a review link** (owner's rule, 2026-10-10): once `/version` shows the deployed SHA, the
++  human gets the URL and a numbered walkthrough per demo user (ship-milestone STOP A).
+ - Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
+ 
+ ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
+--- a/scripts/init-repo.sh
++++ b/scripts/init-repo.sh
+@@ -11,7 +11,8 @@
+ 
+ Scaffolds into <repo-dir> (must be the root of a git repository):
+   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
+-                                       .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md, MILESTONES.md,
++                                       .gitlab-ci.yml, .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md,
++                                       MILESTONES.md,
+                                        docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
+   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
+                                        Makefile.example when a Makefile exists without a `check:` target
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -73,7 +73,7 @@
+ rc 0 "init-repo: scaffolds a fresh repo" bash "$kit/scripts/init-repo.sh" "$repo"
+ missing=""
+ for f in .claude/settings.json .claude/agents/verifier.md .githooks/pre-push \
+-  .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
++  .gitlab-ci.yml .gitlab/merge_request_templates/Default.md .handoff/TRACKER.md .handoff/inbox/.gitkeep .handoff/runs/.gitkeep \
+   .handoff/reviews/.gitkeep MILESTONES.md docs/README.md docs/decisions/DECISION_JOURNAL.md \
+   specs/_templates/task.md specs/_templates/result.md Makefile scripts/scope-guard.sh scripts/delegate.sh \
+   scripts/embed-diagrams.sh scripts/decision-views.sh docs/decisions/REVIEW.md; do
+--- a/skills/ship-milestone/SKILL.md
++++ b/skills/ship-milestone/SKILL.md
+@@ -219,6 +219,9 @@
+ - `bash scripts/smoke.sh <url> <sha>` → <its last line>
+ - Probe: <name> on <path> every <interval>, first pass <time> (seen in <where>)
+ - SLO-1: <one line> · Logs: <command> · Rollback: <RB-n one line> (<safe | not safe: why>)
++Review it: <url>. Demo sign-in: <where the password lives (a git-ignored file the human reads), never the value>.
++  Walkthrough, from acceptance.md ## Demo smoke, one numbered step per line: <step>. <user (role)>: <exact page path>
++  → <what they see>. Pages that do not exist yet are named, with the direct path to use instead.
+ Not verified: <non-blocking GAP-n and anything else unproven, or "none">
+ 
+ Gate G-live — "/version = merged SHA, smoke green with TLS verified?" (plus: one probe has passed)
+--- /dev/null
++++ b/templates/.gitlab-ci.yml
+@@ -0,0 +1,23 @@
++# GitLab CI: one job, the same gate as local and the pre-push hook (`make check`), on the human's own shell runner
++# (tag `macbook-shell`, software-factory-kit WORKFLOW.md §8). Jobs run straight on that machine, not in Docker, and
++# reuse services `make` starts (e.g. a test database via docker compose). If a job sits at "pending", the runner is
++# offline or not yet enabled for this project.
++#
++# ADAPT PER STACK: add the setup steps make check needs before it (e.g. `make db-test-up`, `npm ci`). Until the
++# Makefile is adapted, make check fails on purpose, so an unconfigured repo never looks green.
++
++workflow:
++  rules:
++    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
++    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
++      when: never # the merge request pipeline covers this push
++    - if: $CI_COMMIT_BRANCH
++
++stages: [check]
++
++check:
++  stage: check
++  tags: [macbook-shell]
++  script:
++    - export PATH="/opt/homebrew/bin:$PATH" # Homebrew tools; the runner service starts with a short PATH
++    - make check
+--- a/templates/.gitlab/merge_request_templates/Default.md
++++ b/templates/.gitlab/merge_request_templates/Default.md
+@@ -42,6 +42,7 @@
+ ```
+ 
+ - [ ] `scripts/scope-guard.sh <task-file> milestone/m<N>-<slug>` exited 0 for every task (paste the OK lines)
++- [ ] This MR's pipeline is green on the human's runner: <pipeline link>
+ - [ ] Acceptance tests in `tests/acceptance/**` were written before the code and now pass (counts from the output above)
+ - [ ] `scripts/embed-diagrams.sh --check` is clean for every changed design doc
+ 
+```

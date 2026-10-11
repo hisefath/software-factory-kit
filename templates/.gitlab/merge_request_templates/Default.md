@@ -42,6 +42,7 @@ $ echo $?
 ```
 
 - [ ] `scripts/scope-guard.sh <task-file> milestone/m<N>-<slug>` exited 0 for every task (paste the OK lines)
+- [ ] This MR's pipeline is green on the human's runner: <pipeline link>
 - [ ] Acceptance tests in `tests/acceptance/**` were written before the code and now pass (counts from the output above)
 - [ ] `scripts/embed-diagrams.sh --check` is clean for every changed design doc
 

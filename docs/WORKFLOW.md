@@ -261,6 +261,14 @@ harness → reset the worktree → `human_review` + one question. At most 2 veri
 - **Auto-merge only on a standing yes:** when `## Approvals` holds the human's standing yes to auto-merge, the
   supervisor merges the MR once G5 is approved (merge commit, TL;DR as its message) and pushes `main` to the
   mirror; without that row, merging stays human-only (§2 rule 8).
+- **CI checks every push** (owner's rule, 2026-10-10): `.gitlab-ci.yml` runs `make check` on the human's own
+  shell runner (tag `macbook-shell`; no Docker executor, so CI never grows the container VM). When a project's
+  GitLab repo is created, the supervisor enables that runner for it (`glab api -X POST projects/<id>/runners -f
+  runner_id=<id>`; no new token). After every push it reads the pipeline and reports the job's test counts; an MR
+  merges only on a green pipeline. A job stuck at `pending` means the runner is offline: say so, and never merge on
+  a local run alone.
+- **Every deploy ends with a review link** (owner's rule, 2026-10-10): once `/version` shows the deployed SHA, the
+  human gets the URL and a numbered walkthrough per demo user (ship-milestone STOP A).
 - Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
 
 ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
