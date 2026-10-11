@@ -153,7 +153,7 @@ choice.
 11. **Dispatched only: commit, then write the result.**
     - Commit whenever you wrote R files and Done when passes, whatever the status (a partial answer with its gaps
       is still evidence): `git add -- <each R file> docs/research/sources.md` (explicit paths, never `-A`), then
-      `git commit -m "docs(m<N>/<job>): research R<NN>" -m "Task: <id>"`, with `<N>` and `<job>` from the
+      `git commit -m "docs(m<N>/<job>): research R<NN>" --trailer "Task: <id>"`, with `<N>` and `<job>` from the
       lowercased `id` and every R id listed (M1-T007 → `docs(m1/t007): research R05, R06`). Then
       `git status --porcelain -- . ":!.handoff"` must print nothing; `head_sha=$(git rev-parse --short HEAD)`.
     - Write `$HANDOFF_DIR/runs/<id>/result.md` from `specs/_templates/result.md`; never commit it. One key per

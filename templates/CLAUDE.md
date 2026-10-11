@@ -69,12 +69,15 @@ same format. Commit the inputs it reads first (workers see the branch, not your 
   prompt = "Read <abs path>/SKILL.md and follow it for <task file> in <worktree>. HANDOFF_DIR=<abs>/.handoff".
   Pass paths, never summaries.
 - Other harness: `bash scripts/delegate.sh <task-file>`.
-- Log `DISPATCH <id> harness=<h> why=<one line>` for every job. Never show the verifier a worker's self-report.
+- Log one `DISPATCH <id> harness=<h> why=<one line>` line per id (never a list), and when a Claude subagent returns,
+  the line delegate.sh writes for other harnesses: `RESULT <id> status=<s> harness=claude-subagent timeout=no
+  tree=<clean|dirty>` (report-milestone's first-pass rate reads both). Never show the verifier a worker's self-report.
 
 ## Verify delegated work, in order
 `result.md` exists and parses (exit codes don't count) → `bash scripts/scope-guard.sh <task-file> <milestone-branch>`
 exits 0 → you run `make check` in the worktree yourself → read `git diff` against the claim → verifier pass
-(cross-family when possible) → `git merge --squash` onto the milestone branch → `Verified: <sha> <cmd> → <result>`.
+(cross-family when possible) → `git merge --squash` onto the milestone branch, committed with
+`--trailer "Task: <id>"` → `Verified: <sha> <cmd> → <result>`.
 
 ## Failure ladder
 Log FAIL → retry once with the exact error → fresh session after 2 failed corrections → fallback harness → reset the

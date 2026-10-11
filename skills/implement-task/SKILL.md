@@ -165,7 +165,8 @@ fresh pasted command output; anything that needs a decision goes to a human, nev
     staged mode: it checks what you are about to commit) and paste it under section 7. Non-zero:
     `git restore --staged -- <path>` for each reported path and re-run; if the task truly needs that path, it is a
     stop condition. Commit:
-    `git commit -m "feat(m<N>/t###): <imperative summary, at most 72 chars>" -m "Task: M<N>-T###"`. Confirm the
+    `git commit -m "feat(m<N>/t###): <imperative summary, at most 72 chars>" --trailer "Task: M<N>-T###"`
+    (`--trailer` joins any Co-Authored-By block; a `-m "Task: …"` paragraph is not a trailer). Confirm the
     same `git status` is empty and record `git rev-parse HEAD` as `head_sha`.
 12. **Write the result.** Overwrite the provisional file: fill `assets/template.md` at the `## Return` path
     (`$HANDOFF_DIR/runs/<id>/result.md`, `<id>` = the task `id`). `changes` from
