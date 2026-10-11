@@ -270,7 +270,10 @@ harness → reset the worktree → `human_review` + one question. At most 2 veri
   a local run alone.
 - **Every deploy ends with a review link** (owner's rule, 2026-10-10): once `/version` shows the deployed SHA, the
   human gets the URL and a numbered walkthrough per demo user (ship-milestone STOP A).
-- Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
+- Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume. Records written after
+  the merge (the MILESTONES done row, the release log) reach a protected `main` through their own
+  `chore/m<N>-ship-records` MR, merged on green CI under the same standing yes; never on the next milestone's
+  branch, where report-milestone counts them as unplanned commits (G5 DV) and a revert of that milestone takes them.
 
 ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
 
