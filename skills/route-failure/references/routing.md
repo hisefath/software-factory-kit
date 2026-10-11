@@ -47,8 +47,8 @@ rule the file already states but the agent ignored never gets a second sentence,
 |---|---|---|
 | task | one `specs/M<N>-<slug>/tasks/T###.md` (route to `slice-tasks`; frozen after merge) | the gap is in one task's `Owns:` or Done-when |
 | project | the project's `AGENTS.md`, `CLAUDE.md`, `Makefile`, `.claude/settings.json`, `.githooks/`, `scripts/` | the cause is a fact about this stack, repo or domain |
-| factory template | `$KIT/templates/**` | every future project needs it; `init-repo.sh` never overwrites, so existing projects also need their own project-reach block |
-| factory skill | `$KIT/skills/<name>/**`, `$KIT/agents/**`, `$KIT/scripts/**` | the phase procedure itself is wrong for any project |
+| factory template | `$KIT/templates/**`, plus the files `init-repo.sh` copies: `$KIT/agents/verifier.md`, `$KIT/scripts/{scope-guard,delegate,embed-diagrams,decision-views}.sh` | every future project needs it; `init-repo.sh` never overwrites, so existing projects also need their own project-reach block (`cmp` the project copy first: H4 reached the kit, never Cerbo's scope-guard, F29) |
+| factory skill | `$KIT/skills/<name>/**`, `$KIT/agents/**`, `$KIT/scripts/**` not copied by `init-repo.sh` | the phase procedure itself is wrong for any project |
 | WORKFLOW.md | `$KIT/docs/WORKFLOW.md` | a rule of the factory is wrong; change it first, in the same diff as the skills that implement it |
 
 ## 4. Rule ceilings and counting

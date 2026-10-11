@@ -8,6 +8,9 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 | 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
 | 2026-10-11 | 0.1 | H19: Add `decode-prompt` (phase 0.5, gate G-decode) before sharpen-brief (skills/decode-prompt, skills/sharpen-brief, docs/WORKFLOW.md, templates/CLAUDE.md, README.md) | F28 | "build a skill for this, and this should be before the sharpen brief stage" |
 | 2026-10-09 | 0.1 | H3: Add market, competitor and load-profile research (docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence) | F4 | "approve, then /gather-evidence" |
+| 2026-10-10 | 0.1 | H6: Add a TL;DR to this project's MR template (cerbo-supplement-store .gitlab/merge_request_templates/Default.md) | F6 | "Approve, adopt H5 and H6" |
+| 2026-10-10 | 0.1 | H14: Add the review view and D1-D64 backfill here (cerbo-supplement-store Makefile, docs/decisions/DECISION_JOURNAL.md, docs/decisions/backfill-tags.md, scripts/decision-views.sh) | F25 | "Approve, adopt H13 and H14" |
+| 2026-10-10 | 0.1 | H17: Add a pipeline line to this MR template (cerbo-supplement-store .gitlab/merge_request_templates/Default.md) | F27 | "Approve, adopt H18 and H17" |
 
 ## Proposals
 
@@ -640,7 +643,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  - Milestone: **M<N>** — <one-sentence goal> · branch `milestone/m<N>-<slug>` · report `docs/milestones/M<N>.md`
 ```
 
-### H6 Add a TL;DR to this project's MR template  [status: proposed]
+### H6 Add a TL;DR to this project's MR template  [status: adopted]
 
 - F#: F6 · Layer: Skill · Reach: project
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -651,7 +654,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 - Guard: `grep -c '^## TL;DR' .gitlab/merge_request_templates/Default.md` prints 1.
 - Teach: "The M5 MR starts with a one-line TL;DR because the template asks for it, not because someone remembered."
 - diff-sha256: d14103b14077
-- Verdict: pending G-L5
+- Verdict: adopted 2026-10-11 (Approvals 2026-10-10 17:52 CDT, H6@d14103b14077, "Approve, adopt H5 and H6")
 
 ```diff
 --- a/.gitlab/merge_request_templates/Default.md
@@ -1326,7 +1329,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +- none yet
 ```
 
-### H14 Add the review view and D1-D64 backfill here  [status: proposed]
+### H14 Add the review view and D1-D64 backfill here  [status: adopted]
 
 - F#: F25 · Layer: Script · Reach: project
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -1337,7 +1340,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 - Guard: `make decisions` exits 0 after `bash scripts/decision-views.sh`; in a scratch copy REVIEW.md lists Product 10, Data 8, Security 6, Money 8, Infrastructure 9, Process 23, Untagged 0.
 - Teach: "Cerbo's whole decision history, D1 to D64, now reads by topic and weight, including how the workflow itself improved."
 - diff-sha256: eb8d763f6268
-- Verdict: pending G-L5
+- Verdict: adopted 2026-10-11 (Approvals 2026-10-10 18:23 CDT, H14@eb8d763f6268, "Approve, adopt H13 and H14")
 
 ```diff
 --- a/Makefile
@@ -1735,7 +1738,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  
 ```
 
-### H17 Add a pipeline line to this MR template  [status: proposed]
+### H17 Add a pipeline line to this MR template  [status: adopted]
 
 - F#: F27 · Layer: Verification/hooks · Reach: project
 - Proposed: 2026-10-10 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
@@ -1746,7 +1749,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 - Guard: `grep -c 'pipeline is green' .gitlab/merge_request_templates/Default.md` prints 1.
 - Teach: "Each Cerbo MR shows its CI pipeline before it merges."
 - diff-sha256: 1730d3f72cea
-- Verdict: pending G-L5
+- Verdict: adopted 2026-10-11 (Approvals 2026-10-10 19:46 CDT, H17@1730d3f72cea, "Approve, adopt H18 and H17")
 
 ```diff
 --- a/.gitlab/merge_request_templates/Default.md
@@ -1862,5 +1865,471 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 +- [ ] This MR's pipeline is green on the human's runner: <pipeline link>
  - [ ] Acceptance tests in `tests/acceptance/**` were written before the code and now pass (counts from the output above)
  - [ ] `scripts/embed-diagrams.sh --check` is clean for every changed design doc
+ 
+```
+
+### H20 Give copied kit files a project block  [status: proposed]
+
+- F#: F29 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/route-failure/references/routing.md`
+- Root cause: M5-T008 hit a scope-guard bug the kit had fixed (H4) → H4 was filed with kit reach only → routing.md §3 lists copied scripts under "factory skill", whose row never asks for a project block, and init-repo never overwrites → the project copy kept the bug.
+- Why this layer: §10 "Phase procedure botched → Skill": the reach table is the step that decides which blocks get filed; a sync tool (`init-repo.sh --drift`) is the stronger runner-up, but the table edit costs one cell and stops the miss at filing time.
+- Rules: `skills/route-failure/references/routing.md` §3: 5 → 5 rows (two cells edited, no row added); pruned: none, below ceiling.
+- Guard: the next kit block that edits `scripts/scope-guard.sh`, `delegate.sh`, `embed-diagrams.sh`, `decision-views.sh` or `agents/verifier.md` comes with a project block; `cmp "$KIT/scripts/scope-guard.sh" scripts/scope-guard.sh` exits 0 in Cerbo once H21 is applied.
+- Teach: "A fix in the factory is not a fix in a project that copied the old file; the routing table now says so where the decision is made."
+- diff-sha256: 11ab948173dd
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/route-failure/references/routing.md
++++ b/skills/route-failure/references/routing.md
+@@ -47,8 +47,8 @@
+ |---|---|---|
+ | task | one `specs/M<N>-<slug>/tasks/T###.md` (route to `slice-tasks`; frozen after merge) | the gap is in one task's `Owns:` or Done-when |
+ | project | the project's `AGENTS.md`, `CLAUDE.md`, `Makefile`, `.claude/settings.json`, `.githooks/`, `scripts/` | the cause is a fact about this stack, repo or domain |
+-| factory template | `$KIT/templates/**` | every future project needs it; `init-repo.sh` never overwrites, so existing projects also need their own project-reach block |
+-| factory skill | `$KIT/skills/<name>/**`, `$KIT/agents/**`, `$KIT/scripts/**` | the phase procedure itself is wrong for any project |
++| factory template | `$KIT/templates/**`, plus the files `init-repo.sh` copies: `$KIT/agents/verifier.md`, `$KIT/scripts/{scope-guard,delegate,embed-diagrams,decision-views}.sh` | every future project needs it; `init-repo.sh` never overwrites, so existing projects also need their own project-reach block (`cmp` the project copy first: H4 reached the kit, never Cerbo's scope-guard, F29) |
++| factory skill | `$KIT/skills/<name>/**`, `$KIT/agents/**`, `$KIT/scripts/**` not copied by `init-repo.sh` | the phase procedure itself is wrong for any project |
+ | WORKFLOW.md | `$KIT/docs/WORKFLOW.md` | a rule of the factory is wrong; change it first, in the same diff as the skills that implement it |
+ 
+ ## 4. Rule ceilings and counting
+```
+
+### H21 Sync this project's scope-guard to the kit  [status: proposed]
+
+- F#: F29 · Layer: Skill · Reach: project
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `scripts/scope-guard.sh`
+- Root cause: Same as H20: the project copy never got H4; 428cd99 patched exact paths only, so a folder glob like `server/api/orders/[orderId]/**` still fails.
+- Why this layer: Same as H20; this is the project half, and it replaces the project's own patch with the kit's tested line so the two copies are identical again.
+- Rules: `scripts/scope-guard.sh`: no rules; pruned: none.
+- Guard: `cmp "$KIT/scripts/scope-guard.sh" scripts/scope-guard.sh` exits 0; a scratch repo with Owns `app/pages/orders/[orderId].vue,server/api/orders/[orderId]/**` and both files staged gets exit 0 (today: exit 1, out of scope on the folder file; checked this pass).
+- Teach: "Cerbo now runs the same boundary check the kit tests, not a local variant that only half-fixed the bug."
+- diff-sha256: 30165f829ae7
+- Verdict: pending G-L5
+
+```diff
+--- a/scripts/scope-guard.sh
++++ b/scripts/scope-guard.sh
+@@ -17,6 +17,7 @@
+ 
+ Owns: line(s) in the task file hold comma/space separated globs. `*` matches across `/` (shell case
+ pattern), so `app/Services/**` and `app/Services/*` both cover every file below app/Services/.
++`[` is literal, so route folders like `server/api/orders/[orderId]/**` work (no character classes).
+ A rename counts as delete + add, so both paths must be owned.
+ 
+ Exit: 0 every changed path is owned · 1 a path is out of scope · 2 usage error, unknown ref, or no Owns:
+@@ -62,10 +63,9 @@
+   [ -n "$f" ] || continue
+   n=$((n + 1)) ok=0
+   for p in $owns; do
+-    # an exact path matches literally first: Nuxt routes like app/pages/orders/[orderId].vue hold glob brackets
+-    [ "$f" = "$p" ] && { ok=1; break; }
+-    # shellcheck disable=SC2254 # $p is deliberately a pattern
+-    case $f in $p) ok=1; break ;; esac
++    q=${p//\[/\\[} # a literal [ (Nuxt/Next route folders), never a character class
++    # shellcheck disable=SC2254 # $q is deliberately a pattern
++    case $f in $q) ok=1; break ;; esac
+   done
+   [ "$ok" = 1 ] || { echo "scope-guard: out of scope: $f" >&2; bad=1; }
+ done <<EOF
+```
+
+### H22 Pre-push: worktree-safe check, QA tests alone  [status: proposed]
+
+- F#: F30, F37 · Layer: Verification/hooks · Reach: factory template
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `templates/.githooks/pre-push`, `scripts/test.sh`
+- Root cause: F30: hooks inherit GIT_DIR → in a linked worktree `git -C <dir> rev-parse --show-toplevel` answers the current directory → embed-diagrams built doubled paths → pushes blocked as "flaky". F37: a fix and its acceptance test went out in one commit → nothing separates QA-owned tests from the code they grade → the rule in CLAUDE.md and fix-bug was ignored.
+- Why this layer: §10 "Done claimed but broken → Verification/hooks": both are mechanical facts about each pushed commit, so the hook checks them on every push; F37's rule already exists in CLAUDE.md and fix-bug, so a second sentence would be "rule ignored" again.
+- Rules: `templates/.githooks/pre-push`: checks 3 → 4; `scripts/test.sh` 131 → 135 passed (scratch kit copy); pruned: none (scripts carry no rule count).
+- Guard: `bash scripts/test.sh` prints `ok   pre-push: an acceptance test committed with product code is blocked` and `ok   pre-push: make check in a linked worktree sees that worktree (GIT_DIR unset)`; with today's hook both fail (4 FAIL lines, checked in a scratch kit).
+- Teach: "The push hook now enforces that whoever fixes the code cannot also write the test that grades it, and it behaves the same in a worktree as in the main checkout."
+- diff-sha256: dac0d3019c2d
+- Verdict: pending G-L5
+
+```diff
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -381,7 +381,17 @@
+ printf 'check:\n\t@echo check-red; exit 1\n' >Makefile && git add Makefile && git commit -qm "red"
+ rc 1 "pre-push: failing make check blocks the push" git push -q origin feature/red
+ has "pre-push: says make check failed" "$out" "make check failed"
++git checkout -q -b feature/mixed milestone/m1-demo
++mkdir -p tests/acceptance src && echo t >tests/acceptance/x.test && echo c >src/fix.txt
++git add tests/acceptance/x.test src/fix.txt && git commit -qm "fix: code and its acceptance test together"
++rc 1 "pre-push: an acceptance test committed with product code is blocked" git push -q origin feature/mixed
++has "pre-push: names the mixed commit" "$out" "changes tests/acceptance/** with src/fix.txt"
+ git checkout -q milestone/m1-demo
++git worktree add -q "$tmp/wt-gitdir" -b feature/gitdir milestone/m1-demo
++printf 'check:\n\t@mkdir -p sub && test "$$(git -C sub rev-parse --show-toplevel)" = "$$(pwd -P)" && echo top-ok\n' >"$tmp/wt-gitdir/Makefile"
++git -C "$tmp/wt-gitdir" commit -qam "check: run git from a subdirectory"
++rc 0 "pre-push: make check in a linked worktree sees that worktree (GIT_DIR unset)" git -C "$tmp/wt-gitdir" push -q origin feature/gitdir
++has "pre-push: worktree make check ran" "$out" "top-ok"
+ is "pre-push tests left the supervisor's TRACKER Log intact" "$(grep -c ' DISPATCH M1-T00' "$tracker")" 9
+ 
+ # ---- 6. install.sh (dry run only, fake HOME) -------------------------------------------------------------
+--- a/templates/.githooks/pre-push
++++ b/templates/.githooks/pre-push
+@@ -9,9 +9,11 @@
+ #        task branch m<N>/t###-<slug>        -> specs/M<N>-*/tasks/T###.md
+ #        job branch  m<N>/<letters><nn>-<slug> (e.g. m0/d01-…, a supervisor job such as draw-diagrams)
+ #                                            -> .handoff/runs/M<N>-<LETTERS><nn>/task.md (scripts/delegate.sh)
++#   4. no pushed commit changes tests/acceptance/** together with product code (QA-owned: the test lands first,
++#      in its own commit, so a fix can never write the test that grades it)
+ #
+ # Why local and not only CI: origin pushes to GitLab AND the GitHub mirror at once, before any CI runs.
+-# All three checks run even after one fails, so you see every problem at once.
++# All four checks run even after one fails, so you see every problem at once.
+ # Bypass: `git push --no-verify` is a human-only action — record the yes in .handoff/TRACKER.md first.
+ # Run by hand (no stdin): checks the current branch.
+ set -euo pipefail
+@@ -20,6 +22,9 @@
+ remote=${1:-origin}
+ top=$(git rev-parse --show-toplevel)
+ cd "$top"
++# git sets GIT_DIR (and friends) for hooks; inside a worktree that makes `git -C <dir> rev-parse --show-toplevel`
++# answer the current directory, so scripts resolve doubled paths. Run make check like a person would.
++unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX
+ fail=0
+ pushes=() # "<branch> <local sha> <remote sha>"
+ 
+@@ -106,5 +111,22 @@
+   scripts/scope-guard.sh "$task" "$base" "$2" || fail=1
+ done
+ 
++# ---- 4. acceptance tests never ride with product code ----------------------------------------------------
++# Allowed beside tests/acceptance/**: other tests, specs, docs, .handoff, MILESTONES.md and the Makefile target
++# that runs the suite. Merge commits are skipped (their parents were checked when they were pushed).
++for p in ${pushes[@]+"${pushes[@]}"}; do
++  set -- $p
++  if [ "${3//0/}" != "" ] && git cat-file -e "$3^{commit}" 2>/dev/null; then range="$3..$2"; else range="$2 --not --remotes=$remote"; fi
++  for c in $(git rev-list --no-merges $range); do
++    files=$(git diff-tree --no-commit-id --name-only -r "$c")
++    printf '%s\n' "$files" | grep -q '^tests/acceptance/' || continue
++    other=$(printf '%s\n' "$files" | grep -vE '^(tests/|specs/|docs/|\.handoff/|MILESTONES\.md$|Makefile$)' || true)
++    [ -z "$other" ] || {
++      echo "pre-push: BLOCKED — $(git log -1 --format='%h %s' "$c") changes tests/acceptance/** with $(echo $other) (commit the acceptance test on its own, first)" >&2
++      fail=1
++    }
++  done
++done
++
+ [ "$fail" = 0 ] || { echo "pre-push: push blocked — fix the above (or a human records a yes and uses --no-verify)" >&2; exit 1; }
+ echo "pre-push: all checks passed"
+```
+
+### H23 Block acceptance tests committed with product code  [status: proposed]
+
+- F#: F37 · Layer: Verification/hooks · Reach: project
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `.githooks/pre-push`
+- Root cause: Same as H22 (F37): init-repo never overwrites, so Cerbo's hook needs the same fourth check; its GIT_DIR fix is already in (7e96344).
+- Why this layer: Same as H22; after H22 and H23 the kit and project hooks are byte-identical.
+- Rules: `.githooks/pre-push`: checks 3 → 4; pruned: none.
+- Guard: over Cerbo's history the same per-commit test flags 84e7087 (payments.ts with close-out.test.ts) and nothing else; MILESTONES.md and Makefile beside acceptance tests stay allowed (checked this pass).
+- Teach: "A commit that changes payments.ts and its acceptance test together can no longer leave this machine."
+- diff-sha256: e3e718e446ba
+- Verdict: pending G-L5
+
+```diff
+--- a/.githooks/pre-push
++++ b/.githooks/pre-push
+@@ -9,9 +9,11 @@
+ #        task branch m<N>/t###-<slug>        -> specs/M<N>-*/tasks/T###.md
+ #        job branch  m<N>/<letters><nn>-<slug> (e.g. m0/d01-…, a supervisor job such as draw-diagrams)
+ #                                            -> .handoff/runs/M<N>-<LETTERS><nn>/task.md (scripts/delegate.sh)
++#   4. no pushed commit changes tests/acceptance/** together with product code (QA-owned: the test lands first,
++#      in its own commit, so a fix can never write the test that grades it)
+ #
+ # Why local and not only CI: origin pushes to GitLab AND the GitHub mirror at once, before any CI runs.
+-# All three checks run even after one fails, so you see every problem at once.
++# All four checks run even after one fails, so you see every problem at once.
+ # Bypass: `git push --no-verify` is a human-only action — record the yes in .handoff/TRACKER.md first.
+ # Run by hand (no stdin): checks the current branch.
+ set -euo pipefail
+@@ -109,5 +111,22 @@
+   scripts/scope-guard.sh "$task" "$base" "$2" || fail=1
+ done
+ 
++# ---- 4. acceptance tests never ride with product code ----------------------------------------------------
++# Allowed beside tests/acceptance/**: other tests, specs, docs, .handoff, MILESTONES.md and the Makefile target
++# that runs the suite. Merge commits are skipped (their parents were checked when they were pushed).
++for p in ${pushes[@]+"${pushes[@]}"}; do
++  set -- $p
++  if [ "${3//0/}" != "" ] && git cat-file -e "$3^{commit}" 2>/dev/null; then range="$3..$2"; else range="$2 --not --remotes=$remote"; fi
++  for c in $(git rev-list --no-merges $range); do
++    files=$(git diff-tree --no-commit-id --name-only -r "$c")
++    printf '%s\n' "$files" | grep -q '^tests/acceptance/' || continue
++    other=$(printf '%s\n' "$files" | grep -vE '^(tests/|specs/|docs/|\.handoff/|MILESTONES\.md$|Makefile$)' || true)
++    [ -z "$other" ] || {
++      echo "pre-push: BLOCKED — $(git log -1 --format='%h %s' "$c") changes tests/acceptance/** with $(echo $other) (commit the acceptance test on its own, first)" >&2
++      fail=1
++    }
++  done
++done
++
+ [ "$fail" = 0 ] || { echo "pre-push: push blocked — fix the above (or a human records a yes and uses --no-verify)" >&2; exit 1; }
+ echo "pre-push: all checks passed"
+```
+
+### H24 Analyze dotted milestones and NFR-only tracers  [status: proposed]
+
+- F#: F31 · Layer: Script · Reach: factory skill
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/slice-tasks/references/analyze.md`
+- Root cause: M5.1 is a dotted id → the script's `M<N>` parse, after: strip and Consumes grep take digits only → the folder is rejected; a restyle proves NFRs and has no AE → the tracer and covers checks count FR/AE only → the supervisor ran a hand-edited copy at G4.
+- Why this layer: §10 "Mechanical step done wrong → Script": the tool itself was wrong for a legal milestone shape, and a hand-edited copy at a gate is exactly what a script is there to prevent.
+- Rules: `skills/slice-tasks/references/analyze.md`: checks table rows 12 → 12 (Order cell and Scope paragraph edited); pruned: none.
+- Guard: on Cerbo, the new script prints RESULT: PASS for specs/M5.2-safe-landing, specs/M6.1-patient-orders and for specs/M5.1-visual-refresh at the G4 commit 6bc24f6 (today: "is not specs/M<N>-<slug>"); M6 stays PASS; M4 and M5 fail only on their accepted 11-task size, as today (checked this pass).
+- Teach: "The gate's consistency check now understands the milestone names we actually use, so nobody edits the checker by hand at a gate."
+- diff-sha256: 58bc64be50b3
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/slice-tasks/references/analyze.md
++++ b/skills/slice-tasks/references/analyze.md
+@@ -11,7 +11,8 @@
+ `Analyze:` line verbatim into the STOP message; never retype or round them.
+ 
+ **Scope** = the FR/AE ids in the PRD `## Milestone cut` row for `M<N>` (its Scope and Proves cells) plus the ids in
+-the Covers column of `acceptance.md ## Traceability`. Nothing else in `acceptance.md` counts: its
++the Covers column of `acceptance.md ## Traceability`, plus the NFR ids in that row's Proves cell (a restyle or
++hardening milestone proves NFRs and may have no AE). Milestone ids may be dotted (`M5.1`). Nothing else in `acceptance.md` counts: its
+ `Out of scope this milestone:` line names later milestones' FRs.
+ 
+ ## What it checks
+@@ -24,7 +25,7 @@
+ | Coverage | an in-scope FR/AE is covered by no task |
+ | Owns | not exactly one `Owns:` line before `## Ask`; an empty entry or one containing a space; any glob that matches `tests/acceptance/**`, `specs/**`, `docs/**`, `.handoff/**`, `.claude/**`, `.githooks/**`, `AGENTS.md`, `CLAUDE.md`, `MILESTONES.md` or `scripts/scope-guard.sh`; any entry that is or covers a dependency manifest or lockfile (implementers never install) |
+ | Parallel | two `parallel: true` tasks own overlapping globs (conservative: literal prefixes nest) |
+-| Order | an `after:` id has no task file; a cycle; more than one task in wave 1, or wave 1 is not `T001`; `T001` covers no AE |
++| Order | an `after:` id has no task file; a cycle; more than one task in wave 1, or wave 1 is not `T001`; `T001` covers no AE while the scope has one |
+ | Harness | a `codex` task with `hitl: true` or `parallel: false` |
+ | Sections | `## ` headings are not exactly Ask, Done-when, Must not change, Consumes / Produces, Context manifest, Return; the first line under `## Ask` is not a title of at most 6 words (delegate.sh and implement-task turn it into the branch name); Done-when lacks `make check`; Return lacks `runs/<id>/result.md`; a `- Consumes:` line names a task id missing from `after:` |
+ | Leftovers | `{{` or `<!-- guide:` remains; a fenced code block other than `sh`/`bash` (no code in task files) |
+@@ -42,7 +43,7 @@
+ set -u
+ D=${1:?usage: sh -s -- specs/M<N>-<slug> [prd path]}; D=${D%/}; P=${2:-docs/product/prd.md}
+ T=$D/tasks; A=$D/acceptance.md
+-N=$(basename "$D" | sed -n 's/^M\([0-9][0-9]*\)-.*/\1/p')
++N=$(basename "$D" | sed -n 's/^M\([0-9][0-9.]*\)-.*/\1/p')
+ [ -n "$N" ] || { echo "FAIL: $D is not specs/M<N>-<slug>"; exit 2; }
+ fail=0; bad() { echo "FAIL: $*"; fail=1; }
+ idsof() { grep -oE '(^|[^N])(FR|AE)-[0-9]{3}' | grep -oE '(FR|AE)-[0-9]{3}' | sort -u; }
+@@ -66,7 +67,8 @@
+ files=$(ls "$T"/T[0-9][0-9][0-9].md 2>/dev/null)
+ [ -n "$files" ] || { echo "FAIL: no task files in $T"; exit 1; }
+ set -f
+-scope=$( { grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $4; print $5}'; trace | awk -F'|' '{print $3}'; } | idsof)
++scope=$( { grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $4; print $5}'; trace | awk -F'|' '{print $3}'; } | idsof
++  grep -E "^\| M$N( |\|)" "$P" 2>/dev/null | awk -F'|' '{print $5}' | grep -oE 'NFR-[0-9]{3}' | sort -u)
+ [ -n "$scope" ] || bad "no FR/AE ids for M$N in the Milestone cut row of $P or the Traceability Covers of $A"
+ k=0; pc=0; cc=0; xc=0; hc=0; bm=0; ec=0; ua=0; ao=0; ov=0; bl=0
+ all=""; edges=""; cov=""; par=""
+@@ -95,7 +97,7 @@
+     else bad "$t: covers $c, not in M$N scope"; fi
+   done
+   [ -z "$covers" ] || [ "$n_in" -gt 0 ] || { bad "$t: covers no in-scope FR/AE"; ec=$((ec+1)); }
+-  after=$(fm "$f" after | lst | sed 's/^M[0-9]*-//')
++  after=$(fm "$f" after | lst | sed 's/^M[0-9.]*-//')
+   for a in $after; do case " $all " in *" $a "*) ;; *) bad "$t: after $a has no task file"; ua=$((ua+1));; esac; done
+   edges="$edges
+ $t $(printf '%s ' $after)"
+@@ -123,7 +125,7 @@
+     *) [ "$tw" -le 6 ] || bad "$t: Ask title has $tw words, at most 6 (it becomes the branch name)";; esac
+   sec "$f" Done-when | grep -q 'make check' || bad "$t: Done-when must end with make check"
+   sec "$f" Return | grep -q "runs/$id/result.md" || bad "$t: Return must name \$HANDOFF_DIR/runs/$id/result.md"
+-  for u in $(sec "$f" 'Consumes / Produces' | grep -E '^- Consumes' | grep -oE 'M[0-9]+-T[0-9]{3}' | sed 's/^M[0-9]*-//'); do
++  for u in $(sec "$f" 'Consumes / Produces' | grep -E '^- Consumes' | grep -oE 'M[0-9.]+-T[0-9]{3}' | sed 's/^M[0-9.]*-//'); do
+     printf '%s\n' "$after" | grep -qx "$u" || bad "$t: consumes from $u but after: lacks it"
+   done
+   grep -nE '\{\{|<!-- guide:' "$f" >/dev/null && bad "$t: unfilled {{placeholder}} or guide comment"
+@@ -142,7 +144,7 @@
+ cy=$(printf '%s\n' "$waves" | grep -c ' CYCLE$'); [ "$cy" = 0 ] || bad "after: cycle or unknown dep: $(printf '%s\n' "$waves" | grep ' CYCLE$' | cut -d' ' -f1 | tr '\n' ' ')"
+ w1=$(printf '%s\n' "$waves" | awk '$2==1{print $1}' | tr '\n' ' ')
+ [ "$w1" = "T001 " ] || bad "wave 1 must be the tracer bullet T001 alone (got: $w1)"
+-[ -f "$T/T001.md" ] && { fm "$T/T001.md" covers | lst | grep -q '^AE-' || bad "T001 (tracer bullet) covers no AE"; }
++[ -f "$T/T001.md" ] && printf '%s\n' "$scope" | grep -q '^AE-' && { fm "$T/T001.md" covers | lst | grep -q '^AE-' || bad "T001 (tracer bullet) covers no AE"; }
+ pl=$(printf '%s\n' "$par" | sed '/^$/d')
+ if [ -n "$pl" ]; then
+   ovl=$(printf '%s\n' "$pl" | { i=0; while read -r t1 g1; do i=$((i+1))
+```
+
+### H25 Run the Bash tool in bash here  [status: proposed]
+
+- F#: F33 · Layer: Settings · Reach: project
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `.claude/settings.json`
+- Root cause: Bash snippets in skills and supervisor steps (`set -- $var`, unquoted `$F`, globs) behave differently in zsh → the Bash tool uses the login shell, zsh, on this Mac → nothing pins the shell the kit is written for.
+- Why this layer: §10 "Flaky setup → Environment" with the fix in Settings (step 2, tools): the Claude Code CLI honours `CLAUDE_CODE_SHELL` (checked in the installed 2.1.287 binary), so the right shell becomes the default instead of a rule to remember; project reach first because bash does not read ~/.zprofile, where Homebrew's PATH lives, so the guard must confirm node, npx and glab still resolve before the kit template copies it.
+- Rules: `.claude/settings.json`: one env key; pruned: none.
+- Guard: after a restart, `ps -p $$ -o comm=` in the Bash tool prints bash and `command -v node npx glab` prints three paths; if not, revert the key (one line).
+- Teach: "We pinned the agent's shell to the one our scripts are written for, instead of asking every agent to remember zsh's quirks."
+- diff-sha256: 088425493cbb
+- Verdict: pending G-L5
+
+```diff
+--- a/.claude/settings.json
++++ b/.claude/settings.json
+@@ -1,5 +1,8 @@
+ {
+   "$schema": "https://json.schemastore.org/claude-code-settings.json",
++  "env": {
++    "CLAUDE_CODE_SHELL": "/bin/bash"
++  },
+   "enabledPlugins": {
+     "superpowers@claude-plugins-official": false,
+     "ponytail@ponytail": false,
+```
+
+### H26 Real Task trailers; one Log line per id  [status: proposed]
+
+- F#: F35, F39 · Layer: Skill · Reach: factory skill
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `skills/gather-evidence/SKILL.md`, `skills/implement-task/SKILL.md`, `templates/CLAUDE.md`
+- Root cause: F35: `-m "Task: …"` is its own paragraph and the harness's Co-Authored-By paragraph follows → git sees no Task trailer → workers amend and report-milestone flags squash commits. F39: in-session subagents leave no RESULT line and DISPATCH lines listed several ids → report-milestone's first-pass rate reads 0/4 with tasks "not dispatched".
+- Why this layer: F35 is a tool change inside the recipe (git's own `--trailer` flag merges into the Co-Authored-By block), the cheapest step that makes the right commit the default; F39 sharpens the existing dispatch rule in place (no new rule) so the Log carries what report-milestone already parses.
+- Rules: `templates/CLAUDE.md` 12 → 12 list items (one rule replaced by a sharper one); `skills/implement-task/SKILL.md` 278 → 279 lines (ceiling 300); `skills/gather-evidence/SKILL.md` 252 → 252 lines; pruned: none needed.
+- Guard: `git log -1 --format=%(trailers:key=Task,valueonly)` prints the id on a commit made with the new command (checked in a scratch repo with a Co-Authored-By paragraph before and after); the next report-milestone §8 shows no first_pass=unknown for a Claude-subagent task.
+- Teach: "Git trailers are a parsed block, not a line that looks right; `--trailer` makes the commit correct the first time, and the Log now records what the metric needs."
+- diff-sha256: 0703549f54fb
+- Verdict: pending G-L5
+
+```diff
+--- a/skills/gather-evidence/SKILL.md
++++ b/skills/gather-evidence/SKILL.md
+@@ -153,7 +153,7 @@
+ 11. **Dispatched only: commit, then write the result.**
+     - Commit whenever you wrote R files and Done when passes, whatever the status (a partial answer with its gaps
+       is still evidence): `git add -- <each R file> docs/research/sources.md` (explicit paths, never `-A`), then
+-      `git commit -m "docs(m<N>/<job>): research R<NN>" -m "Task: <id>"`, with `<N>` and `<job>` from the
++      `git commit -m "docs(m<N>/<job>): research R<NN>" --trailer "Task: <id>"`, with `<N>` and `<job>` from the
+       lowercased `id` and every R id listed (M1-T007 → `docs(m1/t007): research R05, R06`). Then
+       `git status --porcelain -- . ":!.handoff"` must print nothing; `head_sha=$(git rev-parse --short HEAD)`.
+     - Write `$HANDOFF_DIR/runs/<id>/result.md` from `specs/_templates/result.md`; never commit it. One key per
+--- a/skills/implement-task/SKILL.md
++++ b/skills/implement-task/SKILL.md
+@@ -165,7 +165,8 @@
+     staged mode: it checks what you are about to commit) and paste it under section 7. Non-zero:
+     `git restore --staged -- <path>` for each reported path and re-run; if the task truly needs that path, it is a
+     stop condition. Commit:
+-    `git commit -m "feat(m<N>/t###): <imperative summary, at most 72 chars>" -m "Task: M<N>-T###"`. Confirm the
++    `git commit -m "feat(m<N>/t###): <imperative summary, at most 72 chars>" --trailer "Task: M<N>-T###"`
++    (`--trailer` joins any Co-Authored-By block; a `-m "Task: …"` paragraph is not a trailer). Confirm the
+     same `git status` is empty and record `git rev-parse HEAD` as `head_sha`.
+ 12. **Write the result.** Overwrite the provisional file: fill `assets/template.md` at the `## Return` path
+     (`$HANDOFF_DIR/runs/<id>/result.md`, `<id>` = the task `id`). `changes` from
+--- a/templates/CLAUDE.md
++++ b/templates/CLAUDE.md
+@@ -69,12 +69,15 @@
+   prompt = "Read <abs path>/SKILL.md and follow it for <task file> in <worktree>. HANDOFF_DIR=<abs>/.handoff".
+   Pass paths, never summaries.
+ - Other harness: `bash scripts/delegate.sh <task-file>`.
+-- Log `DISPATCH <id> harness=<h> why=<one line>` for every job. Never show the verifier a worker's self-report.
++- Log one `DISPATCH <id> harness=<h> why=<one line>` line per id (never a list), and when a Claude subagent returns,
++  the line delegate.sh writes for other harnesses: `RESULT <id> status=<s> harness=claude-subagent timeout=no
++  tree=<clean|dirty>` (report-milestone's first-pass rate reads both). Never show the verifier a worker's self-report.
+ 
+ ## Verify delegated work, in order
+ `result.md` exists and parses (exit codes don't count) → `bash scripts/scope-guard.sh <task-file> <milestone-branch>`
+ exits 0 → you run `make check` in the worktree yourself → read `git diff` against the claim → verifier pass
+-(cross-family when possible) → `git merge --squash` onto the milestone branch → `Verified: <sha> <cmd> → <result>`.
++(cross-family when possible) → `git merge --squash` onto the milestone branch, committed with
++`--trailer "Task: <id>"` → `Verified: <sha> <cmd> → <result>`.
+ 
+ ## Failure ladder
+ Log FAIL → retry once with the exact error → fresh session after 2 failed corrections → fallback harness → reset the
+```
+
+### H27 Same trailer and Log rules in this CLAUDE.md  [status: proposed]
+
+- F#: F35, F39 · Layer: Skill · Reach: project
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `CLAUDE.md`
+- Root cause: Same as H26: init-repo never overwrites, so Cerbo's supervisor rules need the same two edits.
+- Why this layer: Same as H26; the project half.
+- Rules: `CLAUDE.md` 12 → 12 list items; pruned: none needed.
+- Guard: the next squash commit on a Cerbo milestone branch prints its id under `git log -1 --format=%(trailers:key=Task,valueonly)`, and the next Log has one DISPATCH and one RESULT line per Claude-subagent task.
+- Teach: "Cerbo's squash commits now carry a real Task trailer, and its metric counts every dispatched task."
+- diff-sha256: c2bc8cdf30f9
+- Verdict: pending G-L5
+
+```diff
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -66,12 +66,15 @@
+ - Claude subagent (default): Agent tool, `isolation: worktree` for code; prompt = "Read <abs path>/SKILL.md and
+   follow it for <task file>. HANDOFF_DIR=<abs>/.handoff". Pass paths, never summaries.
+ - Other harness: `bash scripts/delegate.sh <task-file>`.
+-- Log `DISPATCH <id> harness=<h> why=<one line>` for every job. Never show the verifier a worker's self-report.
++- Log one `DISPATCH <id> harness=<h> why=<one line>` line per id (never a list), and when a Claude subagent returns,
++  the line delegate.sh writes for other harnesses: `RESULT <id> status=<s> harness=claude-subagent timeout=no
++  tree=<clean|dirty>` (report-milestone's first-pass rate reads both). Never show the verifier a worker's self-report.
+ 
+ ## Verify delegated work, in order
+ `result.md` exists and parses (exit codes don't count) → `bash scripts/scope-guard.sh <task-file> <milestone-branch>`
+ exits 0 → you run `make check` in the worktree yourself → read `git diff` against the claim → verifier pass
+-(cross-family when possible) → `git merge --squash` onto the milestone branch → `Verified: <sha> <cmd> → <result>`.
++(cross-family when possible) → `git merge --squash` onto the milestone branch, committed with
++`--trailer "Task: <id>"` → `Verified: <sha> <cmd> → <result>`.
+ 
+ ## Failure ladder
+ Log FAIL → retry once with the exact error → fresh session after 2 failed corrections → fallback harness → reset the
+```
+
+### H28 Migration tasks own the demo seed list  [status: proposed]
+
+- F#: F38 · Layer: AGENTS.md · Reach: project
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: cerbo-supplement-store · Files: `AGENTS.md`
+- Root cause: A new table must be named in RESET_TABLES (db/seed/demo.ts) → that coupling is a fact of this repo, not in any Ask → slice-tasks' adopted H8 sentence (own every file the Ask assigns) cannot see it → M5 shipped a broken re-seed and M6-T002 stopped on an Owns gap.
+- Why this layer: §10 "Wrong command/API repeatedly → AGENTS.md": the check already exists (tests/unit/seed-demo.test.ts caught M6-T002) but fires mid-task; slice-tasks reads AGENTS.md, so one project line moves the fix to slicing time. Runner-up: derive RESET_TABLES from pg_tables in product code, which removes the coupling (fix-bug or a task, not a harness change).
+- Rules: `AGENTS.md` 16 → 17 list items (ceiling ~20); pruned: none, below ceiling.
+- Guard: in the next milestone's specs folder, `grep -L 'db/seed/demo.ts'` over the task files whose Owns names db/migrations prints nothing (the frozen M4 and M5 tasks list 7 such files today).
+- Teach: "When two files must change together, write the pairing where the planner reads, not only in a test that fires halfway through a task."
+- diff-sha256: 886510ef97aa
+- Verdict: pending G-L5
+
+```diff
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -58,3 +58,5 @@
+ - Stack: TypeScript 5.9 on Node 22.22+, Nuxt 4 (D44) with Vue 3, PostgreSQL 16 through Kysely with plain SQL
+   migrations (D33, D39), Vitest. Acceptance tests run only against the throwaway `supplements_test` database.
+ - Money, when it exists: integer cents only, never floats.
++- A task whose migration adds a table also owns `db/seed/demo.ts`: `RESET_TABLES` must name the table
++  (`tests/unit/seed-demo.test.ts` fails otherwise), so slice-tasks puts both in one `Owns:`.
+```
+
+### H29 Ship records go to main in their own MR  [status: proposed]
+
+- F#: F40 · Layer: Skill · Reach: WORKFLOW.md
+- Proposed: 2026-10-11 by route-failure (Claude Code, claude-opus-5-5) · Project: cerbo-supplement-store
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`
+- Root cause: Ship records are written after the milestone merge → main is protected, so they need an MR → no rule says which → they rode the next milestone's branch → report-milestone flagged them as unplanned commits twice (DV-5, DV-4).
+- Why this layer: §10 "Phase procedure botched → Skill", at WORKFLOW.md reach because the MR rule lives in §8 and ship-milestone defers commits to the supervisor; Cerbo already switched to chore/m<N>-ship-records MRs at M6, so the rule records a working pattern. A report-milestone exemption would hide the records inside another milestone's revert.
+- Rules: `docs/WORKFLOW.md` §8: 11 → 11 bullets (the Done bullet extended); pruned: none.
+- Guard: `git log --first-parent --format=%s main` shows a ship-records merge after each milestone merge, and the next report-milestone lists no records-only unplanned commit.
+- Teach: "Every change to main, even a record, takes its own reviewed path, so reverting a milestone never takes another milestone's paperwork with it."
+- diff-sha256: 0a295ac08761
+- Verdict: pending G-L5
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -270,7 +270,10 @@
+   a local run alone.
+ - **Every deploy ends with a review link** (owner's rule, 2026-10-10): once `/version` shows the deployed SHA, the
+   human gets the URL and a numbered walkthrough per demo user (ship-milestone STOP A).
+-- Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume.
++- Done = merged **and** `make check` run on main, SHA recorded in `MILESTONES.md` and Resume. Records written after
++  the merge (the MILESTONES done row, the release log) reach a protected `main` through their own
++  `chore/m<N>-ship-records` MR, merged on green CI under the same standing yes; never on the next milestone's
++  branch, where report-milestone counts them as unplanned commits (G5 DV) and a revert of that milestone takes them.
+ 
+ ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
  
 ```
