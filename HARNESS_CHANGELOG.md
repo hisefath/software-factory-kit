@@ -2608,3 +2608,204 @@ index 0000000..7c7b7bf
 - Kept: every phase skill, scope-guard, make check, pre-push, verbatim approvals, the decision journal, human-only actions.
 - Guard: H30 metrics on the next project — human touches per milestone below Cerbo v2's, escaped defects equal or lower.
 - Merge: review the branch MR; merging it is the approval.
+
+### H32 Decode pass 2 after research; GI card leads with the real ask  [status: superseded by H33]
+
+- F#: F49 · Layer: Skill · Reach: kit (docs/WORKFLOW.md §4b table, skills/plan-product/SKILL.md, skills/plan-product/assets/card.md)
+- Proposed: 2026-10-15 by route-failure (Claude Code, claude-opus-5-5) · Project: boostlingo-interpreter
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `skills/plan-product/SKILL.md`, `skills/plan-product/assets/card.md`
+- Root cause: decode-prompt is step one of /plan-product and its input 3 says "Don't browse beyond [the portal]; write research questions instead" → those research questions are answered by gather-evidence, but nothing sends the answers back to decode.md → the partner's own shipped product rule and hiring signal reached only the PRD revise, after the human prompted it.
+- Why this layer: the gap is in the session's chain order, which plan-product owns; keeping decode-prompt's no-browse rule keeps pass 1 cheap and lets research do the browsing once. A Done-when grep makes the pass checkable; a card section makes the human see the real ask first.
+- Rules: `skills/plan-product/SKILL.md` 73 → 82 lines (ceiling 300); red-flag rows 4 → 5 (ceiling 6); Done-when 3 → 4; pruned: none, below ceiling.
+- Guard: `grep -cE 'R[0-9]+ F[0-9]+|pass 2: no change' specs/M<N>-<slug>/decode.md` ≥ 1 before write-prd; on boostlingo-interpreter it prints 0 at 6d428e5^ and 6 after.
+- Teach: "My factory decodes the prompt twice: once from the prompt, once after research reads what the partner already ships and hires for, because the real question usually hides in the partner's own product."
+- diff-sha256: 82e34de968b0
+- Verdict: revise 2026-10-15 (owner, on H32@82e34de968b0): "no we dont need that rule, take it out. if we were doing facility grids project, and couldnt search the gap in distributed computing and byzantines fault, then we wouldnt have realized how to handle the impossible project prompt"; superseded by H33
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -134,7 +134,7 @@
+ 
+ | Session (one command) | BMAD perspective | Chains these phase skills | Human checkpoint |
+ |---|---|---|---|
+-| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → write-prd | **Intent check (GI):** one batched card |
++| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → decode pass 2 → write-prd | **Intent check (GI):** one batched card |
+ | `/plan-design` | UX Designer → Architect | (map-ux-flows) → design-hld → design-lld (+ change plan) → draw-diagrams ∥ | **Design check (GD):** one batched card + the diagrams |
+ | `/build-milestone` | Dev → QA | define-acceptance → slice-tasks + readiness check → implement-task ∥ → 3-reviewer review ∥ check-security → report-milestone → merge on green → ship | **Try-it check (GT):** the human uses the app per role |
+ | `/route-failure`, `/quiz-me` | Learn | retro, teach | G-L5 only for harness changes |
+--- a/skills/plan-product/SKILL.md
++++ b/skills/plan-product/SKILL.md
+@@ -16,8 +16,8 @@
+ ## You own / You never touch
+ 
+ - You own running, in order, `decode-prompt` → `sharpen-brief` → `gather-evidence` (→ `audit-codebase` when the repo
+-  inherits code) → `write-prd`, each under its own "You own / You never touch"; you never write a path none of them
+-  declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
++  inherits code) → decode pass 2 → `write-prd`, each under its own "You own / You never touch"; you never write a path
++  none of them declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
+ - You own deciding Type 2 questions on the recommendation (WORKFLOW §5, `auto-T2` Approvals row + `log-decision`);
+   you never decide a Type 1 question or an open ⚠ only the human can answer: they go in the card.
+ - You own continuing past each skill's STOP; you never start `plan-design`.
+@@ -40,9 +40,15 @@
+ 2. Run each chained skill by reading its `SKILL.md` and following it. Where a skill would interview the human, use its
+    recommended answer for Type 2 questions (log them) and park Type 1 questions and human-only ⚠ for the card. Where
+    a skill's STOP names a gate (G-decode, G0, G1), treat it as a checkpoint and continue.
+-3. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
++3. **Decode pass 2 (MUST, after `gather-evidence`, before `write-prd`).** Pass 1 ran before any research and could
++   not browse past the partner portal. Re-read the partner-profile and market R files, and the partner's live product
++   pages they cite, against `decode.md`: does the partner already ship or hire for this problem (a product rule, a job
++   post's skills)? Append new `QB-<n>` and `T<n>` rows citing `R<nn> F<n>`, re-rank so the strongest QB and costliest
++   trap lead, and update the brief's framing line if the top QB changed. No new row → write "pass 2: no change" with
++   the R files read.
++4. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
+    next (e.g. brownfield vs greenfield). Ask it in one message, then continue.
+-4. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
++5. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
+ 
+ ## Output
+ 
+@@ -55,10 +61,12 @@
+ - [ ] Each Type 2 decision taken has an `auto-T2` Approvals row and a journal entry.
+ - [ ] The card lists every Type 1 decision and every human-only ⚠ from all chained artifacts:
+       `grep -c '⚠' <artifacts>` matches the card's ⚠ count.
++- [ ] Decode pass 2 ran: `grep -cE 'R[0-9]+ F[0-9]+|pass 2: no change' specs/M<N>-<slug>/decode.md` ≥ 1, and the
++      card's first section names the top QB and top trap.
+ 
+ ## STOP
+ 
+-> **Intent check (GI), M<N>.** <one-screen summary: the real ask (QB), the problem, North Star, scope cut> ·
++> **Intent check (GI), M<N>.** <the real ask (top QB) and the top trap, first; then the problem, North Star, scope cut> ·
+ > Type 2 decided for you: <n> (see `docs/decisions/REVIEW.md`) · **Your decisions (<k>):** <numbered Type 1 cards
+ > and ⚠ questions>. Reply with your picks in one message (e.g. "1A 2 default 3B"), or Revise / Stop.
+ > Next after your answer: `/plan-design`.
+@@ -67,6 +75,7 @@
+ 
+ | Thought | Do instead |
+ |---|---|
++| "The decode is done; research only filled in facts." | Decode pass 2: the partner's own product and job posts are where the real question hides. |
+ | "I'll ask this one now, it's quick." | Park it; one card at the end. |
+ | "This choice feels big, but it's reversible." | Type 2: decide, log, move on. |
+ | "The PRD can name the framework, it's obvious." | write-prd's rule still holds: tech only in Constraints. |
+--- a/skills/plan-product/assets/card.md
++++ b/skills/plan-product/assets/card.md
+@@ -1,6 +1,10 @@
+ # <GI | GD> card — M<N> <slug>
+ As of: <`date`> · Artifacts: <paths@sha>
+ 
++## The real ask (GI: from decode.md after pass 2)
++- **Question behind the question:** QB-<n> <one line> (evidence: <R<nn> F<n>>)
++- **Top trap:** T<n> <one line> · guard: <phase / check>
++
+ ## Summary (one screen)
+ <What we're building and why, in plain words. For GD: the boxes and how they talk, the tables, the riskiest part.>
+ 
+```
+
+### H33 Decode searches freely, runs again after research; GI card leads with the real ask  [status: proposed]
+
+- F#: F49 · Layer: Skill · Reach: kit (docs/WORKFLOW.md §4b table, skills/decode-prompt/SKILL.md, skills/plan-product/SKILL.md, skills/plan-product/assets/card.md)
+- Proposed: 2026-10-15 by route-failure (Claude Code, claude-opus-5-5) · Project: boostlingo-interpreter · Supersedes: H32 (owner revise)
+- Apply in: software-factory-kit · Files: `docs/WORKFLOW.md`, `skills/decode-prompt/SKILL.md`, `skills/plan-product/SKILL.md`, `skills/plan-product/assets/card.md`
+- Root cause: decode-prompt input 3 said "Don't browse beyond [the portal]; write research questions instead" → pass 1 could not see the partner's live product, job posts or what the field already knows → nothing sent gather-evidence's answers back to decode.md, so the real question reached only the PRD revise, after the human prompted it.
+- Why this layer: the owner's revise: without search, a prompt with a known-impossible core (e.g. a facility-grid prompt that hits Byzantine fault limits) cannot be decoded at all. So pass 1 searches freely and pass 2 still re-reads the sourced R files before write-prd, with a Done-when grep and a card section the human sees first.
+- Rules: `skills/decode-prompt/SKILL.md` 114 → 117 lines, `skills/plan-product/SKILL.md` 73 → 82 (ceiling 300); one no-browse rule removed; plan-product red-flag rows 4 → 5 (ceiling 6); Done-when 3 → 4.
+- Guard: `grep -cE 'R[0-9]+ F[0-9]+|pass 2: no change' specs/M<N>-<slug>/decode.md` ≥ 1 before write-prd; on boostlingo-interpreter it prints 0 at 6d428e5^ and 6 after. ⚠ no mechanical guard for free search in pass 1: the decode's Sources list shows URLs beyond the portal.
+- Teach: "My factory lets the decode search the web, because the real question often hides in what the field already knows or what the partner already ships, then decodes again after research before the PRD."
+- diff-sha256: 59b51f307f21
+- Verdict: approved at G-L5 2026-10-15 00:08 CDT (owner, H33@59b51f307f21): "approve H33"
+
+```diff
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -134,7 +134,7 @@
+ 
+ | Session (one command) | BMAD perspective | Chains these phase skills | Human checkpoint |
+ |---|---|---|---|
+-| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → write-prd | **Intent check (GI):** one batched card |
++| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → decode pass 2 → write-prd | **Intent check (GI):** one batched card |
+ | `/plan-design` | UX Designer → Architect | (map-ux-flows) → design-hld → design-lld (+ change plan) → draw-diagrams ∥ | **Design check (GD):** one batched card + the diagrams |
+ | `/build-milestone` | Dev → QA | define-acceptance → slice-tasks + readiness check → implement-task ∥ → 3-reviewer review ∥ check-security → report-milestone → merge on green → ship | **Try-it check (GT):** the human uses the app per role |
+ | `/route-failure`, `/quiz-me` | Learn | retro, teach | G-L5 only for harness changes |
+--- a/skills/decode-prompt/SKILL.md
++++ b/skills/decode-prompt/SKILL.md
+@@ -38,4 +38,5 @@
+    week teaches tells you what the project is testing.
+-3. **Partner context (SHOULD, partner projects):** the partner's portal page or company panel the human points to.
+-   Don't browse beyond it; write research questions instead.
++3. **Partner context (SHOULD, partner projects):** the partner's portal page or company panel the human points to,
++   then search the web freely: the partner's live product, job posts, and what the field already knows about the
++   problem. Cite each URL as a source; deep sourced research still goes to `gather-evidence`.
+ 4. `docs/decisions/DECISION_JOURNAL.md` and earlier `specs/*/decode.md` if present: never re-ask what's decided.
+@@ -59,2 +60,4 @@
+    - For a hiring partner: what does their business need, and what would make them want to hire the builder?
++   - What does the field already know here: a known-impossible result (e.g. Byzantine fault limits in distributed
++     computing), a standard trade-off, or a product the partner already ships that answers part of it?
+ 3. **Find the traps.** Check every category in the table below; write each trap that applies as: trap, why it's
+--- a/skills/plan-product/SKILL.md
++++ b/skills/plan-product/SKILL.md
+@@ -16,8 +16,8 @@
+ ## You own / You never touch
+ 
+ - You own running, in order, `decode-prompt` → `sharpen-brief` → `gather-evidence` (→ `audit-codebase` when the repo
+-  inherits code) → `write-prd`, each under its own "You own / You never touch"; you never write a path none of them
+-  declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
++  inherits code) → decode pass 2 → `write-prd`, each under its own "You own / You never touch"; you never write a path
++  none of them declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
+ - You own deciding Type 2 questions on the recommendation (WORKFLOW §5, `auto-T2` Approvals row + `log-decision`);
+   you never decide a Type 1 question or an open ⚠ only the human can answer: they go in the card.
+ - You own continuing past each skill's STOP; you never start `plan-design`.
+@@ -40,9 +40,15 @@
+ 2. Run each chained skill by reading its `SKILL.md` and following it. Where a skill would interview the human, use its
+    recommended answer for Type 2 questions (log them) and park Type 1 questions and human-only ⚠ for the card. Where
+    a skill's STOP names a gate (G-decode, G0, G1), treat it as a checkpoint and continue.
+-3. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
++3. **Decode pass 2 (MUST, after `gather-evidence`, before `write-prd`).** Pass 1 ran before the research files
++   existed. Re-read the partner-profile and market R files, and the partner's live product
++   pages they cite, against `decode.md`: does the partner already ship or hire for this problem (a product rule, a job
++   post's skills)? Append new `QB-<n>` and `T<n>` rows citing `R<nn> F<n>`, re-rank so the strongest QB and costliest
++   trap lead, and update the brief's framing line if the top QB changed. No new row → write "pass 2: no change" with
++   the R files read.
++4. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
+    next (e.g. brownfield vs greenfield). Ask it in one message, then continue.
+-4. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
++5. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
+ 
+ ## Output
+ 
+@@ -55,10 +61,12 @@
+ - [ ] Each Type 2 decision taken has an `auto-T2` Approvals row and a journal entry.
+ - [ ] The card lists every Type 1 decision and every human-only ⚠ from all chained artifacts:
+       `grep -c '⚠' <artifacts>` matches the card's ⚠ count.
++- [ ] Decode pass 2 ran: `grep -cE 'R[0-9]+ F[0-9]+|pass 2: no change' specs/M<N>-<slug>/decode.md` ≥ 1, and the
++      card's first section names the top QB and top trap.
+ 
+ ## STOP
+ 
+-> **Intent check (GI), M<N>.** <one-screen summary: the real ask (QB), the problem, North Star, scope cut> ·
++> **Intent check (GI), M<N>.** <the real ask (top QB) and the top trap, first; then the problem, North Star, scope cut> ·
+ > Type 2 decided for you: <n> (see `docs/decisions/REVIEW.md`) · **Your decisions (<k>):** <numbered Type 1 cards
+ > and ⚠ questions>. Reply with your picks in one message (e.g. "1A 2 default 3B"), or Revise / Stop.
+ > Next after your answer: `/plan-design`.
+@@ -67,6 +75,7 @@
+ 
+ | Thought | Do instead |
+ |---|---|
++| "The decode is done; research only filled in facts." | Decode pass 2: the partner's own product and job posts are where the real question hides. |
+ | "I'll ask this one now, it's quick." | Park it; one card at the end. |
+ | "This choice feels big, but it's reversible." | Type 2: decide, log, move on. |
+ | "The PRD can name the framework, it's obvious." | write-prd's rule still holds: tech only in Constraints. |
+--- a/skills/plan-product/assets/card.md
++++ b/skills/plan-product/assets/card.md
+@@ -1,6 +1,10 @@
+ # <GI | GD> card — M<N> <slug>
+ As of: <`date`> · Artifacts: <paths@sha>
+ 
++## The real ask (GI: from decode.md after pass 2)
++- **Question behind the question:** QB-<n> <one line> (evidence: <R<nn> F<n>>)
++- **Top trap:** T<n> <one line> · guard: <phase / check>
++
+ ## Summary (one screen)
+ <What we're building and why, in plain words. For GD: the boxes and how they talk, the tables, the riskiest part.>
+ 
+```

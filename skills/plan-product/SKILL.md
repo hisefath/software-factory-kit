@@ -16,8 +16,8 @@ the human settle every Type 1 decision and open question in a single reply (Inte
 ## You own / You never touch
 
 - You own running, in order, `decode-prompt` → `sharpen-brief` → `gather-evidence` (→ `audit-codebase` when the repo
-  inherits code) → `write-prd`, each under its own "You own / You never touch"; you never write a path none of them
-  declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
+  inherits code) → decode pass 2 → `write-prd`, each under its own "You own / You never touch"; you never write a path
+  none of them declares, except the card at `.handoff/checkpoints/GI-M<N>.md` (supervisor-owned state).
 - You own deciding Type 2 questions on the recommendation (WORKFLOW §5, `auto-T2` Approvals row + `log-decision`);
   you never decide a Type 1 question or an open ⚠ only the human can answer: they go in the card.
 - You own continuing past each skill's STOP; you never start `plan-design`.
@@ -40,9 +40,15 @@ and write down why.
 2. Run each chained skill by reading its `SKILL.md` and following it. Where a skill would interview the human, use its
    recommended answer for Type 2 questions (log them) and park Type 1 questions and human-only ⚠ for the card. Where
    a skill's STOP names a gate (G-decode, G0, G1), treat it as a checkpoint and continue.
-3. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
+3. **Decode pass 2 (MUST, after `gather-evidence`, before `write-prd`).** Pass 1 ran before the research files
+   existed. Re-read the partner-profile and market R files, and the partner's live product
+   pages they cite, against `decode.md`: does the partner already ship or hire for this problem (a product rule, a job
+   post's skills)? Append new `QB-<n>` and `T<n>` rows citing `R<nn> F<n>`, re-rank so the strongest QB and costliest
+   trap lead, and update the brief's framing line if the top QB changed. No new row → write "pass 2: no change" with
+   the R files read.
+4. Stop early only for: a missing MUST input, a red check, or a question whose answer would change which skill runs
    next (e.g. brownfield vs greenfield). Ask it in one message, then continue.
-4. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
+5. Write the card from `assets/card.md` to `.handoff/checkpoints/GI-M<N>.md` and send it as one message.
 
 ## Output
 
@@ -55,10 +61,12 @@ has options incl. "do nothing", costs, a recommendation and a default.
 - [ ] Each Type 2 decision taken has an `auto-T2` Approvals row and a journal entry.
 - [ ] The card lists every Type 1 decision and every human-only ⚠ from all chained artifacts:
       `grep -c '⚠' <artifacts>` matches the card's ⚠ count.
+- [ ] Decode pass 2 ran: `grep -cE 'R[0-9]+ F[0-9]+|pass 2: no change' specs/M<N>-<slug>/decode.md` ≥ 1, and the
+      card's first section names the top QB and top trap.
 
 ## STOP
 
-> **Intent check (GI), M<N>.** <one-screen summary: the real ask (QB), the problem, North Star, scope cut> ·
+> **Intent check (GI), M<N>.** <the real ask (top QB) and the top trap, first; then the problem, North Star, scope cut> ·
 > Type 2 decided for you: <n> (see `docs/decisions/REVIEW.md`) · **Your decisions (<k>):** <numbered Type 1 cards
 > and ⚠ questions>. Reply with your picks in one message (e.g. "1A 2 default 3B"), or Revise / Stop.
 > Next after your answer: `/plan-design`.
@@ -67,6 +75,7 @@ has options incl. "do nothing", costs, a recommendation and a default.
 
 | Thought | Do instead |
 |---|---|
+| "The decode is done; research only filled in facts." | Decode pass 2: the partner's own product and job posts are where the real question hides. |
 | "I'll ask this one now, it's quick." | Park it; one card at the end. |
 | "This choice feels big, but it's reversible." | Type 2: decide, log, move on. |
 | "The PRD can name the framework, it's obvious." | write-prd's rule still holds: tech only in Constraints. |

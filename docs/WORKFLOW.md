@@ -134,7 +134,7 @@ reading markdown to deciding Type 1 choices and trying the product.
 
 | Session (one command) | BMAD perspective | Chains these phase skills | Human checkpoint |
 |---|---|---|---|
-| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → write-prd | **Intent check (GI):** one batched card |
+| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → decode pass 2 → write-prd | **Intent check (GI):** one batched card |
 | `/plan-design` | UX Designer → Architect | (map-ux-flows) → design-hld → design-lld (+ change plan) → draw-diagrams ∥ | **Design check (GD):** one batched card + the diagrams |
 | `/build-milestone` | Dev → QA | define-acceptance → slice-tasks + readiness check → implement-task ∥ → 3-reviewer review ∥ check-security → report-milestone → merge on green → ship | **Try-it check (GT):** the human uses the app per role |
 | `/route-failure`, `/quiz-me` | Learn | retro, teach | G-L5 only for harness changes |

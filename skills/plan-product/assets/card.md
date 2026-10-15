@@ -1,6 +1,10 @@
 # <GI | GD> card — M<N> <slug>
 As of: <`date`> · Artifacts: <paths@sha>
 
+## The real ask (GI: from decode.md after pass 2)
+- **Question behind the question:** QB-<n> <one line> (evidence: <R<nn> F<n>>)
+- **Top trap:** T<n> <one line> · guard: <phase / check>
+
 ## Summary (one screen)
 <What we're building and why, in plain words. For GD: the boxes and how they talk, the tables, the riskiest part.>
 

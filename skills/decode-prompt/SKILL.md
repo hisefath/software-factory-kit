@@ -36,8 +36,9 @@ Read these first. If a MUST is missing, stop and name it.
 2. **Course context (SHOULD):** the syllabus week, lecture notes and "is law" notes in
    `/Users/mastershefu/Desktop/gauntlet_workbench/lectures/` and any memory or notes the human names: what this
    week teaches tells you what the project is testing.
-3. **Partner context (SHOULD, partner projects):** the partner's portal page or company panel the human points to.
-   Don't browse beyond it; write research questions instead.
+3. **Partner context (SHOULD, partner projects):** the partner's portal page or company panel the human points to,
+   then search the web freely: the partner's live product, job posts, and what the field already knows about the
+   problem. Cite each URL as a source; deep sourced research still goes to `gather-evidence`.
 4. `docs/decisions/DECISION_JOURNAL.md` and earlier `specs/*/decode.md` if present: never re-ask what's decided.
 5. `software-factory-kit/FINDINGS.md`: past traps the factory already fell into (e.g. F3: never read the partner
    portal; F4: success targets with no market evidence).
@@ -57,6 +58,8 @@ down the second answer and the ways a fast, literal build would miss it, before 
    - Which words are doing heavy lifting ("production-ready", "auditable", "at scale", "defend", "real users")?
    - What is conspicuously unsaid (scale, users, security, cost, data source) and why might it be left out?
    - For a hiring partner: what does their business need, and what would make them want to hire the builder?
+   - What does the field already know here: a known-impossible result (e.g. Byzantine fault limits in distributed
+     computing), a standard trade-off, or a product the partner already ships that answers part of it?
 3. **Find the traps.** Check every category in the table below; write each trap that applies as: trap, why it's
    tempting, what it would cost, evidence in the prompt, and the guard (which later phase or check catches it).
 4. Mark ambiguities that only the human, an instructor or the partner can answer as `⚠ … (→ G-decode)`, and ones
