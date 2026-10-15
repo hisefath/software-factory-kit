@@ -65,7 +65,7 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
 
 <div class="wrap">
 <nav aria-label="Sections">
-  <b>Open</b><a href="#thesis">Thesis</a><a href="#loop">The loop</a>
+  <b>Open</b><a href="#thesis">Thesis</a><a href="#v02">v0.2: three sessions</a><a href="#loop">The loop</a>
   <b>What changed</b><a href="#added">Added to Claude</a><a href="#repo">The repo</a>
   <b>Walk it</b><a href="#phases">Phases &amp; gates</a><a href="#tracks">Tracks</a><a href="#dispatch">Dispatch</a><a href="#use">How to use it</a>
   <b>Then</b><a href="#verify">Verification</a><a href="#routing">Failure routing</a><a href="#findings">What it learned</a><a href="#glossary">Primitives</a><a href="#status">Status &amp; next</a>
@@ -78,11 +78,37 @@ footer{color:var(--muted);font-size:13px;margin-top:40px}
   <p class="lede">A software factory where I set intent and approve decisions, agents do the investigating, planning, building and testing, and scripts check the work continuously. Each phase is a single-purpose skill with one declared output. The phase stops when its output is written, and I'm the one who starts the next phase.</p>
   <div class="thesis"><span class="pill h">Human approval gates catch wrong</span><span class="pill m">Automated quality gates catch broken</span></div>
   <div class="stats">
-    <div><strong>23</strong><span>phase skills, verb-object names</span></div>
-    <div><strong>6</strong><span>core human gates (G0–G5) + 6 situational</span></div>
+    <div><strong>26</strong><span>skills: 23 phase skills + 3 session commands</span></div>
+    <div><strong>3</strong><span>human checkpoints per project in v0.2 (was ~12 gates)</span></div>
     <div><strong>1</strong><span>read-only verifier subagent</span></div>
-    <div><strong>131</strong><span>passing self-tests for the scripts</span></div>
+    <div><strong>142</strong><span>passing self-tests for the scripts</span></div>
   </div>
+</section>
+
+<section id="v02">
+  <h2>v0.2: three sessions, three checkpoints</h2>
+  <p>The first version asked me about twelve times per project, one decision per reply. On Cerbo v2 that was 213 approvals, and 104 of them were six words or fewer. Meanwhile, every bug that escaped was found by <em>using</em> the app. So v0.2 moves my attention from reading markdown to two things: the one-way decisions, and trying the product. <span class="src">from BMAD: right-sized process</span> <span class="src mine">mine: try-it check</span></p>
+  <p class="eyebrow">On branch <code>bmad-principles</code>; merging the branch is the approval (H31)</p>
+  <div class="tbl"><table>
+    <tr><th>I type</th><th>Claude chains</th><th>My one checkpoint</th></tr>
+    <tr><td><code>/plan-product</code></td><td>decode-prompt → sharpen-brief → gather-evidence → write-prd</td><td><span class="gate">GI</span> Intent check: one message with only the one-way (Type 1) decisions and the questions only I can answer. I reply once, e.g. <code>1A 2 default 3B</code></td></tr>
+    <tr><td><code>/plan-design</code></td><td>map-ux-flows (if needed) → design-hld → design-lld, diagrams drawn in parallel</td><td><span class="gate">GD</span> Design check: the same kind of message, plus the diagrams</td></tr>
+    <tr><td><code>/build-milestone</code></td><td>define-acceptance → slice-tasks (readiness check) → implement-task in parallel → 3 reviewers ∥ check-security → report</td><td><span class="gate">GT</span> Try-it check: a link and a checklist per role. I use the app and reply "works", then it merges on green</td></tr>
+  </table></div>
+  <div class="two">
+    <div class="card"><h3>What Claude decides now</h3><ul>
+      <li><strong>Two-way (Type 2) decisions</strong> go ahead on the recommendation and are logged. I can skim them and reopen any.</li>
+      <li><strong>Readiness</strong> (was G4): PASS, CONCERNS or FAIL; only FAIL stops for me.</li>
+      <li><strong>Review:</strong> three reviewer passes in parallel (spec fidelity, correctness and security, and a skeptic that must find something or explain why there's nothing). Fixes dispatch on their own; only serious (P0/P1) findings reach me.</li>
+      <li><strong>Merge on green</strong> (was G5): checks pass, no serious findings open, and I said "works".</li></ul></div>
+    <div class="card"><h3>What stays the same</h3><ul>
+      <li>Every phase skill, still with one declared output.</li>
+      <li>The walls: scope-guard, <code>make check</code>, the pre-push hook.</li>
+      <li>Word-for-word approvals bound to a commit, and the decision journal.</li>
+      <li>Actions only I take: merge settings, deploys, spending money, repo visibility.</li>
+      <li>Tracks now move <em>both</em> ways, so a small change skips the ceremony. <span class="src">from BMAD</span></li></ul></div>
+  </div>
+  <p><strong>How I'll know it worked:</strong> <code>measure-usage.sh</code> (H30) records my prompts, tokens and hours per milestone. On the next project, human touches per milestone should fall below Cerbo v2's while escaped bugs stay the same or drop.</p>
 </section>
 
 <section id="loop">
@@ -261,7 +287,7 @@ flowchart LR
 
 <section id="findings">
   <h2>What the factory learned</h2>
-  <p>28 findings from the research run and the first real project (Cerbo v2). <strong>Adopted</strong> means the fix landed in the kit; <strong>logged</strong> means a one-off, deliberately not turned into a rule; <strong>routed</strong> means it was sent back to a phase of that project.</p>
+  <p>48 findings from the research run and the first real project (Cerbo v2). <strong>Adopted</strong> means the fix landed in the kit; <strong>logged</strong> means a one-off, deliberately not turned into a rule; <strong>routed</strong> means it was sent back to a phase of that project.</p>
   <div class="tbl"><table>
     <tr><th>Finding</th><th>What went wrong</th><th>What changed</th><th>Status</th></tr>
     <tr><td><code>F1</code></td><td>A plugin's session rules leaked into a research agent</td><td>Plugins off in factory repos</td><td><span class="auto">adopted</span></td></tr>
@@ -284,6 +310,9 @@ flowchart LR
     <tr><td><code>F26</code></td><td>apply-proposal.sh died of SIGPIPE</td><td>Field lookups with awk, no early-exit pipe</td><td><span class="auto">adopted · H15</span></td></tr>
     <tr><td><code>F27</code></td><td>No CI record; deploys had no review link</td><td>CI on every push (MacBook runner) + link and walkthrough per deploy</td><td><span class="auto">adopted · H18</span></td></tr>
     <tr><td><code>F28</code></td><td>Planning read prompts literally</td><td>New first phase: <code>decode-prompt</code></td><td><span class="auto">adopted · H19</span></td></tr>
+    <tr><td><code>F29–F46</code></td><td>Cerbo v2 milestones M5–M6: tooling bugs (scope-guard brackets in copies, worktree pre-push, analyze script), escaped 404 after sign-in, tests that lie</td><td>Script and template fixes (H20–H29); escaped bugs routed to acceptance and design</td><td><span class="auto">mixed</span></td></tr>
+    <tr><td><code>F47</code></td><td>No token, touch or time numbers: gates could only be judged by feel</td><td><code>measure-usage.sh</code> + metrics rows per milestone</td><td><span class="auto">adopted · H30</span></td></tr>
+    <tr><td><code>F48</code></td><td>Decision fatigue: 213 approvals on Cerbo v2, 104 of six words or fewer</td><td>BMAD principles: 3 sessions, batched checks, Type 2 auto, try-it, merge on green</td><td><span class="gate">branch · H31</span></td></tr>
   </table></div>
   <p>The pattern so far: most fixes landed in skills and scripts, not in the supervisor prompt. When something breaks, a better recipe or a check that can't be skipped usually fixes it; more words in the prompt rarely do.</p>
 </section>
@@ -308,6 +337,7 @@ flowchart LR
 <section id="status">
   <h2>Status and next</h2>
   <ul class="status">
+    <li><strong>v0.2 (branch):</strong> three session commands (<code>plan-product</code>, <code>plan-design</code>, <code>build-milestone</code>), batched checkpoints, Type 2 decisions proceed on their own, readiness check, 3-reviewer review, try-it check, merge on green (H31). Plus <code>measure-usage.sh</code> on main (H30).</li>
     <li><strong>Done:</strong> the spec, 23 skills (the original 22 reviewed adversarially and revised, the 5 riskiest test-run on a Cerbo fixture; <code>decode-prompt</code> added 2026-10-11 from finding F28), the verifier, templates, scripts (131/131 tests), and skills installed for Claude, Codex, Cursor and Chops.</li>
     <li><strong>Not yet proven:</strong> no skill has run end to end on a real project. Cerbo v2 is the first real run: same repo, a new branch with the old code removed, M1 research first.</li>
     <li><strong>Missing tools</strong> (your install call): <code>mmdc</code>, so diagrams are marked unverified for now; <code>gitleaks</code>; the Cursor and Antigravity CLIs.</li>
