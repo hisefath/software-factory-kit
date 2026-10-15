@@ -42,9 +42,13 @@ Validate = `define-acceptance` + verifier + `report-milestone`.
    `.handoff/TRACKER.md`. Outside a phase skill it owns `.handoff/**` and the status column of `MILESTONES.md`.
 2. **One skill = one phase = one declared output, then STOP.** A skill writes only its declared paths, ends by
    naming its gate question and the single next skill, and never starts the next phase itself.
-3. **The human is the trigger between phases.** Phase skills are manual-only (`disable-model-invocation: true`
-   for Claude/Cursor; `agents/openai.yaml` `allow_implicit_invocation: false` for Codex). That is a convenience,
-   not a wall: Codex was observed following a hidden skill anyway. The walls are rules 4-5.
+3. **The human sets intent and judges outcomes; the supervisor chains the phases in between** (BMAD principles,
+   2026-10-14, §4b). The human starts a session with one command (`/plan-product`, `/plan-design`,
+   `/build-milestone`); inside it the supervisor runs each phase skill in order by reading its `SKILL.md`, and a
+   phase skill's STOP is a checkpoint, not a pause, unless it raises a Type 1 decision, an open ⚠ only the human can
+   answer, a red check or a P0/P1. Phase skills stay manual-only (`disable-model-invocation: true`;
+   `allow_implicit_invocation: false` for Codex) so nothing starts a session uninvited. That is a convenience, not a
+   wall: the walls are rules 4-5.
 4. **Boundaries are code.** `scripts/scope-guard.sh` fails any task diff outside its `Owns:` paths;
    `make check` is the project's single green/red command; the pre-push hook runs both plus a secret scan.
 5. **Nothing grades its own work.** The `verifier` subagent has Read/Grep/Glob only and never sees a worker's
@@ -68,10 +72,18 @@ Validate = `define-acceptance` + verifier + `report-milestone`.
 | **Standard** | One milestone of a product whose PRD already exists | (`clarify-spec`) → `design-lld` delta → `draw-diagrams` → G3 → `define-acceptance` → `slice-tasks` → G4 → build → G5 |
 | **Full** | New product, graded project, or capstone | Everything from `decode-prompt` |
 
-Auth, payments, migrations and public contracts are never Fix. A task may move up a track mid-flight, never down.
+Auth, payments, migrations and public contracts are never Fix. **Tracks move both ways** (BMAD "right-sized
+process"): before building, the supervisor reads the codebase and the change, then names the lightest track whose
+rule fits; a task moves up when it touches something heavier and down when it turns out smaller. "Start anywhere":
+an existing PRD or design is used as-is, not re-derived.
 Brownfield (inherited code) adds `audit-codebase` before `write-prd`, and `design-lld` writes a change plan.
 
 ## 4. Phase table
+
+Since 2026-10-14 (§4b) the gate ids below are checkpoints inside a session: G-decode, G0 and G1 fold into the
+Intent check (GI); G-ux, G2 and G3 into the Design check (GD); G4 becomes the automatic readiness check; G5 becomes
+merge-on-green after the Try-it check (GT). A phase skill's gate question is still written in its STOP, so the
+supervisor can put it in the batched card when it is Type 1, or proceed when it is not.
 
 Paths are relative to the project repo. `M<N>` = milestone number, `T###` = task id.
 
@@ -114,12 +126,56 @@ G5 → merge → `ship-milestone` → G-live → `garden-docs` (first commit of 
 `route-failure` if the closed milestone's `.handoff/TRACKER.md ## Log` holds a FAIL or ESCALATE line, else
 `quiz-me` → G-L5 → `quiz-me`.
 
-## 5. Gate protocol (every human approval gate)
+## 4b. Sessions and checkpoints (BMAD principles, 2026-10-14)
 
-The agent **diverges**: 2-3 options plus "do nothing", each with cost and a recommendation, one decision per reply,
+Twelve fine-grained gates produced rubber-stamp answers (Cerbo v2: 213 approvals, 104 of six words or fewer, then a
+standing "approve everything"), while every escaped bug was found by using the app. So the human's time moves from
+reading markdown to deciding Type 1 choices and trying the product.
+
+| Session (one command) | BMAD perspective | Chains these phase skills | Human checkpoint |
+|---|---|---|---|
+| `/plan-product` | Analyst → PM | decode-prompt → sharpen-brief → gather-evidence (→ audit-codebase on brownfield) → write-prd | **Intent check (GI):** one batched card |
+| `/plan-design` | UX Designer → Architect | (map-ux-flows) → design-hld → design-lld (+ change plan) → draw-diagrams ∥ | **Design check (GD):** one batched card + the diagrams |
+| `/build-milestone` | Dev → QA | define-acceptance → slice-tasks + readiness check → implement-task ∥ → 3-reviewer review ∥ check-security → report-milestone → merge on green → ship | **Try-it check (GT):** the human uses the app per role |
+| `/route-failure`, `/quiz-me` | Learn | retro, teach | G-L5 only for harness changes |
+
+**Batched card.** At the end of a planning session the supervisor sends ONE message: every Type 1 decision (with
+options incl. "do nothing", costs, recommendation), every open ⚠ only the human can answer, and a one-screen summary
+of the artifacts with links. The human answers all of it in one reply. Type 2 decisions are not asked: they proceed on
+the recommendation and are logged (§5).
+
+**Spec freeze.** When GI and GD are approved, the PRD and design are frozen for that milestone (BMAD "approve the
+spec, which freezes it"); a change after that goes through `clarify-spec` and shows up in the next batched card.
+
+**Readiness check (automatic).** `slice-tasks`' analyze pass prints PASS / CONCERNS / FAIL. PASS → build starts
+without asking; CONCERNS → listed in the GT message; FAIL → the one case that stops for the human before build.
+
+**Three-reviewer review.** At milestone close the supervisor runs the `verifier` subagent three times in parallel
+with different lenses — spec fidelity, correctness and security, adversarial ("tests that lie"; this lens must
+report at least one finding or explain why none exists) — and merges their rows into one triage log. Fix rows
+auto-dispatch to `implement-task` under scope-guard; file/keep/discard needs no human unless P0/P1.
+
+**Merge on green.** G4 and G5 are no longer separate human gates: a milestone merges when `make check`/CI is green,
+there is no open P0/P1, readiness is PASS/CONCERNS, and the human said "works" at GT.
+
+**Try-it check (GT).** Before merge the supervisor runs the app (local or preview deploy) and sends a link plus a
+numbered checklist per role ("sign in as a patient, place an order, open the receipt, sign out"). The human answers
+"works" or describes what is wrong; what is wrong becomes fix tasks or a `fix-bug`. This is the gate that catches
+what artifacts and tests miss.
+
+## 5. Gate protocol (batched checkpoints and the remaining approval gates)
+
+**Type 2 decisions proceed** (BMAD "explicit decisions"; the journal already types them): the supervisor takes the
+recommendation, writes an Approvals row `| time | auto-T2 | artifact@sha | standing rule: Type 2 proceeds (WORKFLOW
+§5) |`, and `log-decision` records it as `accepted (auto, Type 2)` with "Decided by: supervisor under the standing
+rule". The human skims them in `docs/decisions/REVIEW.md` and can reopen any of them; reopening is a new decision.
+**Type 1 decisions** (one-way, hard to reverse: stack, data model shape, auth model, money rules, public contracts,
+spend) always wait for the human, inside the batched card.
+
+For each Type 1 item the agent **diverges**: 2-3 options plus "do nothing", each with cost and a recommendation,
 format: *question · background · options with costs · recommendation · default*. The human **converges**: Approve /
 Revise / Stop. Before acting on Approve the supervisor writes the Approvals row, then calls `log-decision`.
-At G2 and G3 the presenter also states: the hardest decision, the rejected alternatives, and the part it is least
+At GD the presenter also states: the hardest decision, the rejected alternatives, and the part it is least
 confident about. Interrupt the human only for: a gate, a P0/P1 finding, a new dependency, an architecture conflict,
 work stuck after the failure ladder, or spend.
 

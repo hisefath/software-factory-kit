@@ -21,6 +21,10 @@ bash scripts/init-repo.sh ../my-project   # scaffold AGENTS.md, CLAUDE.md, .hand
 ## Phases at a glance
 
 ```
+**v0.2 (BMAD principles, branch `bmad-principles`):** three sessions, three checkpoints:
+`/plan-product` ─GI─ `/plan-design` ─GD─ `/build-milestone` ─GT try-it → merge on green. The phase skills below still
+run inside those sessions.
+
 /decode-prompt ─G-decode─ /sharpen-brief → /gather-evidence → /write-prd ─G1─ /design-hld ─(draw-diagrams ∥)─G2─ /design-lld ─(draw-diagrams ∥)─G3─
 /define-acceptance → /slice-tasks ─G4─ implement-task ∥ (worktrees, any harness) → verifier ∥ /check-security →
 /report-milestone ─G5 merge─ /ship-milestone ─G-live─ /garden-docs · /route-failure · /quiz-me · /write-demo-script → /record-demo

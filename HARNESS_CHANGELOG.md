@@ -6,6 +6,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 |---|---|---|---|---|
 | 2026-10-08 | 0.1 | Initial factory: WORKFLOW.md, skill standard, 22 skills, verifier, templates, scripts | — | "we are putting together the full ai native workflow today" |
 | 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
+| 2026-10-14 | 0.2 (branch) | H31: BMAD principles: sessions, batched checkpoints (GI, GD, GT), Type 2 auto-proceed, readiness check, 3-lens review, merge on green, two-way tracks (WORKFLOW §2-§5, templates/CLAUDE.md, skills/plan-product, plan-design, build-milestone, log-decision, agents/verifier.md, README) | F48 | "lets shift to b-mad principals, and put those changes on a different branch" |
 | 2026-10-14 | 0.1 | H30: Measure tokens, human touches and wall-clock per milestone (scripts/measure-usage.sh, report-milestone, WORKFLOW §10, templates) | F47 | "approve" |
 | 2026-10-11 | 0.1 | H19: Add `decode-prompt` (phase 0.5, gate G-decode) before sharpen-brief (skills/decode-prompt, skills/sharpen-brief, docs/WORKFLOW.md, templates/CLAUDE.md, README.md) | F28 | "build a skill for this, and this should be before the sharpen brief stage" |
 | 2026-10-09 | 0.1 | H3: Add market, competitor and load-profile research (docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence) | F4 | "approve, then /gather-evidence" |
@@ -2598,3 +2599,12 @@ index 0000000..7c7b7bf
 +| Milestone | Wall-clock (h) | Human touches (prompts / approvals) | First-pass | Tokens in+cache / out | Escaped defects | Report |
 +|---|---|---|---|---|---|---|
 ```
+
+### H31 BMAD principles: sessions and batched checkpoints  [status: on branch bmad-principles, pending merge]
+
+- F#: F48 · Layer: Agent policy · Reach: kit (WORKFLOW §2 rule 3, §3, §4, §4b, §5; templates/CLAUDE.md; 3 new skills; log-decision; verifier)
+- Proposed: 2026-10-14 by the supervisor (Claude Code, claude-opus-5-5) · Requested by the human: "lets shift to b-mad principals, and put those changes on a different branch"
+- What changed: one command per session (/plan-product, /plan-design, /build-milestone) chaining the existing phase skills; GI and GD batched cards (Type 1 + human-only ⚠ only); Type 2 decisions proceed via an `auto-T2` Approvals row; readiness PASS/CONCERNS/FAIL replaces G4; three verifier lenses; GT try-it checklist per role then merge on green replaces G5; tracks move both ways; spec frozen after GI/GD.
+- Kept: every phase skill, scope-guard, make check, pre-push, verbatim approvals, the decision journal, human-only actions.
+- Guard: H30 metrics on the next project — human touches per milestone below Cerbo v2's, escaped defects equal or lower.
+- Merge: review the branch MR; merging it is the approval.

@@ -81,7 +81,10 @@ covers.
 
 **Record, never decide:** a status other than `proposed` exists only beside the human's own words, quoted from their
 `## Approvals` row (and, for a CQ, from the CQ entry at the approved sha), and every option the human saw, including
-"do nothing" and the agent's first proposal, stays in the record.
+"do nothing" and the agent's first proposal, stays in the record. **One exception, the standing Type 2 rule
+(WORKFLOW §5):** an Approvals row whose gate cell is `auto-T2` and whose words are `standing rule: Type 2 proceeds
+(WORKFLOW §5)` records as `accepted (auto, Type 2)` with "Decided by: supervisor under the standing rule"; never use it
+for a decision the artifact marks Type 1.
 
 ## Steps
 
