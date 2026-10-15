@@ -399,6 +399,33 @@ rc 0 "install --dry-run: succeeds" env HOME="$tmp/home" bash "$kit/scripts/insta
 if [ ! -e "$tmp/home" ]; then ok "install --dry-run: changed nothing"; else bad "install --dry-run: changed nothing"; fi
 rc 0 "install --uninstall --dry-run: succeeds" env HOME="$tmp/home" bash "$kit/scripts/install.sh" --uninstall --dry-run
 
+# ---- 7. measure-usage.sh (fixture logs; no real transcripts read) ---------------------------------------
+mu=$tmp/mu; mkdir -p "$mu/claude/p/sub" "$mu/codex/2026/10/14" "$mu/repo" "$mu/repo-T001" "$mu/other"
+r=$(cd "$mu/repo" && pwd -P)
+o=$(cd "$mu/other" && pwd -P)
+cat >"$mu/claude/p/s.jsonl" <<JSONL
+{"type":"user","turnOrigin":"human","cwd":"$r","timestamp":"2026-10-14T10:00:00Z","sessionId":"s1"}
+{"type":"user","cwd":"$r","timestamp":"2026-10-14T10:00:01Z","sessionId":"s1"}
+{"type":"assistant","cwd":"$r","timestamp":"2026-10-14T10:00:02Z","sessionId":"s1","requestId":"q1","message":{"id":"m1","model":"claude-x","usage":{"input_tokens":10,"cache_creation_input_tokens":20,"cache_read_input_tokens":30,"output_tokens":5}}}
+{"type":"assistant","cwd":"$r","timestamp":"2026-10-14T10:00:02Z","sessionId":"s1","requestId":"q1","message":{"id":"m1","model":"claude-x","usage":{"input_tokens":10,"cache_creation_input_tokens":20,"cache_read_input_tokens":30,"output_tokens":5}}}
+{"type":"user","turnOrigin":"human","cwd":"$o","timestamp":"2026-10-14T10:00:03Z","sessionId":"s9"}
+{"type":"user","turnOrigin":"human","cwd":"$r","timestamp":"2026-10-13T10:00:00Z","sessionId":"s1"}
+JSONL
+cat >"$mu/claude/p/sub/agent.jsonl" <<JSONL
+{"type":"assistant","isSidechain":true,"cwd":"$r-T001","timestamp":"2026-10-14T11:00:00Z","sessionId":"s1","requestId":"q2","message":{"id":"m2","model":"claude-x","usage":{"input_tokens":1,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":2}}}
+JSONL
+cat >"$mu/codex/2026/10/14/rollout.jsonl" <<JSONL
+{"type":"session_meta","timestamp":"2026-10-14T12:00:00Z","payload":{"cwd":"$r","model":"gpt-x"}}
+{"type":"event_msg","timestamp":"2026-10-14T12:00:01Z","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":100,"cached_input_tokens":40,"output_tokens":7}}}}
+JSONL
+rc 0 "measure-usage: runs on fixture logs" env CLAUDE_PROJECTS_DIR="$mu/claude" CODEX_SESSIONS_DIR="$mu/codex" \
+  bash "$kit/scripts/measure-usage.sh" "$mu/repo" 2026-10-14T00:00:00Z 2026-10-14T23:00:00Z
+has "measure-usage: counts only in-window human prompts in this repo" "$out" "Human touches: 1 prompts typed"
+has "measure-usage: dedupes streamed blocks, includes worktree subagents" "$out" "| claude | claude-x | 11 | 20 | 30 | 7 |"
+has "measure-usage: Codex input excludes cached tokens" "$out" "| codex | gpt-x | 60 | 0 | 40 | 7 |"
+has "measure-usage: wall-clock from the window" "$out" "wall-clock 23.0 h"
+rc 2 "measure-usage: usage error without a window" bash "$kit/scripts/measure-usage.sh" "$mu/repo"
+
 echo
 echo "# $passed passed, $failed failed"
 [ "$failed" = 0 ]

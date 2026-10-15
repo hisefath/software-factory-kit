@@ -321,7 +321,9 @@ prune before adding (~20-rule ceiling per file).
 | One-off model quirk | nothing durable | log it only |
 
 Factory metrics: north star = first-pass acceptance rate per task and per MR; supporting = fix loops per task,
-gate Revise rate, scope-guard blocks, rework after merge. Never lines of code or agent counts.
+gate Revise rate, scope-guard blocks, rework after merge; cost = human touches (prompts typed + approvals), tokens
+per harness and model, and wall-clock per milestone, from `scripts/measure-usage.sh`, with one row per milestone in
+the project's `docs/metrics/FACTORY_METRICS.md`. Never lines of code or agent counts.
 
 ## 11. Terminology
 

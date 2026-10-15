@@ -6,6 +6,7 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
 |---|---|---|---|---|
 | 2026-10-08 | 0.1 | Initial factory: WORKFLOW.md, skill standard, 22 skills, verifier, templates, scripts | — | "we are putting together the full ai native workflow today" |
 | 2026-10-09 | 0.1 | H1: Add North Star metrics and partner lens (docs/METRICS.md, docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence, skills/write-prd) | F3 | "approved" |
+| 2026-10-14 | 0.1 | H30: Measure tokens, human touches and wall-clock per milestone (scripts/measure-usage.sh, report-milestone, WORKFLOW §10, templates) | F47 | "approve" |
 | 2026-10-11 | 0.1 | H19: Add `decode-prompt` (phase 0.5, gate G-decode) before sharpen-brief (skills/decode-prompt, skills/sharpen-brief, docs/WORKFLOW.md, templates/CLAUDE.md, README.md) | F28 | "build a skill for this, and this should be before the sharpen brief stage" |
 | 2026-10-09 | 0.1 | H3: Add market, competitor and load-profile research (docs/WORKFLOW.md, skills/sharpen-brief, skills/gather-evidence) | F4 | "approve, then /gather-evidence" |
 | 2026-10-10 | 0.1 | H6: Add a TL;DR to this project's MR template (cerbo-supplement-store .gitlab/merge_request_templates/Default.md) | F6 | "Approve, adopt H5 and H6" |
@@ -2332,4 +2333,268 @@ Every adopted change to a skill, hook, template or supervisor rule, with the FIN
  
  ## 9. Decision journal schema (`docs/decisions/DECISION_JOURNAL.md`, committed)
  
+```
+
+### H30 Measure tokens, human touches and wall-clock per milestone  [status: adopted]
+
+- F#: F47 · Layer: Script · Reach: kit (scripts, report-milestone, WORKFLOW §10, templates)
+- Proposed: 2026-10-14 by the supervisor (Claude Code, claude-opus-5-5) from reports/factory-level-up-context.md · Project: all
+- Apply in: software-factory-kit · Files: `scripts/measure-usage.sh` (new), `scripts/test.sh`, `scripts/init-repo.sh`, `skills/report-milestone/{SKILL.md,assets/template.md,references/commands.md}`, `docs/WORKFLOW.md`, `templates/docs/metrics/FACTORY_METRICS.md` (new)
+- Root cause: Cost was only read from per-run events.jsonl files → the supervisor session and Agent-tool subagents have none → every report said "not measured", and no one counted human touches → gate changes could only be judged by feel.
+- Why this layer: §10 "Mechanical step done wrong → Script". Claude Code and Codex already log every turn's usage on disk, so a read-only script measures it exactly; a prompt asking the model to estimate would be a guess.
+- Scope chosen by the human: option B (forward only, no backfill of Cerbo v2 or Equinox), name `measure-usage.sh`.
+- Rules: WORKFLOW §10 metrics paragraph extended; report-milestone gains one owned path (its FACTORY_METRICS.md row) and recipe 10b; pruned: the "supervisor session … not measured" row.
+- Guard: scripts/test.sh section 7 (fixture logs: in-window human prompts only, streamed-block dedupe, worktree subagents counted, Codex cached split); the next milestone report shows numbers in §8 Human touches and §9 supervisor row.
+- Teach: "You can't remove a gate safely until you can see what it costs; the harness already writes the receipts, so read them instead of guessing."
+- Check run before proposing: on Cerbo v2's window (2026-10-08 22:30 → 2026-10-12 00:00 CDT) it printed 296 prompts typed, 73.5 h, 2 Claude sessions, about 1.49 billion tokens (1.46 B cache reads, 2.3 M output). Not recorded in any project (option B).
+- diff-sha256: 30a9ca682835
+- Verdict: G-L5 approved 2026-10-14 22:32 CDT: "approve"
+
+```diff
+diff --git a/docs/WORKFLOW.md b/docs/WORKFLOW.md
+index c81fd5e..6ab35c5 100644
+--- a/docs/WORKFLOW.md
++++ b/docs/WORKFLOW.md
+@@ -321,7 +321,9 @@ prune before adding (~20-rule ceiling per file).
+ | One-off model quirk | nothing durable | log it only |
+ 
+ Factory metrics: north star = first-pass acceptance rate per task and per MR; supporting = fix loops per task,
+-gate Revise rate, scope-guard blocks, rework after merge. Never lines of code or agent counts.
++gate Revise rate, scope-guard blocks, rework after merge; cost = human touches (prompts typed + approvals), tokens
++per harness and model, and wall-clock per milestone, from `scripts/measure-usage.sh`, with one row per milestone in
++the project's `docs/metrics/FACTORY_METRICS.md`. Never lines of code or agent counts.
+ 
+ ## 11. Terminology
+ 
+diff --git a/scripts/init-repo.sh b/scripts/init-repo.sh
+index 7363db0..86b3324 100755
+--- a/scripts/init-repo.sh
++++ b/scripts/init-repo.sh
+@@ -13,7 +13,8 @@ Scaffolds into <repo-dir> (must be the root of a git repository):
+   templates/**                      → same paths (AGENTS.md, CLAUDE.md, .claude/settings.json, .githooks/pre-push,
+                                        .gitlab-ci.yml, .gitlab/merge_request_templates/Default.md, .handoff/TRACKER.md,
+                                        MILESTONES.md,
+-                                       docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, specs/_templates/*)
++                                       docs/README.md, docs/decisions/{DECISION_JOURNAL,REVIEW}.md, docs/metrics/FACTORY_METRICS.md,
++                                       specs/_templates/*)
+   templates/Makefile.example        → Makefile when the repo has none (its check target fails until you adapt it);
+                                        Makefile.example when a Makefile exists without a `check:` target
+   agents/verifier.md                → .claude/agents/verifier.md
+diff --git a/scripts/measure-usage.sh b/scripts/measure-usage.sh
+new file mode 100755
+index 0000000..8d292c2
+--- /dev/null
++++ b/scripts/measure-usage.sh
+@@ -0,0 +1,87 @@
++#!/usr/bin/env bash
++# measure-usage.sh — tokens, human touches and wall-clock for one project over a time window.
++#
++# Why this exists: gates can't be removed safely without measuring what they cost (FINDINGS F47). The per-run
++# events.jsonl files only cover delegated workers; the supervisor session and in-session subagents were
++# "not measured". Claude Code and Codex already log every turn's token usage on disk, so this reads those logs.
++set -euo pipefail
++usage() {
++  cat <<'EOF'
++usage: scripts/measure-usage.sh <repo-dir> <since> [<until>]
++  <since>/<until>: ISO 8601 times (e.g. 2026-10-14T09:00:00-05:00); <until> defaults to now.
++  Reads Claude Code transcripts (~/.claude/projects/**/*.jsonl, subagents included) and Codex sessions
++  (~/.codex/sessions/**/*.jsonl) whose working directory is <repo-dir> or a sibling/nested worktree of it.
++  Prints a markdown table: tokens per harness and model, human touches (prompts you typed), and wall-clock.
++  Tokens are the signal; a Max plan bills no per-token cost, so no dollar figure is printed.
++  Env: CLAUDE_PROJECTS_DIR, CODEX_SESSIONS_DIR override the log roots (used by test.sh).
++EOF
++}
++case "${1:-}" in -h | --help) usage; exit 0 ;; esac
++[ $# -ge 2 ] && [ $# -le 3 ] || { usage >&2; exit 2; }
++repo=$(cd "$1" && pwd -P)
++python3 -I - "$repo" "$2" "${3:-}" "${CLAUDE_PROJECTS_DIR:-$HOME/.claude/projects}" "${CODEX_SESSIONS_DIR:-$HOME/.codex/sessions}" <<'PY'
++import json, sys, glob, os
++from datetime import datetime, timezone
++repo, since, until, claude_root, codex_root = sys.argv[1:6]
++def ts(s):
++    d = datetime.fromisoformat(s.replace("Z", "+00:00"))
++    return d if d.tzinfo else d.astimezone()
++t0 = ts(since); t1 = ts(until) if until else datetime.now(timezone.utc)
++def mine(cwd):  # the repo, anything inside it, or a sibling worktree named <repo>-<id>
++    return bool(cwd) and (cwd == repo or cwd.startswith(repo + "/") or cwd.startswith(repo + "-"))
++def inwin(s):
++    try: return t0 <= ts(s) <= t1
++    except Exception: return False
++rows = {}  # (harness, model) -> [in, cache_write, cache_read, out]
++def add(h, m, a, b, c, d):
++    r = rows.setdefault((h, m or "unknown"), [0, 0, 0, 0]); r[0] += a; r[1] += b; r[2] += c; r[3] += d
++seen, touches, sessions = set(), 0, set()
++for f in glob.glob(os.path.join(claude_root, "**", "*.jsonl"), recursive=True):
++    try: fh = open(f, encoding="utf-8", errors="replace")
++    except OSError: continue
++    for line in fh:
++        try: e = json.loads(line)
++        except ValueError: continue
++        if not mine(e.get("cwd")) or not inwin(e.get("timestamp", "")): continue
++        t = e.get("type")
++        if t == "user" and e.get("turnOrigin") == "human" and not e.get("isSidechain"):
++            touches += 1
++        elif t == "assistant":
++            msg = e.get("message") or {}
++            key = (msg.get("id"), e.get("requestId"))
++            u = msg.get("usage")
++            if not u or key in seen: continue  # streamed blocks repeat one message's usage
++            seen.add(key); sessions.add(e.get("sessionId"))
++            add("claude", msg.get("model"), u.get("input_tokens", 0), u.get("cache_creation_input_tokens", 0),
++                u.get("cache_read_input_tokens", 0), u.get("output_tokens", 0))
++codex_sessions = 0
++for f in glob.glob(os.path.join(codex_root, "**", "*.jsonl"), recursive=True):
++    cwd = model = None; counted = False
++    try: fh = open(f, encoding="utf-8", errors="replace")
++    except OSError: continue
++    for line in fh:
++        try: e = json.loads(line)
++        except ValueError: continue
++        p = e.get("payload") or {}
++        if e.get("type") == "session_meta":
++            cwd = p.get("cwd"); model = p.get("model") or model
++        elif e.get("type") == "turn_context":
++            model = p.get("model") or model
++        elif e.get("type") == "event_msg" and p.get("type") == "token_count" and mine(cwd) and inwin(e.get("timestamp", "")):
++            u = ((p.get("info") or {}).get("last_token_usage")) or {}
++            if not u: continue
++            cached = u.get("cached_input_tokens", 0)
++            add("codex", model, u.get("input_tokens", 0) - cached, u.get("cache_write_input_tokens", 0), cached, u.get("output_tokens", 0))
++            counted = True
++    codex_sessions += counted
++print(f"Window: {t0.isoformat(timespec='minutes')} → {t1.isoformat(timespec='minutes')} · wall-clock {(t1 - t0).total_seconds() / 3600:.1f} h")
++print(f"Human touches: {touches} prompts typed · Claude sessions: {len(sessions)} · Codex sessions: {codex_sessions}")
++print()
++print("| Harness | Model | Input | Cache write | Cache read | Output |")
++print("|---|---|---|---|---|---|")
++tot = [0, 0, 0, 0]
++for (h, m), r in sorted(rows.items()):
++    print(f"| {h} | {m} | " + " | ".join(f"{x:,}" for x in r) + " |")
++    tot = [a + b for a, b in zip(tot, r)]
++print("| **total** | | " + " | ".join(f"**{x:,}**" for x in tot) + " |")
++PY
+diff --git a/scripts/test.sh b/scripts/test.sh
+index f9e38e1..ca4def9 100755
+--- a/scripts/test.sh
++++ b/scripts/test.sh
+@@ -399,6 +399,33 @@ rc 0 "install --dry-run: succeeds" env HOME="$tmp/home" bash "$kit/scripts/insta
+ if [ ! -e "$tmp/home" ]; then ok "install --dry-run: changed nothing"; else bad "install --dry-run: changed nothing"; fi
+ rc 0 "install --uninstall --dry-run: succeeds" env HOME="$tmp/home" bash "$kit/scripts/install.sh" --uninstall --dry-run
+ 
++# ---- 7. measure-usage.sh (fixture logs; no real transcripts read) ---------------------------------------
++mu=$tmp/mu; mkdir -p "$mu/claude/p/sub" "$mu/codex/2026/10/14" "$mu/repo" "$mu/repo-T001" "$mu/other"
++r=$(cd "$mu/repo" && pwd -P)
++o=$(cd "$mu/other" && pwd -P)
++cat >"$mu/claude/p/s.jsonl" <<JSONL
++{"type":"user","turnOrigin":"human","cwd":"$r","timestamp":"2026-10-14T10:00:00Z","sessionId":"s1"}
++{"type":"user","cwd":"$r","timestamp":"2026-10-14T10:00:01Z","sessionId":"s1"}
++{"type":"assistant","cwd":"$r","timestamp":"2026-10-14T10:00:02Z","sessionId":"s1","requestId":"q1","message":{"id":"m1","model":"claude-x","usage":{"input_tokens":10,"cache_creation_input_tokens":20,"cache_read_input_tokens":30,"output_tokens":5}}}
++{"type":"assistant","cwd":"$r","timestamp":"2026-10-14T10:00:02Z","sessionId":"s1","requestId":"q1","message":{"id":"m1","model":"claude-x","usage":{"input_tokens":10,"cache_creation_input_tokens":20,"cache_read_input_tokens":30,"output_tokens":5}}}
++{"type":"user","turnOrigin":"human","cwd":"$o","timestamp":"2026-10-14T10:00:03Z","sessionId":"s9"}
++{"type":"user","turnOrigin":"human","cwd":"$r","timestamp":"2026-10-13T10:00:00Z","sessionId":"s1"}
++JSONL
++cat >"$mu/claude/p/sub/agent.jsonl" <<JSONL
++{"type":"assistant","isSidechain":true,"cwd":"$r-T001","timestamp":"2026-10-14T11:00:00Z","sessionId":"s1","requestId":"q2","message":{"id":"m2","model":"claude-x","usage":{"input_tokens":1,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":2}}}
++JSONL
++cat >"$mu/codex/2026/10/14/rollout.jsonl" <<JSONL
++{"type":"session_meta","timestamp":"2026-10-14T12:00:00Z","payload":{"cwd":"$r","model":"gpt-x"}}
++{"type":"event_msg","timestamp":"2026-10-14T12:00:01Z","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":100,"cached_input_tokens":40,"output_tokens":7}}}}
++JSONL
++rc 0 "measure-usage: runs on fixture logs" env CLAUDE_PROJECTS_DIR="$mu/claude" CODEX_SESSIONS_DIR="$mu/codex" \
++  bash "$kit/scripts/measure-usage.sh" "$mu/repo" 2026-10-14T00:00:00Z 2026-10-14T23:00:00Z
++has "measure-usage: counts only in-window human prompts in this repo" "$out" "Human touches: 1 prompts typed"
++has "measure-usage: dedupes streamed blocks, includes worktree subagents" "$out" "| claude | claude-x | 11 | 20 | 30 | 7 |"
++has "measure-usage: Codex input excludes cached tokens" "$out" "| codex | gpt-x | 60 | 0 | 40 | 7 |"
++has "measure-usage: wall-clock from the window" "$out" "wall-clock 23.0 h"
++rc 2 "measure-usage: usage error without a window" bash "$kit/scripts/measure-usage.sh" "$mu/repo"
++
+ echo
+ echo "# $passed passed, $failed failed"
+ [ "$failed" = 0 ]
+diff --git a/skills/report-milestone/SKILL.md b/skills/report-milestone/SKILL.md
+index e7dc14c..cba5677 100644
+--- a/skills/report-milestone/SKILL.md
++++ b/skills/report-milestone/SKILL.md
+@@ -17,7 +17,8 @@ confidence up.
+ 
+ ## You own / You never touch
+ 
+-- You own `docs/milestones/M<N>.md` fully (create it; regenerate it on a re-run or a Revise); you never edit
++- You own `docs/milestones/M<N>.md` fully (create it; regenerate it on a re-run or a Revise) and this milestone's one
++  row in `docs/metrics/FACTORY_METRICS.md` (append it; replace it on a re-run); you never edit
+   `MILESTONES.md` (the supervisor owns its status column; merge SHA, main-check SHA and tag exist only after the
+   merge), `specs/**`, `docs/decisions/**`, `docs/security/**`, `docs/product/**`, `tests/**` or product code.
+ - You own reading `.handoff/**` (TRACKER, runs, reviews) as evidence; you never write there, except, when
+@@ -116,7 +117,10 @@ command, or a claim without its evidence, stays out of the report.
+     (which FAIL lines are route-failure candidates). In §9 say plainly that Claude's `total_cost_usd` is an
+     API-equivalent figure a Max plan does not bill, and that Codex on the seat reports tokens only; anything
+     without an event file is `not measured`, never an estimate. §10 "Checked by" comes from each task's VERIFY Log
+-    line, or `⚠ no VERIFY line`.
++    line, or `⚠ no VERIFY line`. Run recipe 10b (`scripts/measure-usage.sh`) over the milestone window and paste
++    its output in §9: it measures the supervisor session and in-session subagents that leave no `events.jsonl`, and
++    gives §8 its human-touch and wall-clock rows. Then append the milestone's row to `docs/metrics/FACTORY_METRICS.md`
++    with the same numbers.
+ 11. **Not verified and rollback, §11-§12 (recipe 11).** Gather every `not_verified` from result files (worker
+     claims), the verifier's Not reviewed list, each recipe that could not run, Approvals rows with no resolvable
+     sha, and unmeasured cost. Riskiest first. For rollback, state the merge method, write the one-line revert, and
+diff --git a/skills/report-milestone/assets/template.md b/skills/report-milestone/assets/template.md
+index d29a0da..9dcca37 100644
+--- a/skills/report-milestone/assets/template.md
++++ b/skills/report-milestone/assets/template.md
+@@ -193,6 +193,8 @@ $ {{recipe 8 commands}}
+ | Gate Revise count | {{r}} of {{g}} gate answers | `## Approvals` rows of this milestone whose words say Revise |
+ | Scope-guard blocks | {{b}} logged · {{x}} failing now (§4.3) | FAIL lines naming scope-guard + non-zero exits in §4.3 |
+ | Rework after merge | n/a — measured at the next milestone | — |
++| Human touches | {{h}} prompts typed · {{a}} Approvals rows | recipe 10b `Human touches` line · `## Approvals` rows of this milestone |
++| Wall-clock | {{w}} h | recipe 10b window: first to last TRACKER Log line of M{{N}} |
+ 
+ ```console
+ $ {{recipe 9 loop}}
+@@ -213,7 +215,7 @@ a slice-tasks gap, worth a route-failure row"}}
+ | Run | Harness | Tokens in / cached / out | Reported cost | Source |
+ |---|---|---|---|---|
+ | {{M<N>-T### or M<N>-T###.attempt-<ts>}} | {{claude / codex}} | {{in}} / {{cached}} / {{out}} | {{$x.xxxx API-equivalent / seat: not metered per run}} | `events.jsonl` {{result / turn.completed}} |
+-| supervisor session | Claude Code | not measured: {{why}} | not measured | — |
++| supervisor session + in-session subagents | Claude Code | {{in}} / {{cached}} / {{out}} from recipe 10b | tokens only (Max plan) | `scripts/measure-usage.sh` |
+ 
+ Totals: {{claude API-equivalent $ over n runs}} · {{codex tokens over n runs}} · {{n}} runs not measured.
+ 
+diff --git a/skills/report-milestone/references/commands.md b/skills/report-milestone/references/commands.md
+index 615db37..2f6a96a 100644
+--- a/skills/report-milestone/references/commands.md
++++ b/skills/report-milestone/references/commands.md
+@@ -219,8 +219,17 @@ Gate Revise count: recipe 6. Rework after merge: measured at the next milestone,
+ 
+ Claude workers write stream-json (`"type":"result"` carries `total_cost_usd`, an API-equivalent figure that a Max
+ subscription does not bill). Codex `exec --json` writes `turn.completed` events with token usage only (seat, not
+-metered per run). Agent-tool subagents and the interactive supervisor leave no `events.jsonl`: write
+-`not measured: <why>`, never an estimate.
++metered per run). Agent-tool subagents and the interactive supervisor leave no `events.jsonl`; recipe 10b measures them from the
++harness logs instead. Anything neither covers is `not measured: <why>`, never an estimate.
++
++**Recipe 10b: whole-milestone usage, human touches, wall-clock.** The window is the first to the last TRACKER Log
++line of the milestone (the Log's dates carry their timezone from `date`).
++
++```bash
++first=$(section Log | grep -E "[[:space:]]$M-T" | head -n 1 | cut -c1-25)
++last=$(section Log | grep -E "[[:space:]]$M-T" | tail -n 1 | cut -c1-25)
++bash "${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/scripts/measure-usage.sh" . "$first" "$last"
++```
+ 
+ ```bash
+ for d in .handoff/runs/$M-T*/; do e=${d}events.jsonl
+diff --git a/templates/docs/metrics/FACTORY_METRICS.md b/templates/docs/metrics/FACTORY_METRICS.md
+new file mode 100644
+index 0000000..7c7b7bf
+--- /dev/null
++++ b/templates/docs/metrics/FACTORY_METRICS.md
+@@ -0,0 +1,8 @@
++# Factory metrics
++
++One row per milestone, appended by `report-milestone` (numbers from `docs/milestones/M<N>.md` §8-§9).
++The goal: fewer human touches per milestone with equal or fewer escaped defects (bugs found by using the app after
++merge), while tokens and wall-clock stay measured. A Max plan bills no per-token cost, so tokens are the cost signal.
++
++| Milestone | Wall-clock (h) | Human touches (prompts / approvals) | First-pass | Tokens in+cache / out | Escaped defects | Report |
++|---|---|---|---|---|---|---|
 ```

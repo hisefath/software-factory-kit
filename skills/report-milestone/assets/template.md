@@ -193,6 +193,8 @@ $ {{recipe 8 commands}}
 | Gate Revise count | {{r}} of {{g}} gate answers | `## Approvals` rows of this milestone whose words say Revise |
 | Scope-guard blocks | {{b}} logged · {{x}} failing now (§4.3) | FAIL lines naming scope-guard + non-zero exits in §4.3 |
 | Rework after merge | n/a — measured at the next milestone | — |
+| Human touches | {{h}} prompts typed · {{a}} Approvals rows | recipe 10b `Human touches` line · `## Approvals` rows of this milestone |
+| Wall-clock | {{w}} h | recipe 10b window: first to last TRACKER Log line of M{{N}} |
 
 ```console
 $ {{recipe 9 loop}}
@@ -213,7 +215,7 @@ a slice-tasks gap, worth a route-failure row"}}
 | Run | Harness | Tokens in / cached / out | Reported cost | Source |
 |---|---|---|---|---|
 | {{M<N>-T### or M<N>-T###.attempt-<ts>}} | {{claude / codex}} | {{in}} / {{cached}} / {{out}} | {{$x.xxxx API-equivalent / seat: not metered per run}} | `events.jsonl` {{result / turn.completed}} |
-| supervisor session | Claude Code | not measured: {{why}} | not measured | — |
+| supervisor session + in-session subagents | Claude Code | {{in}} / {{cached}} / {{out}} from recipe 10b | tokens only (Max plan) | `scripts/measure-usage.sh` |
 
 Totals: {{claude API-equivalent $ over n runs}} · {{codex tokens over n runs}} · {{n}} runs not measured.
 

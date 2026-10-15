@@ -219,8 +219,17 @@ Gate Revise count: recipe 6. Rework after merge: measured at the next milestone,
 
 Claude workers write stream-json (`"type":"result"` carries `total_cost_usd`, an API-equivalent figure that a Max
 subscription does not bill). Codex `exec --json` writes `turn.completed` events with token usage only (seat, not
-metered per run). Agent-tool subagents and the interactive supervisor leave no `events.jsonl`: write
-`not measured: <why>`, never an estimate.
+metered per run). Agent-tool subagents and the interactive supervisor leave no `events.jsonl`; recipe 10b measures them from the
+harness logs instead. Anything neither covers is `not measured: <why>`, never an estimate.
+
+**Recipe 10b: whole-milestone usage, human touches, wall-clock.** The window is the first to the last TRACKER Log
+line of the milestone (the Log's dates carry their timezone from `date`).
+
+```bash
+first=$(section Log | grep -E "[[:space:]]$M-T" | head -n 1 | cut -c1-25)
+last=$(section Log | grep -E "[[:space:]]$M-T" | tail -n 1 | cut -c1-25)
+bash "${FACTORY_KIT_DIR:-$HOME/Desktop/gauntlet_workbench/software-factory-kit}/scripts/measure-usage.sh" . "$first" "$last"
+```
 
 ```bash
 for d in .handoff/runs/$M-T*/; do e=${d}events.jsonl

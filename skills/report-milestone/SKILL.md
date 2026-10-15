@@ -17,7 +17,8 @@ confidence up.
 
 ## You own / You never touch
 
-- You own `docs/milestones/M<N>.md` fully (create it; regenerate it on a re-run or a Revise); you never edit
+- You own `docs/milestones/M<N>.md` fully (create it; regenerate it on a re-run or a Revise) and this milestone's one
+  row in `docs/metrics/FACTORY_METRICS.md` (append it; replace it on a re-run); you never edit
   `MILESTONES.md` (the supervisor owns its status column; merge SHA, main-check SHA and tag exist only after the
   merge), `specs/**`, `docs/decisions/**`, `docs/security/**`, `docs/product/**`, `tests/**` or product code.
 - You own reading `.handoff/**` (TRACKER, runs, reviews) as evidence; you never write there, except, when
@@ -116,7 +117,10 @@ command, or a claim without its evidence, stays out of the report.
     (which FAIL lines are route-failure candidates). In §9 say plainly that Claude's `total_cost_usd` is an
     API-equivalent figure a Max plan does not bill, and that Codex on the seat reports tokens only; anything
     without an event file is `not measured`, never an estimate. §10 "Checked by" comes from each task's VERIFY Log
-    line, or `⚠ no VERIFY line`.
+    line, or `⚠ no VERIFY line`. Run recipe 10b (`scripts/measure-usage.sh`) over the milestone window and paste
+    its output in §9: it measures the supervisor session and in-session subagents that leave no `events.jsonl`, and
+    gives §8 its human-touch and wall-clock rows. Then append the milestone's row to `docs/metrics/FACTORY_METRICS.md`
+    with the same numbers.
 11. **Not verified and rollback, §11-§12 (recipe 11).** Gather every `not_verified` from result files (worker
     claims), the verifier's Not reviewed list, each recipe that could not run, Approvals rows with no resolvable
     sha, and unmeasured cost. Riskiest first. For rollback, state the merge method, write the one-line revert, and
